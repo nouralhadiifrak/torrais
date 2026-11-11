@@ -6,7 +6,7 @@
 (function () {
   'use strict';
 
-  var KEY = 'torrais_demo_v1';
+  var KEY = 'torrais_demo_v2';
 
   /* ---------- utilitaires ---------- */
   function uid() { return Math.random().toString(36).slice(2, 10); }
@@ -67,6 +67,8 @@
     { id: 'refuse', label: 'Refusé' }
   ];
   var PENDING = ['nouveau', 'contacte', 'devis'];
+  // D'où vient la demande / la réservation
+  var SOURCES = ['Site web', 'WhatsApp', 'Téléphone', 'Boutique', 'Instagram', 'Bouche-à-oreille', 'Autre'];
 
   /* ---------- contenu par défaut du site ---------- */
   function defaultContent() {
@@ -116,11 +118,15 @@
     var events = [];
     var requests = [];
     function d(n) { return iso(addDays(today, n)); }
+    var SRC_CYCLE = ['WhatsApp', 'Boutique', 'Site web', 'WhatsApp', 'Téléphone', 'Instagram', 'Boutique', 'WhatsApp', 'Bouche-à-oreille', 'Site web'];
+    var srcIndex = 0;
 
     function addEvent(o) {
       var id = uid();
+      var source = o.source || SRC_CYCLE[srcIndex++ % SRC_CYCLE.length];
       var e = {
         id: id,
+        source: source,
         clientName: o.client,
         phone: o.phone,
         eventType: o.type,
@@ -138,7 +144,7 @@
       };
       events.push(e);
       requests.push({
-        id: uid(), createdAt: d(o.booked) + 'T11:00', name: o.client, phone: o.phone, eventType: o.type,
+        id: uid(), source: source, createdAt: d(o.booked) + 'T11:00', name: o.client, phone: o.phone, eventType: o.type,
         date: e.date, guests: o.guests, budget: '', services: o.services || ['Traiteur'], message: '',
         status: 'confirme', notes: 'Converti en événement.', eventId: id
       });
@@ -174,18 +180,18 @@
     // Demandes en cours
     function addReq(o) {
       requests.push({
-        id: uid(), createdAt: d(o.created) + 'T' + (o.time || '09:30'), name: o.name, phone: o.phone, eventType: o.type,
+        id: uid(), source: o.source, createdAt: d(o.created) + 'T' + (o.time || '09:30'), name: o.name, phone: o.phone, eventType: o.type,
         date: d(o.at), guests: o.guests, budget: o.budget || '', services: o.services || [], message: o.message || '',
         status: o.status, notes: o.notes || '', eventId: null
       });
     }
-    addReq({ created: 0, time: '10:12', status: 'nouveau', name: 'Salma Aït Lahcen', phone: '0661728394', type: 'Mariage', at: 4, guests: 200, budget: '60 000 – 80 000 DH', services: ['Traiteur', 'Décoration'], message: 'Bonjour, nous cherchons un traiteur pour notre mariage. Est-ce que cette date est encore disponible ?' });
-    addReq({ created: -1, time: '18:40', status: 'nouveau', name: 'Youssef Amrani', phone: '0677345612', type: 'Fiançailles', at: 38, guests: 100, budget: '20 000 – 25 000 DH', services: ['Traiteur', 'Tyafer'], message: 'Fiançailles à la maison, environ 100 personnes.' });
-    addReq({ created: -2, time: '14:05', status: 'nouveau', name: 'Nadia Squalli', phone: '0650127845', type: 'Henné', at: 60, guests: 50, services: ['Tyafer', 'Décoration'], message: 'Je voudrais voir vos modèles de tyafer.' });
-    addReq({ created: -4, time: '11:20', status: 'contacte', name: 'Karim Fassi', phone: '0662984513', type: 'Mariage', at: 130, guests: 250, budget: '90 000 DH', services: ['Traiteur', 'Décoration', 'Buffet'], notes: 'Rappeler samedi. Hésite entre Prestige et Royale.' });
-    addReq({ created: -7, time: '16:45', status: 'devis', name: 'Imane Rami', phone: '0671456239', type: 'Anniversaire', at: 18, guests: 40, services: ['Buffet'], notes: 'Devis envoyé par WhatsApp : 8 500 DH.' });
-    addReq({ created: -10, time: '09:15', status: 'devis', name: 'Novatech SARL', phone: '0522987412', type: "Événement d'entreprise", at: 52, guests: 120, budget: '30 000 DH', services: ['Buffet'], notes: 'Cocktail de fin d\'année. Devis de 28 000 DH envoyé.' });
-    addReq({ created: -15, time: '20:30', status: 'refuse', name: 'Hamza Benjelloun', phone: '0663218745', type: 'Mariage', at: 200, guests: 400, services: ['Traiteur'], notes: 'Budget trop bas pour 400 invités.' });
+    addReq({ source: 'Site web', created: 0, time: '10:12', status: 'nouveau', name: 'Salma Aït Lahcen', phone: '0661728394', type: 'Mariage', at: 4, guests: 200, budget: '60 000 – 80 000 DH', services: ['Traiteur', 'Décoration'], message: 'Bonjour, nous cherchons un traiteur pour notre mariage. Est-ce que cette date est encore disponible ?' });
+    addReq({ source: 'WhatsApp', created: -1, time: '18:40', status: 'nouveau', name: 'Youssef Amrani', phone: '0677345612', type: 'Fiançailles', at: 38, guests: 100, budget: '20 000 – 25 000 DH', services: ['Traiteur', 'Tyafer'], message: 'Fiançailles à la maison, environ 100 personnes.' });
+    addReq({ source: 'Instagram', created: -2, time: '14:05', status: 'nouveau', name: 'Nadia Squalli', phone: '0650127845', type: 'Henné', at: 60, guests: 50, services: ['Tyafer', 'Décoration'], message: 'Je voudrais voir vos modèles de tyafer.' });
+    addReq({ source: 'Boutique', created: -4, time: '11:20', status: 'contacte', name: 'Karim Fassi', phone: '0662984513', type: 'Mariage', at: 130, guests: 250, budget: '90 000 DH', services: ['Traiteur', 'Décoration', 'Buffet'], notes: 'Rappeler samedi. Hésite entre Prestige et Royale.' });
+    addReq({ source: 'Téléphone', created: -7, time: '16:45', status: 'devis', name: 'Imane Rami', phone: '0671456239', type: 'Anniversaire', at: 18, guests: 40, services: ['Buffet'], notes: 'Devis envoyé par WhatsApp : 8 500 DH.' });
+    addReq({ source: 'Site web', created: -10, time: '09:15', status: 'devis', name: 'Novatech SARL', phone: '0522987412', type: "Événement d'entreprise", at: 52, guests: 120, budget: '30 000 DH', services: ['Buffet'], notes: 'Cocktail de fin d\'année. Devis de 28 000 DH envoyé.' });
+    addReq({ source: 'WhatsApp', created: -15, time: '20:30', status: 'refuse', name: 'Hamza Benjelloun', phone: '0663218745', type: 'Mariage', at: 200, guests: 400, services: ['Traiteur'], notes: 'Budget trop bas pour 400 invités.' });
 
     requests.sort(function (a, b) { return a.createdAt < b.createdAt ? 1 : -1; });
 
@@ -230,6 +236,7 @@
     icons: ICONS,
     EVENT_TYPES: EVENT_TYPES,
     SERVICE_NAMES: SERVICE_NAMES,
+    SOURCES: SOURCES,
     STATUSES: STATUSES,
     PENDING: PENDING
   };

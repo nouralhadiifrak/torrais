@@ -16,7 +16,8 @@ Démo du site de **TORRAIS EVENT**, traiteur de mariages et d'événements à Ca
 
 ### Espace gérant
 - **Tableau de bord** : nouvelles demandes, événements du mois, chiffre du mois, reste à encaisser, graphique de l'année
-- **Demandes de devis** : statuts (Nouveau → Contacté → Devis envoyé → Confirmé / Refusé), notes privées, appel / WhatsApp en un clic, alerte si la date est déjà prise, conversion en événement
+- **Ajout manuel** : « Nouvelle demande » et « Nouvel événement » pour les réservations reçues par WhatsApp, téléphone, en boutique, Instagram ou bouche-à-oreille. Chaque demande et chaque événement garde sa **source** (les demandes du site sont marquées « Site web » automatiquement), avec un résumé « D'où viennent vos clients ? »
+- **Demandes de devis** : filtre par source, statuts (Nouveau → Contacté → Devis envoyé → Confirmé / Refusé), notes privées, appel / WhatsApp en un clic, alerte si la date est déjà prise, conversion en événement
 - **Calendrier** : vue **Année** (12 mois), vue Mois et vue Liste, navigation d'une année à l'autre, aucune limite d'événements par jour (le nombre s'affiche sur le jour)
 - **Événements & paiements** : prix total, acomptes, reste à payer
 - **Clients** : fiches créées automatiquement à partir des demandes et des événements

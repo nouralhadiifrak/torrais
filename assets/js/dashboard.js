@@ -21,6 +21,7 @@
     calMode: 'year',
     reqFilter: 'actives',
     reqSearch: '',
+    reqSource: '',
     evFilter: 'avenir',
     clientSearch: ''
   };
@@ -93,6 +94,12 @@
     var d = U.parseISO(date);
     return '<div class="dateblock' + (date < TODAY ? ' dateblock--past' : '') + '"><span>' + d.getDate() + '</span><small>' +
       MONTHS_SHORT[d.getMonth()] + '</small><small>' + d.getFullYear() + '</small></div>';
+  }
+  function sourceTag(src) { return src ? '<span class="src-tag">' + esc(src) + '</span>' : ''; }
+  function sourceOptions(selected, withSite) {
+    return T.SOURCES.filter(function (s) { return withSite || s !== 'Site web' || s === selected; }).map(function (s) {
+      return '<option' + (s === selected ? ' selected' : '') + '>' + esc(s) + '</option>';
+    }).join('');
   }
   function statusBadge(st) { return '<span class="badge badge--' + st + '">' + esc(statusLabel(st)) + '</span>'; }
   function progress(e) {
@@ -177,7 +184,8 @@
 
     return '' +
       '<div class="welcome"><div><h2>' + hello + ' ' + esc(data.settings.owner) + '</h2><p>' + esc(weekdayDate(TODAY)) + '</p></div>' +
-      '<button class="btn btn--gold" data-action="new-event">' + icon('plus') + ' Nouvel événement</button></div>' +
+      '<div class="welcome__actions"><button class="btn btn--light" data-action="new-request">' + icon('plus') + ' Nouvelle demande</button>' +
+      '<button class="btn btn--gold" data-action="new-event">' + icon('plus') + ' Nouvel événement</button></div></div>' +
 
       '<div class="kpis">' +
         kpi('Nouvelles demandes', newReqs.length, plural(pendingReqs.length, 'demande') + ' en cours', 'requests', newReqs.length ? 'kpi--alert' : '') +
@@ -203,7 +211,26 @@
           return '<button class="bars__col' + (current ? ' is-current' : '') + '" data-action="cal-month" data-month="' + i + '" data-year="' + year + '" title="' + p.count + ' événement(s) · ' + U.formatDH(p.revenue) + '">' +
             '<span class="bars__val">' + (p.count || '') + '</span><span class="bars__bar" style="height:' + Math.max(h, p.count ? 8 : 2) + '%"></span><span class="bars__label">' + p.label + '</span></button>';
         }).join('') + '</div>' +
-      '</section>';
+      '</section>' +
+      sourcesCard();
+  }
+
+  function sourcesCard() {
+    var rows = T.SOURCES.map(function (s) {
+      return {
+        label: s,
+        req: data.requests.filter(function (r) { return (r.source || 'Autre') === s; }).length,
+        ev: activeEvents().filter(function (e) { return (e.source || 'Autre') === s; }).length
+      };
+    }).filter(function (x) { return x.req || x.ev; }).sort(function (a, b) { return b.req - a.req; });
+    if (!rows.length) return '';
+    var max = Math.max.apply(null, rows.map(function (x) { return x.req; }).concat([1]));
+    return '<section class="card"><header class="card__head"><h3>D\'où viennent vos clients ?</h3><span class="muted">Demandes reçues et réservations confirmées, par source</span></header>' +
+      '<div class="src-rows">' + rows.map(function (x) {
+        return '<div class="src-row"><span class="src-row__label">' + esc(x.label) + '</span>' +
+          '<div class="src-row__bar"><span style="width:' + Math.round(x.req / max * 100) + '%"></span></div>' +
+          '<span class="src-row__val"><b>' + plural(x.req, 'demande') + '</b> · ' + plural(x.ev, 'réservation') + '</span></div>';
+      }).join('') + '</div></section>';
   }
 
   function kpi(label, value, sub, view, cls) {
@@ -230,7 +257,7 @@
     return '<li><button class="row" data-action="open-req" data-id="' + r.id + '">' +
       '<div class="avatar">' + esc((r.name || '?').charAt(0).toUpperCase()) + '</div>' +
       '<div class="row__main"><strong>' + esc(r.name) + '</strong><span>' + esc(r.eventType) + ' · ' + U.formatDate(r.date, { day: 'numeric', month: 'short', year: 'numeric' }) + ' · ' + esc(r.guests) + ' invités</span>' +
-      '<span class="row__rel">Reçue ' + receivedLabel(r.createdAt).toLowerCase() + ' ' + conflictFlag(r) + '</span></div>' +
+      '<span class="row__rel">' + sourceTag(r.source) + ' Reçue ' + receivedLabel(r.createdAt).toLowerCase() + ' ' + conflictFlag(r) + '</span></div>' +
       '<div class="row__side">' + statusBadge(r.status) + '</div></button></li>';
   }
 
@@ -244,7 +271,13 @@
         var n = countRequests(f.id);
         return '<button class="chip' + (state.reqFilter === f.id ? ' is-active' : '') + '" data-action="req-filter" data-filter="' + f.id + '">' + f.label + ' <b>' + n + '</b></button>';
       }).join('') + '</div>' +
-      '<input class="search" type="search" id="reqSearch" placeholder="Rechercher un nom, un téléphone…" value="' + esc(state.reqSearch) + '">' +
+      '</div>' +
+      '<div class="toolbar">' +
+        '<div class="toolbar__group">' +
+          '<input class="search" type="search" id="reqSearch" placeholder="Rechercher un nom, un téléphone…" value="' + esc(state.reqSearch) + '">' +
+          '<select class="search search--select" id="reqSource" aria-label="Filtrer par source"><option value="">Toutes les sources</option>' + sourceOptions(state.reqSource, true) + '</select>' +
+        '</div>' +
+        '<button class="btn btn--gold btn--sm" data-action="new-request">' + icon('plus') + ' Nouvelle demande</button>' +
       '</div><section class="card card--flush"><ul class="rows rows--big" id="reqList"></ul></section>';
   }
   function filterRequests(id) {
@@ -259,6 +292,7 @@
     var q = state.reqSearch.trim().toLowerCase();
     var qd = U.digits(q);
     var list = filterRequests(state.reqFilter).filter(function (r) {
+      if (state.reqSource && (r.source || 'Autre') !== state.reqSource) return false;
       if (!q) return true;
       return (r.name || '').toLowerCase().indexOf(q) !== -1 || (qd && U.digits(r.phone).indexOf(qd) !== -1) || (r.eventType || '').toLowerCase().indexOf(q) !== -1;
     });
@@ -276,9 +310,10 @@
         '<dl class="info">' +
           info('Téléphone', U.formatPhone(r.phone)) +
           info('Événement', r.eventType) +
-          info('Date', U.formatDate(r.date, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) + ' <small>(' + relDays(r.date).toLowerCase() + ')</small>', true) +
-          info('Invités', r.guests) +
+          info('Date', r.date ? U.formatDate(r.date, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) + ' <small>(' + relDays(r.date).toLowerCase() + ')</small>' : '—', true) +
+          info('Invités', r.guests || '—') +
           info('Budget', r.budget || '—') +
+          info('Reçue par', r.source || '—') +
           info('Services', (r.services || []).join(', ') || '—') +
         '</dl>' +
         (r.message ? '<div class="quote">« ' + esc(r.message) + ' »</div>' : '') +
@@ -297,6 +332,78 @@
           : '<button class="btn btn--gold" data-action="req-convert" data-id="' + r.id + '">Confirmer & créer l\'événement</button>') +
       '</footer>'
     );
+  }
+
+  /* Ajouter à la main une demande reçue par WhatsApp, téléphone, en boutique… */
+  function openRequestForm(prefill) {
+    var r = Object.assign({ name: '', phone: '', source: 'WhatsApp', eventType: 'Mariage', date: '', guests: '', budget: '', services: [], message: '', status: 'nouveau' }, prefill || {});
+    var manualSources = T.SOURCES.filter(function (s) { return s !== 'Site web'; });
+    openSheet(
+      '<header class="sheet__head"><div><p class="sheet__eyebrow">Ajout manuel</p><h2>Nouvelle demande</h2></div>' + closeBtn() + '</header>' +
+      '<form class="sheet__body" id="reqForm" novalidate>' +
+        '<div class="field"><span>Reçue par</span><div class="pick">' + manualSources.map(function (s) {
+          return '<label class="pick__opt"><input type="radio" name="source" value="' + esc(s) + '"' + (s === r.source ? ' checked' : '') + '><span>' + esc(s) + '</span></label>';
+        }).join('') + '</div></div>' +
+        '<div class="form-grid">' +
+          field('Nom du client *', '<input name="name" required value="' + esc(r.name) + '" placeholder="Ex. Famille Alaoui">') +
+          field('Téléphone', '<input name="phone" type="tel" value="' + esc(r.phone) + '" placeholder="06 XX XX XX XX">') +
+          field('Type d\'événement', '<select name="eventType">' + T.EVENT_TYPES.map(function (t) { return '<option' + (t === r.eventType ? ' selected' : '') + '>' + esc(t) + '</option>'; }).join('') + '</select>') +
+          field('Date de l\'événement *', '<input name="date" type="date" required value="' + esc(r.date) + '">') +
+          field('Invités', '<input name="guests" type="number" min="0" step="10" value="' + esc(r.guests) + '">') +
+          field('Budget', '<input name="budget" value="' + esc(r.budget) + '" placeholder="Ex. 50 000 DH">') +
+          field('Statut', '<select name="status">' + T.STATUSES.filter(function (s) { return s.id !== 'confirme'; }).map(function (s) {
+            return '<option value="' + s.id + '"' + (s.id === r.status ? ' selected' : '') + '>' + s.label + '</option>';
+          }).join('') + '</select>', 'span-2') +
+        '</div>' +
+        '<div class="field"><span>Services souhaités</span><div class="pick">' + T.SERVICE_NAMES.map(function (n) {
+          return '<label class="pick__opt"><input type="checkbox" name="services" value="' + esc(n) + '"' + (r.services.indexOf(n) !== -1 ? ' checked' : '') + '><span>' + esc(n) + '</span></label>';
+        }).join('') + '</div></div>' +
+        field('Détails / notes', '<textarea name="message" rows="3" placeholder="Ce que le client a demandé : menu, lieu, formule…">' + esc(r.message) + '</textarea>') +
+        '<div id="reqAvail"></div>' +
+      '</form>' +
+      '<footer class="sheet__foot"><span class="muted small">Le client sera ajouté à la liste des clients.</span>' +
+        '<button class="btn btn--gold" data-action="req-form-save">Enregistrer la demande</button></footer>'
+    );
+    var form = $('#reqForm');
+    function avail() {
+      var d = form.elements.date.value;
+      $('#reqAvail').innerHTML = d ? '<h4 class="sub">Disponibilité</h4>' + availability(d, null, null) : '';
+    }
+    form.elements.date.addEventListener('change', avail);
+    form.addEventListener('submit', function (e) { e.preventDefault(); saveRequestForm(); });
+    avail();
+    setTimeout(function () { form.elements.name.focus(); }, 50);
+  }
+
+  function saveRequestForm() {
+    var form = $('#reqForm');
+    var f = form.elements;
+    var name = f.name.value.trim();
+    if (!name || !f.date.value) {
+      toast('Merci d\'indiquer au moins le nom du client et la date.', true);
+      (name ? f.date : f.name).focus();
+      return;
+    }
+    var now = new Date();
+    var req = {
+      id: U.uid(),
+      source: (form.querySelector('input[name="source"]:checked') || {}).value || 'Autre',
+      createdAt: U.iso(now) + 'T' + String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0'),
+      name: name,
+      phone: f.phone.value.trim(),
+      eventType: f.eventType.value,
+      date: f.date.value,
+      guests: +f.guests.value || 0,
+      budget: f.budget.value.trim(),
+      services: $$('input[name="services"]:checked', form).map(function (c) { return c.value; }),
+      message: f.message.value.trim(),
+      status: f.status.value,
+      notes: '',
+      eventId: null
+    };
+    data.requests.unshift(req);
+    closeSheet();
+    if (commit('Demande ajoutée (' + req.source + ').')) openRequest(req.id);
   }
 
   function info(label, value, raw) {
@@ -428,7 +535,8 @@
         '<h4 class="sub">Demandes en attente (' + pend.length + ')</h4>' +
         (pend.length ? '<ul class="rows">' + pend.map(requestRow).join('') + '</ul>' : empty('Aucune demande en attente pour cette date.')) +
       '</div>' +
-      '<footer class="sheet__foot"><span></span><button class="btn btn--gold" data-action="new-event" data-date="' + date + '">' + icon('plus') + ' Ajouter un événement</button></footer>'
+      '<footer class="sheet__foot"><button class="btn btn--light" data-action="new-request" data-date="' + date + '">' + icon('plus') + ' Demande</button>' +
+      '<button class="btn btn--gold" data-action="new-event" data-date="' + date + '">' + icon('plus') + ' Événement</button></footer>'
     );
   }
 
@@ -472,7 +580,7 @@
   function openEventForm(id, prefill) {
     var existing = id && data.events.filter(function (e) { return e.id === id; })[0];
     draft = existing ? JSON.parse(JSON.stringify(existing)) : Object.assign({
-      id: null, clientName: '', phone: '', eventType: 'Mariage', date: '', venue: '', guests: '', package: '', total: '',
+      id: null, source: 'WhatsApp', clientName: '', phone: '', eventType: 'Mariage', date: '', venue: '', guests: '', package: '', total: '',
       status: 'confirme', notes: '', payments: [], createdAt: TODAY
     }, prefill || {});
     var pkgOptions = data.packages.map(function (p) { return p.name; }).concat(['Buffet cocktail', 'Tyafer + décoration', 'Sur mesure']);
@@ -487,10 +595,11 @@
           field('Téléphone', '<input name="phone" type="tel" value="' + esc(draft.phone) + '" placeholder="06 XX XX XX XX">') +
           field('Type d\'événement', '<select name="eventType">' + T.EVENT_TYPES.map(function (t) { return '<option' + (t === draft.eventType ? ' selected' : '') + '>' + esc(t) + '</option>'; }).join('') + '</select>') +
           field('Date *', '<input name="date" type="date" required value="' + esc(draft.date) + '">') +
-          field('Lieu', '<input name="venue" value="' + esc(draft.venue) + '" placeholder="Salle, adresse…">', 'span-2') +
+          field('Lieu', '<input name="venue" value="' + esc(draft.venue) + '" placeholder="Salle, adresse…">') +
           field('Invités', '<input name="guests" type="number" min="0" step="10" value="' + esc(draft.guests) + '">') +
           field('Formule', '<select name="package"><option value="">—</option>' + pkgOptions.map(function (p) { return '<option' + (p === draft.package ? ' selected' : '') + '>' + esc(p) + '</option>'; }).join('') + '</select>') +
           field('Prix total (DH) *', '<input name="total" type="number" min="0" step="500" value="' + esc(draft.total) + '">') +
+          field('Réservé par', '<select name="source">' + sourceOptions(draft.source || 'Autre', true) + '</select>') +
           field('Statut', '<select name="status"><option value="confirme"' + (draft.status !== 'annule' ? ' selected' : '') + '>Confirmé</option><option value="annule"' + (draft.status === 'annule' ? ' selected' : '') + '>Annulé</option></select>') +
           field('Notes', '<textarea name="notes" rows="3" placeholder="Menu, horaires, demandes particulières…">' + esc(draft.notes) + '</textarea>', 'span-2') +
         '</div>' +
@@ -556,7 +665,7 @@
     Object.assign(draft, {
       clientName: clientName, phone: f.phone.value.trim(), eventType: f.eventType.value, date: date,
       venue: f.venue.value.trim(), guests: +f.guests.value || 0, package: f.package.value,
-      total: +f.total.value || 0, status: f.status.value, notes: f.notes.value.trim()
+      total: +f.total.value || 0, status: f.status.value, notes: f.notes.value.trim(), source: f.source.value
     });
     var isNew = !draft.id;
     if (isNew) {
@@ -740,6 +849,8 @@
     'close-sheet': closeSheet,
     'open-req': function (el) { openRequest(el.dataset.id); },
     'open-event': function (el) { openEventForm(el.dataset.id); },
+    'new-request': function (el) { openRequestForm(el.dataset.date ? { date: el.dataset.date } : null); },
+    'req-form-save': saveRequestForm,
     'new-event': function (el) { openEventForm(null, el.dataset.date ? { date: el.dataset.date } : null); },
     'open-day': function (el) { openDay(el.dataset.date); },
     'open-client': function (el) { openClient(el.dataset.key); },
@@ -772,7 +883,7 @@
     'req-convert': function (el) {
       var r = findReq(el.dataset.id);
       openEventForm(null, {
-        clientName: r.name, phone: r.phone, eventType: r.eventType, date: r.date, guests: r.guests,
+        clientName: r.name, phone: r.phone, eventType: r.eventType, date: r.date, guests: r.guests, source: r.source || 'Autre',
         notes: [r.message, r.notes].filter(Boolean).join('\n'), fromRequest: r.id
       });
     },
@@ -877,6 +988,7 @@
       commit('Statut mis à jour : ' + statusLabel(next) + '.');
       openRequest(r.id);
     }
+    if (e.target.id === 'reqSource') { state.reqSource = e.target.value; renderRequestList(); return; }
     if (e.target.id === 'galleryUpload') {
       var files = Array.prototype.slice.call(e.target.files || []);
       if (!files.length) return;

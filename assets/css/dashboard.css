@@ -407,3 +407,28 @@ body.sheet-open { overflow: hidden; }
 }
 .toast.is-visible { opacity: 1; transform: translate(-50%, 0); }
 .toast--error { background: var(--red); }
+
+/* ---------- sources & ajout manuel ---------- */
+.welcome__actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.toolbar__group { display: flex; gap: 8px; flex-wrap: wrap; flex: 1; }
+.search--select { width: 200px; cursor: pointer; }
+@media (max-width: 640px) { .search--select { width: 100%; } .toolbar > .btn { width: 100%; } }
+.src-tag { display: inline-flex; align-items: center; padding: 1px 8px; border-radius: 6px; background: var(--cream); color: var(--ink-soft); font-size: .7rem; font-weight: 600; letter-spacing: .02em; }
+.pick { display: flex; flex-wrap: wrap; gap: 6px; }
+.pick__opt { position: relative; cursor: pointer; }
+.pick__opt input { position: absolute; opacity: 0; pointer-events: none; }
+.pick__opt span { display: inline-block; padding: 7px 13px; border-radius: 999px; border: 1px solid var(--line); background: var(--ivory); font-size: .8rem; font-weight: 500; color: var(--ink-soft); transition: .15s; }
+.pick__opt input:checked + span { background: var(--gold); border-color: var(--gold); color: #fff; }
+.pick__opt input:focus-visible + span { box-shadow: 0 0 0 3px rgba(176, 138, 69, .25); }
+.src-rows { display: flex; flex-direction: column; gap: 12px; }
+.src-row { display: grid; grid-template-columns: 140px 1fr 210px; gap: 14px; align-items: center; font-size: .85rem; }
+.src-row__label { font-weight: 600; color: var(--ink); }
+.src-row__bar { height: 10px; background: var(--cream); border-radius: 5px; overflow: hidden; }
+.src-row__bar span { display: block; height: 100%; background: linear-gradient(90deg, var(--gold-light), var(--gold)); border-radius: 5px; }
+.src-row__val { color: var(--muted); text-align: right; }
+.src-row__val b { color: var(--ink); font-weight: 600; }
+@media (max-width: 640px) {
+  .src-row { grid-template-columns: 1fr auto; gap: 4px 10px; }
+  .src-row__bar { grid-column: span 2; grid-row: 2; }
+  .src-row__val { font-size: .76rem; }
+}
