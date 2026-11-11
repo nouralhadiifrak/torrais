@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Espace gérant — TORRAIS EVENT</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/dashboard.css">
+</head>
+<body>
+
+  <!-- Connexion -->
+  <div class="login" id="login" hidden>
+    <form class="login__card" id="loginForm">
+      <div class="login__mark">T</div>
+      <h1>TORRAIS <em>EVENT</em></h1>
+      <p class="login__sub">Espace gérant</p>
+      <label class="field">
+        <span>Mot de passe</span>
+        <input type="password" id="loginPass" autocomplete="current-password" placeholder="••••••">
+      </label>
+      <p class="login__error" id="loginError" hidden>Mot de passe incorrect.</p>
+      <button class="btn btn--gold btn--block" type="submit">Se connecter</button>
+      <p class="login__hint">Version démo — mot de passe : <strong>demo</strong></p>
+      <a class="login__back" href="../">← Retour au site</a>
+    </form>
+  </div>
+
+  <!-- Application -->
+  <div class="app" id="app" hidden>
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar__brand">
+        <span class="sidebar__mark">T</span>
+        <div><strong>TORRAIS <em>EVENT</em></strong><small>Espace gérant</small></div>
+      </div>
+      <nav class="sidebar__nav" id="sideNav"></nav>
+      <div class="sidebar__foot">
+        <a href="../" target="_blank" rel="noopener" class="sidebar__link" data-icon-before="external">Voir le site</a>
+        <button type="button" class="sidebar__link" data-action="reset-demo" data-icon-before="reset">Réinitialiser la démo</button>
+        <button type="button" class="sidebar__link" data-action="logout" data-icon-before="logout">Déconnexion</button>
+      </div>
+    </aside>
+    <div class="scrim" data-action="toggle-nav"></div>
+
+    <div class="main">
+      <header class="topbar">
+        <button class="topbar__menu" data-action="toggle-nav" aria-label="Menu">
+          <span></span><span></span><span></span>
+        </button>
+        <h1 class="topbar__title" id="viewTitle">Tableau de bord</h1>
+        <span class="demo-pill" title="Les données affichées sont fictives">Démo · données fictives</span>
+      </header>
+      <main class="content" id="view"></main>
+    </div>
+  </div>
+
+  <!-- Panneau latéral / fenêtre -->
+  <div class="sheet" id="sheet" hidden>
+    <div class="sheet__backdrop" data-action="close-sheet"></div>
+    <section class="sheet__panel" role="dialog" aria-modal="true" id="sheetPanel"></section>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="../assets/js/data.js"></script>
+  <script src="../assets/js/dashboard.js"></script>
+</body>
+</html>
