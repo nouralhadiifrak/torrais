@@ -6,6 +6,14 @@
   var U = T.util;
   var esc = U.esc;
   var data = T.store.load();
+  function normalize() {
+    if (!data.staff) data.staff = [];
+    if (!data.inventory) data.inventory = [];
+    data.events.forEach(function (e) {
+      ['payments', 'team', 'equipment', 'expenses'].forEach(function (k) { if (!e[k]) e[k] = []; });
+    });
+  }
+  normalize();
 
   var MONTHS = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
   var MONTHS_SHORT = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
@@ -23,7 +31,8 @@
     reqSearch: '',
     reqSource: '',
     evFilter: 'avenir',
-    clientSearch: ''
+    clientSearch: '',
+    finYear: NOW.getFullYear()
   };
 
   var ICONS = {
@@ -32,6 +41,9 @@
     calendar: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>',
     events: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/><path d="M16 15h2"/></svg>',
     clients: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7"/><path d="M18 14a6 6 0 0 1 3.5 6"/></svg>',
+    team: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7.5" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/><path d="M9 14.5l3 3 3-3"/></svg>',
+    box: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 8L12 3.5 20.5 8v8L12 20.5 3.5 16z"/><path d="M3.5 8l8.5 4.5L20.5 8"/><path d="M12 12.5v8"/></svg>',
+    chart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4v16h16"/><path d="M8 16v-4M12 16V8M16 16v-6"/></svg>',
     content: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg>',
     external: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>',
     reset: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4v6h6"/><path d="M4.5 15a8 8 0 1 0 1.5-8.5L4 10"/></svg>',
@@ -50,10 +62,16 @@
 
   var NAV = [
     { id: 'overview', label: 'Tableau de bord', icon: 'overview' },
+    { group: 'Ventes' },
     { id: 'requests', label: 'Demandes de devis', icon: 'requests' },
     { id: 'calendar', label: 'Calendrier', icon: 'calendar' },
-    { id: 'events', label: 'Événements & paiements', icon: 'events' },
+    { id: 'events', label: 'Événements', icon: 'events' },
     { id: 'clients', label: 'Clients', icon: 'clients' },
+    { group: 'Organisation' },
+    { id: 'team', label: 'Équipe', icon: 'team' },
+    { id: 'inventory', label: 'Matériel', icon: 'box' },
+    { group: 'Gestion' },
+    { id: 'finances', label: 'Finances', icon: 'chart' },
     { id: 'content', label: 'Contenu du site', icon: 'content' }
   ];
 
@@ -138,6 +156,7 @@
   function renderNav() {
     var newCount = data.requests.filter(function (r) { return r.status === 'nouveau'; }).length;
     $('#sideNav').innerHTML = NAV.map(function (n) {
+      if (n.group) return '<p class="sidebar__group">' + n.group + '</p>';
       var badge = n.id === 'requests' && newCount ? '<span class="nav-badge">' + newCount + '</span>' : '';
       return '<button type="button" class="sidebar__item' + (state.view === n.id ? ' is-active' : '') + '" data-action="goto" data-view="' + n.id + '">' +
         icon(n.icon) + '<span>' + n.label + '</span>' + badge + '</button>';
@@ -148,7 +167,7 @@
     renderNav();
     var nav = NAV.filter(function (n) { return n.id === state.view; })[0];
     $('#viewTitle').textContent = nav ? nav.label : '';
-    var views = { overview: viewOverview, requests: viewRequests, calendar: viewCalendar, events: viewEvents, clients: viewClients, content: viewContent };
+    var views = { overview: viewOverview, requests: viewRequests, calendar: viewCalendar, events: viewEvents, clients: viewClients, team: viewTeam, inventory: viewInventory, finances: viewFinances, content: viewContent };
     $('#view').innerHTML = views[state.view]();
     if (state.view === 'requests') renderRequestList();
     if (state.view === 'clients') renderClientList();
@@ -194,6 +213,8 @@
         kpi('Reste à encaisser', U.formatDH(due), 'Sur ' + plural(upcoming.length, 'événement') + ' à venir', 'events') +
       '</div>' +
 
+      alertsCard() +
+
       '<div class="grid-2">' +
         '<section class="card"><header class="card__head"><h3>Prochains événements</h3><button class="link" data-action="goto" data-view="calendar">Voir le calendrier →</button></header>' +
           (upcoming.length ? '<ul class="rows">' + upcoming.slice(0, 6).map(eventRow).join('') + '</ul>' : empty('Aucun événement à venir.')) +
@@ -213,6 +234,31 @@
         }).join('') + '</div>' +
       '</section>' +
       sourcesCard();
+  }
+
+  // Ce qui demande une action : équipe manquante, matériel insuffisant, soldes en retard, paies à régler
+  function alertsCard() {
+    var items = [];
+    activeEvents().filter(function (e) { return e.date >= TODAY && daysBetween(TODAY, e.date) <= 14 && !(e.team || []).length; }).sort(byDate).forEach(function (e) {
+      items.push('<button class="alert" data-action="open-event" data-id="' + e.id + '" data-tab="team">' + icon('team') + '<span><strong>Aucune équipe affectée</strong> pour ' + esc(e.clientName) + ' — ' + esc(e.eventType.toLowerCase()) + ' du ' + U.formatDate(e.date, { day: 'numeric', month: 'long' }) + ' (' + relDays(e.date).toLowerCase() + ')</span><em>Affecter →</em></button>');
+    });
+    var short = shortages(60);
+    var days = {};
+    short.forEach(function (x) { (days[x.date] = days[x.date] || []).push(x); });
+    Object.keys(days).sort().forEach(function (date) {
+      items.push('<button class="alert" data-action="goto" data-view="inventory">' + icon('box') + '<span><strong>Matériel insuffisant</strong> le ' + U.formatDate(date, { day: 'numeric', month: 'long' }) + ' — il manque ' +
+        days[date].map(function (x) { return x.missing + ' ' + esc(x.item.name.toLowerCase()); }).join(', ') + '</span><em>Voir →</em></button>');
+    });
+    activeEvents().filter(function (e) { return e.date < TODAY && remaining(e) > 0; }).sort(byDate).forEach(function (e) {
+      items.push('<button class="alert" data-action="open-event" data-id="' + e.id + '" data-tab="pay">' + icon('events') + '<span><strong>Solde en retard</strong> — ' + esc(e.clientName) + ' doit encore ' + U.formatDH(remaining(e)) + ' (événement du ' + U.formatDate(e.date, { day: 'numeric', month: 'long' }) + ')</span><em>Voir →</em></button>');
+    });
+    var owed = sum(data.staff, function (s) { return staffOwed(s.id); });
+    if (owed) {
+      var n = data.staff.filter(function (s) { return staffOwed(s.id) > 0; }).length;
+      items.push('<button class="alert" data-action="goto" data-view="team">' + icon('team') + '<span><strong>Équipe à payer</strong> — ' + U.formatDH(owed) + ' pour ' + plural(n, 'personne') + '</span><em>Voir →</em></button>');
+    }
+    if (!items.length) return '';
+    return '<section class="card card--alerts"><header class="card__head"><h3>À surveiller</h3><span class="muted">' + plural(items.length, 'point') + '</span></header><div class="alerts">' + items.join('') + '</div></section>';
   }
 
   function sourcesCard() {
@@ -541,7 +587,56 @@
   }
 
   /* =========================================================
-     ÉVÉNEMENTS & PAIEMENTS
+     COÛTS, ÉQUIPE ET MATÉRIEL (calculs)
+     ========================================================= */
+  function staffById(id) { return data.staff.filter(function (s) { return s.id === id; })[0]; }
+  function itemById(id) { return data.inventory.filter(function (i) { return i.id === id; })[0]; }
+  function staffCost(e) { return sum(e.team || [], function (t) { return t.pay; }); }
+  function expenseCost(e) { return sum(e.expenses || [], function (x) { return x.amount; }); }
+  function cost(e) { return staffCost(e) + expenseCost(e); }
+  function profit(e) { return (+e.total || 0) - cost(e); }
+  function marginPct(total, c) { return total ? Math.round((total - c) / total * 100) : 0; }
+  // Événements (autres que exceptId) où cette personne travaille déjà ce jour-là
+  function staffBusy(staffId, date, exceptId) {
+    return activeEvents().filter(function (e) {
+      return e.date === date && e.id !== exceptId && (e.team || []).some(function (t) { return t.staffId === staffId; });
+    });
+  }
+  function reservedOn(itemId, date, exceptId) {
+    return sum(activeEvents().filter(function (e) { return e.date === date && e.id !== exceptId; }), function (e) {
+      return sum((e.equipment || []).filter(function (q) { return q.itemId === itemId; }), function (q) { return q.qty; });
+    });
+  }
+  // Jours à venir où le matériel réservé dépasse le stock
+  function shortages(maxDays) {
+    var dates = {};
+    activeEvents().forEach(function (e) {
+      if (e.date >= TODAY && (maxDays == null || daysBetween(TODAY, e.date) <= maxDays) && (e.equipment || []).length) dates[e.date] = true;
+    });
+    var out = [];
+    Object.keys(dates).sort().forEach(function (date) {
+      data.inventory.forEach(function (it) {
+        var need = reservedOn(it.id, date, null);
+        if (need > it.qty) out.push({ date: date, item: it, need: need, missing: need - it.qty });
+      });
+    });
+    return out;
+  }
+  function staffOwed(staffId) {
+    return sum(activeEvents().filter(function (e) { return e.date <= TODAY; }), function (e) {
+      return sum((e.team || []).filter(function (t) { return t.staffId === staffId && !t.paid; }), function (t) { return t.pay; });
+    });
+  }
+  function suggestedQty(item, guests) {
+    var g = +guests || 0;
+    if (item.rule === 'guest1') return g;
+    if (item.rule === 'guest2') return g * 2;
+    if (item.rule === 'table1') return Math.ceil(g / 10);
+    return 0;
+  }
+
+  /* =========================================================
+     ÉVÉNEMENTS
      ========================================================= */
   function viewEvents() {
     var year = NOW.getFullYear();
@@ -568,75 +663,216 @@
   }
 
   function eventMoneyRow(e) {
+    var team = (e.team || []).length;
     return '<li><button class="row" data-action="open-event" data-id="' + e.id + '">' + dateBlock(e.date) +
       '<div class="row__main"><strong>' + esc(e.clientName) + '</strong><span>' + esc(e.eventType) + ' · ' + esc(e.package || 'Sur mesure') + ' · ' + esc(e.guests) + ' invités</span>' +
-      '<span class="row__rel">' + icon('pin', 'ic--xs') + ' ' + esc(e.venue || '—') + '</span></div>' +
+      '<span class="row__rel">' + icon('pin', 'ic--xs') + ' ' + esc(e.venue || '—') + ' · ' + (team ? plural(team, 'personne') + ' dans l\'équipe' : 'Équipe à affecter') + '</span></div>' +
       '<div class="row__money"><div class="row__amounts"><span>' + U.formatDH(paid(e)) + '</span><small>/ ' + U.formatDH(e.total) + '</small></div>' + progress(e) +
       (remaining(e) ? '<small class="due">Reste ' + U.formatDH(remaining(e)) + '</small>' : '<small class="ok">Payé en totalité</small>') + '</div></button></li>';
   }
 
   var draft = null;
+  var evTab = 'details';
+  var EV_TABS = [['details', 'Détails'], ['menu', 'Menu'], ['team', 'Équipe'], ['equip', 'Matériel'], ['costs', 'Dépenses'], ['pay', 'Paiements']];
 
-  function openEventForm(id, prefill) {
+  function openEventForm(id, prefill, tab) {
     var existing = id && data.events.filter(function (e) { return e.id === id; })[0];
     draft = existing ? JSON.parse(JSON.stringify(existing)) : Object.assign({
       id: null, source: 'WhatsApp', clientName: '', phone: '', eventType: 'Mariage', date: '', venue: '', guests: '', package: '', total: '',
       status: 'confirme', notes: '', payments: [], createdAt: TODAY
     }, prefill || {});
+    ['payments', 'team', 'equipment', 'expenses'].forEach(function (k) { if (!draft[k]) draft[k] = []; });
+    ['arrival', 'service', 'menu', 'menuNotes'].forEach(function (k) { if (draft[k] == null) draft[k] = ''; });
+    evTab = tab || 'details';
     var pkgOptions = data.packages.map(function (p) { return p.name; }).concat(['Buffet cocktail', 'Tyafer + décoration', 'Sur mesure']);
     if (draft.package && pkgOptions.indexOf(draft.package) === -1) pkgOptions.push(draft.package);
 
     openSheet(
       '<header class="sheet__head"><div><p class="sheet__eyebrow">' + (existing ? 'Événement confirmé' : 'Nouvel événement') + '</p><h2>' + (existing ? esc(existing.clientName) : 'Ajouter un événement') + '</h2></div>' + closeBtn() + '</header>' +
+      '<nav class="tabs" id="evTabs"></nav>' +
       '<form class="sheet__body" id="eventForm" novalidate>' +
-        (existing ? '<div class="actions">' + contactButtons(existing.phone, existing.clientName, existing.date) + '</div>' : '') +
-        '<div class="form-grid">' +
-          field('Client *', '<input name="clientName" required value="' + esc(draft.clientName) + '" placeholder="Ex. Famille Alaoui">') +
-          field('Téléphone', '<input name="phone" type="tel" value="' + esc(draft.phone) + '" placeholder="06 XX XX XX XX">') +
-          field('Type d\'événement', '<select name="eventType">' + T.EVENT_TYPES.map(function (t) { return '<option' + (t === draft.eventType ? ' selected' : '') + '>' + esc(t) + '</option>'; }).join('') + '</select>') +
-          field('Date *', '<input name="date" type="date" required value="' + esc(draft.date) + '">') +
-          field('Lieu', '<input name="venue" value="' + esc(draft.venue) + '" placeholder="Salle, adresse…">') +
-          field('Invités', '<input name="guests" type="number" min="0" step="10" value="' + esc(draft.guests) + '">') +
-          field('Formule', '<select name="package"><option value="">—</option>' + pkgOptions.map(function (p) { return '<option' + (p === draft.package ? ' selected' : '') + '>' + esc(p) + '</option>'; }).join('') + '</select>') +
-          field('Prix total (DH) *', '<input name="total" type="number" min="0" step="500" value="' + esc(draft.total) + '">') +
-          field('Réservé par', '<select name="source">' + sourceOptions(draft.source || 'Autre', true) + '</select>') +
-          field('Statut', '<select name="status"><option value="confirme"' + (draft.status !== 'annule' ? ' selected' : '') + '>Confirmé</option><option value="annule"' + (draft.status === 'annule' ? ' selected' : '') + '>Annulé</option></select>') +
-          field('Notes', '<textarea name="notes" rows="3" placeholder="Menu, horaires, demandes particulières…">' + esc(draft.notes) + '</textarea>', 'span-2') +
+        '<div class="tabpanel" data-panel="details">' +
+          (existing ? '<div class="actions">' + contactButtons(existing.phone, existing.clientName, existing.date) + '</div>' : '') +
+          '<div class="form-grid">' +
+            field('Client *', '<input name="clientName" required value="' + esc(draft.clientName) + '" placeholder="Ex. Famille Alaoui">') +
+            field('Téléphone', '<input name="phone" type="tel" value="' + esc(draft.phone) + '" placeholder="06 XX XX XX XX">') +
+            field('Type d\'événement', '<select name="eventType">' + T.EVENT_TYPES.map(function (t) { return '<option' + (t === draft.eventType ? ' selected' : '') + '>' + esc(t) + '</option>'; }).join('') + '</select>') +
+            field('Date *', '<input name="date" type="date" required value="' + esc(draft.date) + '">') +
+            field('Lieu', '<input name="venue" value="' + esc(draft.venue) + '" placeholder="Salle, adresse…">') +
+            field('Invités', '<input name="guests" type="number" min="0" step="10" value="' + esc(draft.guests) + '">') +
+            field('Formule', '<select name="package"><option value="">—</option>' + pkgOptions.map(function (p) { return '<option' + (p === draft.package ? ' selected' : '') + '>' + esc(p) + '</option>'; }).join('') + '</select>') +
+            field('Prix total (DH) *', '<input name="total" type="number" min="0" step="500" value="' + esc(draft.total) + '">') +
+            field('Réservé par', '<select name="source">' + sourceOptions(draft.source || 'Autre', true) + '</select>') +
+            field('Statut', '<select name="status"><option value="confirme"' + (draft.status !== 'annule' ? ' selected' : '') + '>Confirmé</option><option value="annule"' + (draft.status === 'annule' ? ' selected' : '') + '>Annulé</option></select>') +
+            field('Notes (lieu, accès, contact sur place…)', '<textarea name="notes" rows="3">' + esc(draft.notes) + '</textarea>', 'span-2') +
+          '</div>' +
+          '<div id="eventAvail"></div>' +
         '</div>' +
-        '<div id="eventAvail"></div>' +
-        '<h4 class="sub">Paiements</h4>' +
-        '<div id="paymentsBox"></div>' +
+        '<div class="tabpanel" data-panel="menu">' +
+          '<div class="form-grid">' +
+            field('Arrivée de l\'équipe', '<input name="arrival" type="time" value="' + esc(draft.arrival) + '">') +
+            field('Début du service', '<input name="service" type="time" value="' + esc(draft.service) + '">') +
+          '</div>' +
+          field('Menu convenu (un plat par ligne)', '<textarea name="menu" rows="8" placeholder="Pastilla…&#10;Méchoui…">' + esc(draft.menu) + '</textarea>') +
+          '<button type="button" class="btn btn--light btn--sm" data-action="ev-menu-from-package">Reprendre le contenu de la formule</button>' +
+          '<div class="gap"></div>' +
+          field('Demandes particulières', '<textarea name="menuNotes" rows="3" placeholder="Allergies, menus spéciaux, tables à part…">' + esc(draft.menuNotes) + '</textarea>') +
+        '</div>' +
+        '<div class="tabpanel" data-panel="team" id="teamBox"></div>' +
+        '<div class="tabpanel" data-panel="equip" id="equipBox"></div>' +
+        '<div class="tabpanel" data-panel="costs" id="costsBox"></div>' +
+        '<div class="tabpanel" data-panel="pay" id="paymentsBox"></div>' +
       '</form>' +
+      '<div class="profit-bar" id="profitBar"></div>' +
       '<footer class="sheet__foot">' +
         (existing ? '<button class="btn btn--text btn--danger" data-action="ev-delete" data-id="' + existing.id + '">' + icon('trash') + ' Supprimer</button>' : '<span></span>') +
         '<button class="btn btn--gold" data-action="ev-save">Enregistrer</button>' +
       '</footer>'
     );
-    renderPayments();
-    renderEventAvail();
     var form = $('#eventForm');
-    form.elements.date.addEventListener('change', renderEventAvail);
-    form.elements.total.addEventListener('input', renderPayments);
+    form.elements.date.addEventListener('change', function () { renderEventAvail(); renderTeam(); renderEquip(); });
+    form.elements.total.addEventListener('input', function () { renderPayments(); renderProfit(); });
     form.addEventListener('submit', function (e) { e.preventDefault(); saveEvent(); });
+    renderEventAvail();
+    renderTeam();
+    renderEquip();
+    renderCosts();
+    renderPayments();
+    showEvTab(evTab);
   }
 
   function field(label, control, cls) {
     return '<label class="field' + (cls ? ' ' + cls : '') + '"><span>' + label + '</span>' + control + '</label>';
   }
 
+  function draftDate() { var f = $('#eventForm'); return f ? f.elements.date.value : draft.date; }
+  function draftTotal() { var f = $('#eventForm'); return f ? +f.elements.total.value || 0 : +draft.total || 0; }
+  function draftGuests() { var f = $('#eventForm'); return f ? +f.elements.guests.value || 0 : +draft.guests || 0; }
+
+  function showEvTab(tab) {
+    evTab = tab;
+    var counts = { team: draft.team.length, equip: draft.equipment.length, costs: draft.expenses.length, pay: draft.payments.length };
+    $('#evTabs').innerHTML = EV_TABS.map(function (t) {
+      return '<button type="button" class="tabs__btn' + (t[0] === tab ? ' is-active' : '') + '" data-action="ev-tab" data-tab="' + t[0] + '">' + t[1] +
+        (counts[t[0]] ? '<b>' + counts[t[0]] + '</b>' : '') + '</button>';
+    }).join('');
+    $$('.tabpanel').forEach(function (p) { p.hidden = p.getAttribute('data-panel') !== tab; });
+    var active = $('#evTabs .is-active');
+    if (active) {
+      var bar = $('#evTabs');
+      var left = active.offsetLeft - 16;
+      var right = active.offsetLeft + active.offsetWidth + 16;
+      if (left < bar.scrollLeft) bar.scrollLeft = left;
+      else if (right > bar.scrollLeft + bar.clientWidth) bar.scrollLeft = right - bar.clientWidth;
+    }
+    renderProfit();
+  }
+
+  function renderProfit() {
+    var total = draftTotal();
+    var c = cost(draft);
+    var p = total - c;
+    $('#profitBar').innerHTML =
+      '<div><small>Prix</small><strong>' + U.formatDH(total) + '</strong></div><span>−</span>' +
+      '<div><small>Coûts</small><strong>' + U.formatDH(c) + '</strong></div><span>=</span>' +
+      '<div class="profit-bar__result"><small>Bénéfice' + (total && c ? ' · ' + marginPct(total, c) + ' %' : '') + '</small><strong class="' + (p < 0 ? 'due' : 'ok') + '">' + U.formatDH(p) + '</strong></div>';
+  }
+
   function renderEventAvail() {
-    var form = $('#eventForm');
-    if (!form) return;
-    var date = form.elements.date.value;
+    var date = draftDate();
     $('#eventAvail').innerHTML = date ? '<h4 class="sub">Disponibilité</h4>' + availability(date, draft.id, null) : '';
   }
 
+  /* ----- onglet Équipe ----- */
+  function renderTeam() {
+    var date = draftDate();
+    var assigned = draft.team.map(function (t) { return t.staffId; });
+    var free = data.staff.filter(function (s) { return assigned.indexOf(s.id) === -1; });
+    var html = '<p class="hint">Les personnes qui travaillent sur cet événement et ce que vous leur payez.</p>';
+    if (draft.team.length) {
+      html += '<ul class="lines">' + draft.team.map(function (t, i) {
+        var s = staffById(t.staffId) || { name: 'Personne supprimée', role: '' };
+        var busy = date ? staffBusy(t.staffId, date, draft.id) : [];
+        return '<li class="line"><div class="line__main"><strong>' + esc(s.name) + '</strong><span>' + esc(s.role) +
+          (busy.length ? ' <span class="flag">' + icon('alert') + ' Déjà sur ' + esc(busy[0].clientName) + ' ce jour-là</span>' : '') + '</span></div>' +
+          '<label class="line__num"><input type="number" min="0" step="50" value="' + esc(t.pay) + '" data-team-pay="' + i + '" aria-label="Paie de ' + esc(s.name) + '"><span>DH</span></label>' +
+          '<label class="line__check"><input type="checkbox" data-team-paid="' + i + '"' + (t.paid ? ' checked' : '') + '><span>Payé</span></label>' +
+          '<button type="button" class="icon-btn icon-btn--sm" data-action="ev-del-team" data-index="' + i + '" aria-label="Retirer ' + esc(s.name) + '">' + ICONS.close + '</button></li>';
+      }).join('') + '</ul>' +
+      '<p class="line-total">Coût de l\'équipe : <strong>' + U.formatDH(staffCost(draft)) + '</strong> · ' + plural(draft.team.length, 'personne') + '</p>';
+    } else {
+      html += '<p class="empty empty--sm">Personne n\'est encore affecté à cet événement.</p>';
+    }
+    if (free.length) {
+      html += '<div class="add-row"><select id="teamAdd" aria-label="Personne à ajouter">' + free.map(function (s) {
+        var busy = date ? staffBusy(s.id, date, draft.id).length : 0;
+        return '<option value="' + s.id + '">' + esc(s.name) + ' — ' + esc(s.role) + ' (' + s.rate + ' DH)' + (busy ? ' · déjà pris ce jour' : '') + '</option>';
+      }).join('') + '</select><button type="button" class="btn btn--light btn--sm" data-action="ev-add-team">' + icon('plus') + ' Ajouter</button></div>';
+    } else if (!data.staff.length) {
+      html += '<p class="hint">Ajoutez d\'abord des personnes dans la page Équipe.</p>';
+    }
+    $('#teamBox').innerHTML = html;
+  }
+
+  /* ----- onglet Matériel ----- */
+  function equipStatus(q) {
+    var it = itemById(q.itemId);
+    if (!it) return '';
+    var date = draftDate();
+    var others = date ? reservedOn(q.itemId, date, draft.id) : 0;
+    var left = it.qty - others - (+q.qty || 0);
+    if (left < 0) return '<span class="flag">' + icon('alert') + ' Il en manque ' + (-left) + '</span> <span class="muted">(stock ' + it.qty + (others ? ', ' + others + ' pris par un autre événement' : '') + ')</span>';
+    return '<span class="muted">Stock ' + it.qty + (others ? ' · ' + others + ' pris ailleurs ce jour' : '') + ' · reste ' + left + '</span>';
+  }
+  function renderEquip() {
+    var used = draft.equipment.map(function (q) { return q.itemId; });
+    var free = data.inventory.filter(function (it) { return used.indexOf(it.id) === -1; });
+    var html = '<p class="hint">Le matériel réservé pour cet événement. Le tableau de bord vous prévient si le stock ne suffit pas ce jour-là.</p>';
+    if (draft.equipment.length) {
+      html += '<ul class="lines">' + draft.equipment.map(function (q, i) {
+        var it = itemById(q.itemId) || { name: 'Article supprimé' };
+        return '<li class="line"><div class="line__main"><strong>' + esc(it.name) + '</strong><span data-eq-status="' + i + '">' + equipStatus(q) + '</span></div>' +
+          '<label class="line__num"><input type="number" min="0" value="' + esc(q.qty) + '" data-eq-qty="' + i + '" aria-label="Quantité de ' + esc(it.name) + '"></label>' +
+          '<button type="button" class="icon-btn icon-btn--sm" data-action="ev-del-equip" data-index="' + i + '" aria-label="Retirer ' + esc(it.name) + '">' + ICONS.close + '</button></li>';
+      }).join('') + '</ul>';
+    } else {
+      html += '<p class="empty empty--sm">Aucun matériel réservé.</p>';
+    }
+    html += '<div class="add-row">' +
+      (free.length ? '<select id="equipAdd" aria-label="Article à ajouter">' + free.map(function (it) { return '<option value="' + it.id + '">' + esc(it.name) + '</option>'; }).join('') + '</select>' +
+        '<input type="number" id="equipQty" min="1" placeholder="Qté" aria-label="Quantité">' +
+        '<button type="button" class="btn btn--light btn--sm" data-action="ev-add-equip">' + icon('plus') + ' Ajouter</button>' : '') +
+      '</div>' +
+      '<button type="button" class="btn btn--light btn--sm" data-action="ev-suggest-equip">Proposer selon le nombre d\'invités</button>';
+    $('#equipBox').innerHTML = html;
+  }
+
+  /* ----- onglet Dépenses ----- */
+  function renderCosts() {
+    var html = '<p class="hint">Ce que cet événement vous coûte. La paie de l\'équipe est comptée automatiquement.</p><ul class="lines">';
+    html += '<li class="line line--auto"><div class="line__main"><strong>Équipe</strong><span>' + (draft.team.length ? plural(draft.team.length, 'personne') : 'Personne affecté') + ' · calculé depuis l\'onglet Équipe</span></div><strong class="line__amount">' + U.formatDH(staffCost(draft)) + '</strong></li>';
+    html += draft.expenses.map(function (x) {
+      return '<li class="line"><div class="line__main"><strong>' + esc(x.label) + '</strong><span>' + esc(x.category) + (x.date ? ' · ' + U.formatDate(x.date, { day: 'numeric', month: 'short' }) : '') + '</span></div>' +
+        '<strong class="line__amount">' + U.formatDH(x.amount) + '</strong>' +
+        '<button type="button" class="icon-btn icon-btn--sm" data-action="ev-del-expense" data-id="' + x.id + '" aria-label="Supprimer cette dépense">' + ICONS.close + '</button></li>';
+    }).join('');
+    html += '</ul><p class="line-total">Total des coûts : <strong>' + U.formatDH(cost(draft)) + '</strong></p>' +
+      '<div class="add-row add-row--expense">' +
+        '<input id="expLabel" placeholder="Ex. Boucher, fleurs, location…" aria-label="Libellé">' +
+        '<select id="expCat" aria-label="Catégorie">' + T.EXPENSE_CATEGORIES.map(function (c) { return '<option>' + esc(c) + '</option>'; }).join('') + '</select>' +
+        '<input type="number" id="expAmount" min="0" step="100" placeholder="Montant (DH)" aria-label="Montant">' +
+        '<button type="button" class="btn btn--light btn--sm" data-action="ev-add-expense">' + icon('plus') + ' Ajouter</button>' +
+      '</div>';
+    $('#costsBox').innerHTML = html;
+  }
+
+  /* ----- onglet Paiements ----- */
   function renderPayments() {
-    var form = $('#eventForm');
-    var total = form ? +form.elements.total.value || 0 : +draft.total || 0;
+    var total = draftTotal();
     var p = sum(draft.payments, function (x) { return x.amount; });
     var pct = total ? Math.min(100, Math.round(p / total * 100)) : 0;
     $('#paymentsBox').innerHTML =
+      '<p class="hint">Ce que le client vous a déjà versé.</p>' +
       '<div class="pay-summary"><div><small>Encaissé</small><strong>' + U.formatDH(p) + '</strong></div>' +
       '<div><small>Reste</small><strong class="' + (total - p > 0 ? 'due' : 'ok') + '">' + U.formatDH(Math.max(0, total - p)) + '</strong></div>' +
       '<div><small>Total</small><strong>' + U.formatDH(total) + '</strong></div></div>' +
@@ -658,6 +894,7 @@
     var clientName = f.clientName.value.trim();
     var date = f.date.value;
     if (!clientName || !date) {
+      showEvTab('details');
       toast('Merci d\'indiquer au moins le client et la date.', true);
       (clientName ? f.date : f.clientName).focus();
       return;
@@ -665,8 +902,10 @@
     Object.assign(draft, {
       clientName: clientName, phone: f.phone.value.trim(), eventType: f.eventType.value, date: date,
       venue: f.venue.value.trim(), guests: +f.guests.value || 0, package: f.package.value,
-      total: +f.total.value || 0, status: f.status.value, notes: f.notes.value.trim(), source: f.source.value
+      total: +f.total.value || 0, status: f.status.value, notes: f.notes.value.trim(), source: f.source.value,
+      arrival: f.arrival.value, service: f.service.value, menu: f.menu.value.trim(), menuNotes: f.menuNotes.value.trim()
     });
+    draft.equipment = draft.equipment.filter(function (q) { return +q.qty > 0; });
     var isNew = !draft.id;
     if (isNew) {
       draft.id = U.uid();
@@ -683,6 +922,213 @@
     if (commit(isNew ? 'Événement ajouté au calendrier.' : 'Événement enregistré.')) {
       if (isNew) { state.calYear = +date.slice(0, 4); state.calMonth = +date.slice(5, 7) - 1; }
     }
+  }
+
+  /* =========================================================
+     ÉQUIPE
+     ========================================================= */
+  function staffAssignments(staffId) {
+    var out = [];
+    activeEvents().forEach(function (e) {
+      (e.team || []).forEach(function (t) { if (t.staffId === staffId) out.push({ event: e, t: t }); });
+    });
+    return out.sort(function (a, b) { return byDate(a.event, b.event); });
+  }
+
+  function viewTeam() {
+    var totalOwed = sum(data.staff, function (s) { return staffOwed(s.id); });
+    var roles = T.ROLES.filter(function (r) { return data.staff.some(function (s) { return s.role === r; }); });
+    data.staff.forEach(function (s) { if (roles.indexOf(s.role) === -1) roles.push(s.role); });
+    var html = '<div class="kpis kpis--3">' +
+      '<div class="kpi kpi--static"><span class="kpi__label">Personnes</span><strong class="kpi__value">' + data.staff.length + '</strong><span class="kpi__sub">Cuisine, service, décoration, transport</span></div>' +
+      '<div class="kpi kpi--static' + (totalOwed ? ' kpi--alert' : '') + '"><span class="kpi__label">À payer à l\'équipe</span><strong class="kpi__value">' + U.formatDH(totalOwed) + '</strong><span class="kpi__sub">Événements déjà passés</span></div>' +
+      '<div class="kpi kpi--static"><span class="kpi__label">Payé à l\'équipe en ' + NOW.getFullYear() + '</span><strong class="kpi__value">' + U.formatDH(sum(activeEvents().filter(function (e) { return +e.date.slice(0, 4) === NOW.getFullYear(); }), function (e) {
+        return sum((e.team || []).filter(function (t) { return t.paid; }), function (t) { return t.pay; });
+      })) + '</strong><span class="kpi__sub">Toutes les paies réglées</span></div></div>' +
+      '<div class="toolbar"><p class="muted">Chaque personne est payée à l\'événement. Affectez l\'équipe depuis la fiche de chaque événement.</p>' +
+      '<button class="btn btn--gold btn--sm" data-action="staff-new">' + icon('plus') + ' Ajouter une personne</button></div>';
+    if (!data.staff.length) return html + '<section class="card">' + empty('Aucune personne dans l\'équipe.') + '</section>';
+    roles.forEach(function (role) {
+      var list = data.staff.filter(function (s) { return s.role === role; });
+      html += '<section class="card card--flush"><header class="card__head card__head--pad"><h3>' + esc(role) + '</h3><span class="muted">' + list.length + '</span></header><ul class="rows rows--big">' +
+        list.map(function (s) {
+          var as = staffAssignments(s.id);
+          var next = as.filter(function (a) { return a.event.date >= TODAY; });
+          var owed = staffOwed(s.id);
+          return '<li><div class="row row--static"><button class="row__open" data-action="staff-open" data-id="' + s.id + '"><div class="avatar">' + esc(s.name.charAt(0).toUpperCase()) + '</div>' +
+            '<div class="row__main"><strong>' + esc(s.name) + '</strong><span>' + esc(U.formatPhone(s.phone) || 'Pas de téléphone') + ' · ' + U.formatDH(s.rate) + ' par événement</span>' +
+            '<span class="row__rel">' + (next.length ? plural(next.length, 'événement') + ' à venir · prochain le ' + U.formatDate(next[0].event.date, { day: 'numeric', month: 'short' }) : 'Aucun événement à venir') + '</span></div></button>' +
+            '<div class="row__side">' + (owed ? '<span class="amount amount--due">' + U.formatDH(owed) + '</span><button class="btn btn--light btn--sm" data-action="staff-pay" data-id="' + s.id + '">Marquer payé</button>' : '<span class="badge badge--paid">À jour</span>') + '</div></div></li>';
+        }).join('') + '</ul></section>';
+    });
+    return html;
+  }
+
+  function openStaff(id) {
+    var s = id ? staffById(id) : null;
+    var v = s || { id: '', name: '', role: 'Serveur', phone: '', rate: 200 };
+    var as = s ? staffAssignments(s.id) : [];
+    openSheet(
+      '<header class="sheet__head"><div><p class="sheet__eyebrow">Équipe</p><h2>' + (s ? esc(s.name) : 'Ajouter une personne') + '</h2></div>' + closeBtn() + '</header>' +
+      '<form class="sheet__body" id="staffForm" novalidate data-id="' + esc(v.id) + '">' +
+        (s && s.phone ? '<div class="actions">' + contactButtons(s.phone, s.name, null) + '</div>' : '') +
+        '<div class="form-grid">' +
+          field('Nom *', '<input name="name" required value="' + esc(v.name) + '">') +
+          field('Téléphone', '<input name="phone" type="tel" value="' + esc(v.phone) + '" placeholder="06 XX XX XX XX">') +
+          field('Rôle', '<select name="role">' + T.ROLES.map(function (r) { return '<option' + (r === v.role ? ' selected' : '') + '>' + esc(r) + '</option>'; }).join('') + '</select>') +
+          field('Tarif par événement (DH)', '<input name="rate" type="number" min="0" step="50" value="' + esc(v.rate) + '">') +
+        '</div>' +
+        (s ? '<h4 class="sub">Événements (' + as.length + ')</h4>' + (as.length ? '<ul class="lines">' + as.slice().reverse().map(function (a) {
+          return '<li class="line"><div class="line__main"><strong>' + esc(a.event.clientName) + '</strong><span>' + U.formatDate(a.event.date, { day: 'numeric', month: 'short', year: 'numeric' }) + ' · ' + esc(a.event.eventType) + '</span></div>' +
+            '<strong class="line__amount">' + U.formatDH(a.t.pay) + '</strong>' +
+            (a.t.paid ? '<span class="badge badge--paid">Payé</span>' : a.event.date <= TODAY ? '<span class="badge badge--refuse">À payer</span>' : '<span class="badge badge--muted">À venir</span>') + '</li>';
+        }).join('') + '</ul>' : '<p class="empty empty--sm">Pas encore affecté à un événement.</p>') : '') +
+      '</form>' +
+      '<footer class="sheet__foot">' +
+        (s ? '<button class="btn btn--text btn--danger" data-action="staff-delete" data-id="' + s.id + '">' + icon('trash') + ' Supprimer</button>' : '<span></span>') +
+        '<button class="btn btn--gold" data-action="staff-save">Enregistrer</button></footer>'
+    );
+    $('#staffForm').addEventListener('submit', function (e) { e.preventDefault(); actions['staff-save'](); });
+  }
+
+  /* =========================================================
+     MATÉRIEL
+     ========================================================= */
+  function itemPeak(itemId) {
+    var peak = { qty: 0, date: '' };
+    var dates = {};
+    activeEvents().forEach(function (e) { if (e.date >= TODAY) dates[e.date] = true; });
+    Object.keys(dates).forEach(function (date) {
+      var n = reservedOn(itemId, date, null);
+      if (n > peak.qty) peak = { qty: n, date: date };
+    });
+    return peak;
+  }
+
+  function shortageList(list) {
+    var byDay = {};
+    list.forEach(function (x) { (byDay[x.date] = byDay[x.date] || []).push(x); });
+    return Object.keys(byDay).sort().map(function (date) {
+      return '<li><strong>' + U.formatDate(date, { weekday: 'long', day: 'numeric', month: 'long' }) + '</strong> — il manque ' +
+        byDay[date].map(function (x) { return '<b>' + x.missing + '</b> ' + esc(x.item.name.toLowerCase()); }).join(', ') +
+        ' <span class="muted">(' + eventsOn(date).map(function (e) { return esc(e.clientName); }).join(' + ') + ')</span></li>';
+    }).join('');
+  }
+
+  function viewInventory() {
+    var short = shortages(null);
+    var cats = T.INV_CATEGORIES.filter(function (c) { return data.inventory.some(function (i) { return i.category === c; }); });
+    data.inventory.forEach(function (i) { if (cats.indexOf(i.category) === -1) cats.push(i.category); });
+    var html = (short.length ? '<div class="avail avail--busy avail--block">' + ICONS.alert + '<div><strong>Stock insuffisant sur ' + plural(Object.keys(short.reduce(function (m, x) { m[x.date] = 1; return m; }, {})).length, 'jour') + ' à venir</strong><ul>' + shortageList(short) + '</ul><span>Prévoyez une location, ou modifiez le matériel réservé dans la fiche des événements.</span></div></div>' : '') +
+      '<div class="toolbar"><p class="muted">Ce que vous possédez. « Réservé au maximum » montre le jour à venir le plus chargé.</p>' +
+      '<button class="btn btn--gold btn--sm" data-action="item-new">' + icon('plus') + ' Ajouter un article</button></div>';
+    if (!data.inventory.length) return html + '<section class="card">' + empty('Aucun article en stock.') + '</section>';
+    cats.forEach(function (cat) {
+      var list = data.inventory.filter(function (i) { return i.category === cat; });
+      html += '<section class="card card--flush"><header class="card__head card__head--pad"><h3>' + esc(cat) + '</h3></header><ul class="rows rows--big">' + list.map(function (it) {
+        var peak = itemPeak(it.id);
+        var pct = it.qty ? Math.min(100, Math.round(peak.qty / it.qty * 100)) : (peak.qty ? 100 : 0);
+        var over = peak.qty > it.qty;
+        return '<li><button class="row" data-action="item-open" data-id="' + it.id + '"><div class="row__main"><strong>' + esc(it.name) + '</strong>' +
+          '<span>' + (peak.qty ? 'Réservé au maximum : ' + peak.qty + ' le ' + U.formatDate(peak.date, { day: 'numeric', month: 'short' }) : 'Aucune réservation à venir') + '</span></div>' +
+          '<div class="row__money"><div class="row__amounts"><span>' + it.qty + '</span><small>en stock</small></div>' +
+          '<div class="progress' + (over ? ' progress--over' : '') + '"><span style="width:' + pct + '%"></span></div>' +
+          (over ? '<small class="due">Il en manque ' + (peak.qty - it.qty) + '</small>' : '<small class="muted">' + (peak.qty ? pct + ' % utilisé au maximum' : 'Disponible') + '</small>') + '</div></button></li>';
+      }).join('') + '</ul></section>';
+    });
+    return html;
+  }
+
+  function openItem(id) {
+    var it = id ? itemById(id) : null;
+    var v = it || { id: '', name: '', category: 'Mobilier', qty: '', rule: '' };
+    var uses = [];
+    if (it) {
+      activeEvents().filter(function (e) { return e.date >= TODAY; }).sort(byDate).forEach(function (e) {
+        (e.equipment || []).forEach(function (q) { if (q.itemId === it.id) uses.push({ event: e, qty: q.qty }); });
+      });
+    }
+    openSheet(
+      '<header class="sheet__head"><div><p class="sheet__eyebrow">Matériel</p><h2>' + (it ? esc(it.name) : 'Ajouter un article') + '</h2></div>' + closeBtn() + '</header>' +
+      '<form class="sheet__body" id="itemForm" novalidate data-id="' + esc(v.id) + '">' +
+        '<div class="form-grid">' +
+          field('Nom *', '<input name="name" required value="' + esc(v.name) + '" placeholder="Ex. Chaises dorées">', 'span-2') +
+          field('Catégorie', '<select name="category">' + T.INV_CATEGORIES.map(function (c) { return '<option' + (c === v.category ? ' selected' : '') + '>' + esc(c) + '</option>'; }).join('') + '</select>') +
+          field('Quantité en stock', '<input name="qty" type="number" min="0" value="' + esc(v.qty) + '">') +
+          field('Quantité habituelle par événement', '<select name="rule">' + T.INV_RULES.map(function (r) { return '<option value="' + r.id + '"' + (r.id === (v.rule || '') ? ' selected' : '') + '>' + esc(r.label) + '</option>'; }).join('') + '</select>', 'span-2') +
+        '</div>' +
+        (it ? '<h4 class="sub">Réservations à venir (' + uses.length + ')</h4>' + (uses.length ? '<ul class="lines">' + uses.map(function (u) {
+          var total = reservedOn(it.id, u.event.date, null);
+          return '<li class="line"><div class="line__main"><strong>' + esc(u.event.clientName) + '</strong><span>' + U.formatDate(u.event.date, { day: 'numeric', month: 'short', year: 'numeric' }) +
+            (total > it.qty ? ' <span class="flag">' + icon('alert') + ' ' + total + ' réservés ce jour-là</span>' : '') + '</span></div><strong class="line__amount">' + u.qty + '</strong></li>';
+        }).join('') + '</ul>' : '<p class="empty empty--sm">Aucune réservation à venir.</p>') : '') +
+      '</form>' +
+      '<footer class="sheet__foot">' +
+        (it ? '<button class="btn btn--text btn--danger" data-action="item-delete" data-id="' + it.id + '">' + icon('trash') + ' Supprimer</button>' : '<span></span>') +
+        '<button class="btn btn--gold" data-action="item-save">Enregistrer</button></footer>'
+    );
+    $('#itemForm').addEventListener('submit', function (e) { e.preventDefault(); actions['item-save'](); });
+  }
+
+  /* =========================================================
+     FINANCES
+     ========================================================= */
+  function viewFinances() {
+    var y = state.finYear;
+    var evs = activeEvents().filter(function (e) { return +e.date.slice(0, 4) === y; });
+    var done = evs.filter(function (e) { return e.date < TODAY; });
+    var revenue = sum(evs, function (e) { return e.total; });
+    var doneRevenue = sum(done, function (e) { return e.total; });
+    var doneCost = sum(done, cost);
+    var months = MONTHS.map(function (m, i) {
+      var list = evs.filter(function (e) { return +e.date.slice(5, 7) === i + 1; });
+      var past = list.length && list.every(function (e) { return e.date < TODAY; });
+      return { label: m, count: list.length, revenue: sum(list, function (e) { return e.total; }), cost: sum(list, cost), past: past };
+    });
+    var maxRev = Math.max.apply(null, months.map(function (m) { return m.revenue; }).concat([1]));
+    var cats = T.EXPENSE_CATEGORIES.map(function (c) {
+      return { label: c, amount: sum(done, function (e) { return sum((e.expenses || []).filter(function (x) { return x.category === c; }), function (x) { return x.amount; }); }) };
+    });
+    cats.unshift({ label: 'Équipe', amount: sum(done, staffCost) });
+    cats = cats.filter(function (c) { return c.amount; }).sort(function (a, b) { return b.amount - a.amount; });
+    var maxCat = Math.max.apply(null, cats.map(function (c) { return c.amount; }).concat([1]));
+
+    return '<div class="cal-toolbar"><div class="cal-nav"><button class="icon-btn" data-action="fin-prev" aria-label="Année précédente">' + ICONS.chevL + '</button><h2>' + y + '</h2>' +
+        '<button class="icon-btn" data-action="fin-next" aria-label="Année suivante">' + ICONS.chevR + '</button></div></div>' +
+      '<div class="kpis">' +
+        '<div class="kpi kpi--static"><span class="kpi__label">Chiffre d\'affaires</span><strong class="kpi__value">' + U.formatDH(revenue) + '</strong><span class="kpi__sub">' + plural(evs.length, 'événement') + ' confirmés</span></div>' +
+        '<div class="kpi kpi--static"><span class="kpi__label">Encaissé</span><strong class="kpi__value">' + U.formatDH(sum(evs, paid)) + '</strong><span class="kpi__sub">Reste ' + U.formatDH(sum(evs, remaining)) + '</span></div>' +
+        '<div class="kpi kpi--static"><span class="kpi__label">Coûts</span><strong class="kpi__value">' + U.formatDH(doneCost) + '</strong><span class="kpi__sub">' + plural(done.length, 'événement réalisé', 'événements réalisés') + '</span></div>' +
+        '<div class="kpi kpi--static kpi--alert"><span class="kpi__label">Bénéfice réalisé</span><strong class="kpi__value">' + U.formatDH(doneRevenue - doneCost) + '</strong><span class="kpi__sub">Marge de ' + marginPct(doneRevenue, doneCost) + ' % sur les événements réalisés</span></div>' +
+      '</div>' +
+
+      '<section class="card"><header class="card__head"><h3>Mois par mois</h3><span class="muted">Le bénéfice est calculé une fois les événements du mois passés</span></header>' +
+        '<div class="table-wrap"><table class="table"><thead><tr><th>Mois</th><th class="num">Événements</th><th class="num">Chiffre d\'affaires</th><th class="num">Coûts</th><th class="num">Bénéfice</th><th class="table__bar"></th></tr></thead><tbody>' +
+        months.map(function (m) {
+          if (!m.count) return '<tr class="is-empty"><td>' + m.label + '</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="table__bar"></td></tr>';
+          return '<tr><td>' + m.label + '</td><td class="num">' + m.count + '</td><td class="num">' + U.formatDH(m.revenue) + '</td><td class="num">' + (m.cost ? U.formatDH(m.cost) : '—') + '</td>' +
+            '<td class="num">' + (m.past ? '<strong class="' + (m.revenue - m.cost < 0 ? 'due' : 'ok') + '">' + U.formatDH(m.revenue - m.cost) + '</strong>' : '<span class="muted">à venir</span>') + '</td>' +
+            '<td class="table__bar"><div class="duo"><span style="width:' + Math.round(m.revenue / maxRev * 100) + '%"></span><i style="width:' + Math.round(m.cost / maxRev * 100) + '%"></i></div></td></tr>';
+        }).join('') + '</tbody></table></div>' +
+        '<div class="legend legend--inline"><span><i class="lg lg--rev"></i>Chiffre d\'affaires</span><span><i class="lg lg--cost"></i>Coûts</span></div>' +
+      '</section>' +
+
+      '<div class="grid-2">' +
+        '<section class="card"><header class="card__head"><h3>Où part l\'argent</h3><span class="muted">Événements réalisés</span></header>' +
+          (cats.length ? '<div class="src-rows">' + cats.map(function (c) {
+            return '<div class="src-row src-row--compact"><span class="src-row__label">' + esc(c.label) + '</span><div class="src-row__bar"><span style="width:' + Math.round(c.amount / maxCat * 100) + '%"></span></div>' +
+              '<span class="src-row__val"><b>' + U.formatDH(c.amount) + '</b> · ' + Math.round(c.amount / (doneCost || 1) * 100) + ' %</span></div>';
+          }).join('') + '</div>' : empty('Aucune dépense enregistrée.')) +
+        '</section>' +
+        '<section class="card"><header class="card__head"><h3>Bénéfice par événement</h3><span class="muted">Les plus récents</span></header>' +
+          (done.length ? '<ul class="rows">' + done.slice().sort(byDate).reverse().slice(0, 7).map(function (e) {
+            var c = cost(e);
+            return '<li><button class="row" data-action="open-event" data-id="' + e.id + '" data-tab="costs">' + dateBlock(e.date) +
+              '<div class="row__main"><strong>' + esc(e.clientName) + '</strong><span>' + U.formatDH(e.total) + ' − ' + U.formatDH(c) + ' de coûts</span></div>' +
+              '<div class="row__side"><span class="amount ' + (e.total - c < 0 ? 'due' : 'ok') + '">' + U.formatDH(e.total - c) + '</span><small>marge ' + marginPct(e.total, c) + ' %</small></div></button></li>';
+          }).join('') + '</ul>' : empty('Aucun événement réalisé cette année.')) +
+        '</section>' +
+      '</div>';
   }
 
   /* =========================================================
@@ -848,7 +1294,7 @@
     'toggle-nav': function () { document.body.classList.toggle('nav-open'); },
     'close-sheet': closeSheet,
     'open-req': function (el) { openRequest(el.dataset.id); },
-    'open-event': function (el) { openEventForm(el.dataset.id); },
+    'open-event': function (el) { openEventForm(el.dataset.id, null, el.dataset.tab); },
     'new-request': function (el) { openRequestForm(el.dataset.date ? { date: el.dataset.date } : null); },
     'req-form-save': saveRequestForm,
     'new-event': function (el) { openEventForm(null, el.dataset.date ? { date: el.dataset.date } : null); },
@@ -898,13 +1344,120 @@
       var amount = +$('#payAmount').value;
       if (!amount || amount <= 0) { toast('Indiquez un montant.', true); $('#payAmount').focus(); return; }
       draft.payments.push({ id: U.uid(), amount: amount, date: $('#payDate').value || TODAY, note: $('#payNote').value });
-      renderPayments();
+      renderPayments(); showEvTab('pay');
     },
     'ev-del-payment': function (el) {
       draft.payments = draft.payments.filter(function (p) { return p.id !== el.dataset.id; });
-      renderPayments();
+      renderPayments(); showEvTab('pay');
     },
     'ev-save': saveEvent,
+    'ev-tab': function (el) { showEvTab(el.dataset.tab); },
+    'ev-menu-from-package': function () {
+      var f = $('#eventForm').elements;
+      var pkg = data.packages.filter(function (p) { return p.name === f.package.value; })[0];
+      if (!pkg) { toast('Choisissez d\'abord une formule dans l\'onglet Détails.', true); return; }
+      if (f.menu.value.trim() && !window.confirm('Remplacer le menu actuel par le contenu de la formule ' + pkg.name + ' ?')) return;
+      f.menu.value = pkg.features.join('\n');
+    },
+    'ev-add-team': function () {
+      var s = staffById($('#teamAdd').value);
+      if (!s) return;
+      draft.team.push({ staffId: s.id, pay: s.rate, paid: false });
+      renderTeam(); renderCosts(); showEvTab('team');
+    },
+    'ev-del-team': function (el) { draft.team.splice(+el.dataset.index, 1); renderTeam(); renderCosts(); showEvTab('team'); },
+    'ev-add-equip': function () {
+      var qty = +$('#equipQty').value;
+      var it = itemById($('#equipAdd').value);
+      if (!it) return;
+      if (!qty || qty <= 0) qty = suggestedQty(it, draftGuests());
+      if (!qty) { toast('Indiquez une quantité.', true); $('#equipQty').focus(); return; }
+      draft.equipment.push({ itemId: it.id, qty: qty });
+      renderEquip(); showEvTab('equip');
+    },
+    'ev-del-equip': function (el) { draft.equipment.splice(+el.dataset.index, 1); renderEquip(); showEvTab('equip'); },
+    'ev-suggest-equip': function () {
+      var guests = draftGuests();
+      if (!guests) { toast('Indiquez d\'abord le nombre d\'invités dans l\'onglet Détails.', true); return; }
+      var n = 0;
+      data.inventory.forEach(function (it) {
+        var qty = suggestedQty(it, guests);
+        if (!qty) return;
+        var line = draft.equipment.filter(function (q) { return q.itemId === it.id; })[0];
+        if (line) line.qty = qty; else draft.equipment.push({ itemId: it.id, qty: qty });
+        n++;
+      });
+      renderEquip(); showEvTab('equip');
+      toast(n ? 'Quantités proposées pour ' + guests + ' invités.' : 'Aucun article n\'a de quantité habituelle.');
+    },
+    'ev-add-expense': function () {
+      var label = $('#expLabel').value.trim();
+      var amount = +$('#expAmount').value;
+      if (!amount || amount <= 0) { toast('Indiquez un montant.', true); $('#expAmount').focus(); return; }
+      draft.expenses.push({ id: U.uid(), label: label || $('#expCat').value, category: $('#expCat').value, amount: amount, date: TODAY });
+      renderCosts(); showEvTab('costs');
+    },
+    'ev-del-expense': function (el) {
+      draft.expenses = draft.expenses.filter(function (x) { return x.id !== el.dataset.id; });
+      renderCosts(); showEvTab('costs');
+    },
+
+    'staff-new': function () { openStaff(null); },
+    'staff-open': function (el) { openStaff(el.dataset.id); },
+    'staff-save': function () {
+      var form = $('#staffForm');
+      var f = form.elements;
+      var name = f.name.value.trim();
+      if (!name) { toast('Indiquez le nom.', true); f.name.focus(); return; }
+      var s = staffById(form.dataset.id);
+      if (!s) { s = { id: U.uid() }; data.staff.push(s); }
+      s.name = name; s.phone = f.phone.value.trim(); s.role = f.role.value; s.rate = +f.rate.value || 0;
+      closeSheet();
+      commit('Équipe mise à jour.');
+    },
+    'staff-delete': function (el) {
+      var s = staffById(el.dataset.id);
+      var n = staffAssignments(el.dataset.id).length;
+      if (!window.confirm('Supprimer ' + s.name + ' de l\'équipe ?' + (n ? ' Cette personne sera aussi retirée de ' + plural(n, 'événement') + '.' : ''))) return;
+      data.staff = data.staff.filter(function (x) { return x.id !== el.dataset.id; });
+      data.events.forEach(function (e) { e.team = (e.team || []).filter(function (t) { return t.staffId !== el.dataset.id; }); });
+      closeSheet();
+      commit('Personne supprimée.');
+    },
+    'staff-pay': function (el) {
+      var s = staffById(el.dataset.id);
+      var owed = staffOwed(s.id);
+      if (!window.confirm('Marquer ' + U.formatDH(owed) + ' comme payés à ' + s.name + ' ?')) return;
+      activeEvents().forEach(function (e) {
+        if (e.date <= TODAY) (e.team || []).forEach(function (t) { if (t.staffId === s.id) t.paid = true; });
+      });
+      commit(s.name + ' : paie réglée.');
+    },
+
+    'item-new': function () { openItem(null); },
+    'item-open': function (el) { openItem(el.dataset.id); },
+    'item-save': function () {
+      var form = $('#itemForm');
+      var f = form.elements;
+      var name = f.name.value.trim();
+      if (!name) { toast('Indiquez le nom de l\'article.', true); f.name.focus(); return; }
+      var it = itemById(form.dataset.id);
+      if (!it) { it = { id: U.uid() }; data.inventory.push(it); }
+      it.name = name; it.category = f.category.value; it.qty = +f.qty.value || 0; it.rule = f.rule.value;
+      closeSheet();
+      commit('Stock mis à jour.');
+    },
+    'item-delete': function (el) {
+      var it = itemById(el.dataset.id);
+      if (!window.confirm('Supprimer « ' + it.name + ' » du stock ? Il sera aussi retiré des événements.')) return;
+      data.inventory = data.inventory.filter(function (x) { return x.id !== el.dataset.id; });
+      data.events.forEach(function (e) { e.equipment = (e.equipment || []).filter(function (q) { return q.itemId !== el.dataset.id; }); });
+      closeSheet();
+      commit('Article supprimé.');
+    },
+
+    'fin-prev': function () { state.finYear--; render(); },
+    'fin-next': function () { state.finYear++; render(); },
     'ev-delete': function (el) {
       if (!window.confirm('Supprimer définitivement cet événement ?')) return;
       var id = el.dataset.id;
@@ -952,7 +1505,7 @@
 
     'reset-demo': function () {
       if (!window.confirm('Remettre toutes les données de démonstration à zéro ?')) return;
-      data = T.store.reset();
+      data = T.store.reset(); normalize();
       closeSheet();
       go('overview');
       toast('Démo réinitialisée.');
@@ -975,6 +1528,7 @@
   });
 
   document.addEventListener('change', function (e) {
+    if (draft && e.target.dataset && e.target.dataset.teamPaid != null) { draft.team[+e.target.dataset.teamPaid].paid = e.target.checked; return; }
     if (e.target.id === 'reqStatus') {
       var r = findReq(e.target.dataset.id);
       var next = e.target.value;
@@ -1007,6 +1561,13 @@
   });
 
   document.addEventListener('input', function (e) {
+    var ds = e.target.dataset || {};
+    if (draft && ds.teamPay != null) { draft.team[+ds.teamPay].pay = +e.target.value || 0; renderCosts(); renderProfit(); $('.line-total strong', $('#teamBox')).textContent = U.formatDH(staffCost(draft)); }
+    if (draft && ds.eqQty != null) {
+      draft.equipment[+ds.eqQty].qty = +e.target.value || 0;
+      var st = $('[data-eq-status="' + ds.eqQty + '"]');
+      if (st) st.innerHTML = equipStatus(draft.equipment[+ds.eqQty]);
+    }
     if (e.target.id === 'reqSearch') { state.reqSearch = e.target.value; renderRequestList(); }
     if (e.target.id === 'clientSearch') { state.clientSearch = e.target.value; renderClientList(); }
   });
@@ -1018,7 +1579,7 @@
   // Une demande envoyée depuis le site (autre onglet) apparaît tout de suite
   window.addEventListener('storage', function (e) {
     if (e.key === T.KEY && authed) {
-      data = T.store.fresh();
+      data = T.store.fresh(); normalize();
       if ($('#sheet').hidden) render(); else renderNav();
       toast('Données mises à jour.');
     }
@@ -1041,7 +1602,7 @@
     $$('[data-icon-before]').forEach(function (el) {
       if (!el.querySelector('.ic')) el.insertAdjacentHTML('afterbegin', icon(el.getAttribute('data-icon-before')));
     });
-    data = T.store.fresh();
+    data = T.store.fresh(); normalize();
     render();
   }
 
