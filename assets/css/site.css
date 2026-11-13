@@ -342,3 +342,45 @@ p { margin: 0 0 1em; }
   html { scroll-behavior: auto; }
   *, *::before, *::after { transition: none !important; }
 }
+
+/* ---------- photos gérées depuis l'espace gérant ---------- */
+.brand__logo { height: 44px; width: auto; max-width: 140px; object-fit: contain; display: block; }
+
+/* Diaporama d'accueil */
+.hero__slides { position: absolute; inset: 0; pointer-events: none; }
+.hero__slide { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: 0; transform: scale(1.04); transition: opacity 1.4s ease, transform 7s ease; }
+.hero__slide.is-active { opacity: 1; transform: scale(1); }
+.hero--photo { background: #2b2622; padding: 140px 0 150px; }
+.hero--photo .hero__pattern { display: none; }
+.hero--photo .hero__slides::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(28, 22, 16, .45) 0%, rgba(28, 22, 16, .62) 100%); }
+.hero--photo .hero__inner { z-index: 1; }
+.hero--photo .eyebrow { color: var(--gold-light); }
+.hero--photo .hero__title { color: var(--white); text-shadow: 0 2px 30px rgba(0, 0, 0, .25); }
+.hero--photo .hero__title span { color: var(--gold-light); }
+.hero--photo .hero__lead, .hero--photo .hero__lead strong { color: rgba(255, 255, 255, .92); }
+.hero--photo .hero__lead span { color: var(--gold-soft); }
+.hero--photo .hero__badges { color: rgba(255, 255, 255, .85); }
+.hero--photo .hero__badges .icon { color: var(--gold-light); }
+.hero--photo .btn--outline { border-color: rgba(255, 255, 255, .7); color: var(--white); }
+.hero--photo .btn--outline:hover { background: var(--white); color: var(--ink); border-color: var(--white); }
+.hero--photo .ornament span { background: linear-gradient(90deg, transparent, var(--gold-light)); }
+.hero__dots { position: absolute; left: 0; right: 0; bottom: 26px; display: flex; justify-content: center; gap: 10px; z-index: 2; }
+.hero__dot { width: 10px; height: 10px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, .8); background: transparent; padding: 0; cursor: pointer; transition: .3s; }
+.hero__dot.is-active { background: var(--white); width: 26px; border-radius: 5px; }
+@media (max-width: 600px) { .hero--photo { padding: 100px 0 110px; } }
+
+/* Photo « Notre maison » */
+.about__frame--photo { overflow: hidden; background: var(--sand); }
+.about__frame--photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.about__frame--photo::before { z-index: 1; }
+
+/* Services et formules avec photo */
+.service--photo { padding: 0; overflow: hidden; display: flex; flex-direction: column; }
+.service__img { aspect-ratio: 4 / 3; overflow: hidden; background: var(--sand); }
+.service__img img { width: 100%; height: 100%; object-fit: cover; transition: transform .6s; }
+.service--photo:hover .service__img img { transform: scale(1.05); }
+.service__body { padding: 22px 22px 26px; }
+.package--photo { padding-top: 0; overflow: visible; }
+.package__img { margin: 0 -30px 24px; aspect-ratio: 16 / 10; overflow: hidden; border-radius: calc(var(--radius) - 1px) calc(var(--radius) - 1px) 0 0; background: var(--sand); }
+.package__img img { width: 100%; height: 100%; object-fit: cover; }
+.package--photo .package__badge { z-index: 1; }

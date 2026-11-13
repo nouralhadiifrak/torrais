@@ -80,9 +80,27 @@
   ];
   var SOURCES = ['Site web', 'WhatsApp', 'Téléphone', 'Boutique', 'Instagram', 'Bouche-à-oreille', 'Autre'];
 
+  /* ---------- carte des plats (choix pour le menu d'un événement) ---------- */
+  var DISH_CATEGORIES = ['Accueil', 'Entrées', 'Plats', 'Desserts', 'Boissons', 'Autres'];
+  var DEFAULT_DISHES = {
+    'Accueil': ["Cocktail d'accueil", 'Dattes et lait', 'Jus frais', 'Briouates', 'Mini pastillas', 'Verrines salées', 'Mini brochettes'],
+    'Entrées': ['Pastilla au poulet', 'Pastilla aux fruits de mer', 'Salades marocaines', 'Harira'],
+    'Plats': ['Méchoui', 'Poulet aux olives et citron confit', 'Tajine de viande aux pruneaux', 'Tajine de veau aux pruneaux', 'Poisson à la chermoula', 'Couscous royal', 'Tanjia', 'Buffet salé'],
+    'Desserts': ['Corbeille de fruits', 'Buffet de desserts', 'Gâteau des mariés', 'Gâteau', 'Petits fours sucrés', 'Pâtisseries marocaines'],
+    'Boissons': ['Thé à la menthe et pâtisseries marocaines', 'Thé à la menthe', 'Café', 'Jus et boissons'],
+    'Autres': []
+  };
+  function defaultDishes() {
+    var out = [];
+    DISH_CATEGORIES.forEach(function (c) { DEFAULT_DISHES[c].forEach(function (n) { out.push({ name: n, category: c }); }); });
+    return out;
+  }
+
   /* ---------- contenu par défaut du site ---------- */
   function defaultContent() {
     return {
+      // Photos du site : logo, diaporama du héros, photo « Notre maison »
+      media: { logo: '', about: '', hero: [] },
       settings: {
         businessName: 'TORRAIS EVENT',
         owner: 'Saïd',
@@ -96,17 +114,17 @@
         tagline: 'Réservez la formule mariage à votre service, selon votre choix.'
       },
       services: [
-        { id: 'traiteur', icon: 'traiteur', title: 'Traiteur', text: 'Cuisine marocaine traditionnelle et internationale : pastilla, méchoui, tajines, plats royaux et desserts, préparés avec soin pour tous vos invités.' },
-        { id: 'buffet', icon: 'buffet', title: 'Buffet', text: "Buffets et cocktails dînatoires, salés et sucrés, pour vos mariages, fiançailles, anniversaires et événements d'entreprise." },
-        { id: 'tyafer', icon: 'tyafer', title: 'Tyafer', text: 'Tyafer décorés pour la henné, les fiançailles et la dote : une présentation raffinée des cadeaux, dans le respect de la tradition.' },
-        { id: 'deco', icon: 'deco', title: 'Décoration', text: 'Décoration des tables, fleurs, lumières et kousha de la mariée, accordées au thème et aux couleurs de votre fête.' }
+        { id: 'traiteur', image: '', icon: 'traiteur', title: 'Traiteur', text: 'Cuisine marocaine traditionnelle et internationale : pastilla, méchoui, tajines, plats royaux et desserts, préparés avec soin pour tous vos invités.' },
+        { id: 'buffet', image: '', icon: 'buffet', title: 'Buffet', text: "Buffets et cocktails dînatoires, salés et sucrés, pour vos mariages, fiançailles, anniversaires et événements d'entreprise." },
+        { id: 'tyafer', image: '', icon: 'tyafer', title: 'Tyafer', text: 'Tyafer décorés pour la henné, les fiançailles et la dote : une présentation raffinée des cadeaux, dans le respect de la tradition.' },
+        { id: 'deco', image: '', icon: 'deco', title: 'Décoration', text: 'Décoration des tables, fleurs, lumières et kousha de la mariée, accordées au thème et aux couleurs de votre fête.' }
       ],
       packages: [
-        { id: 'essentielle', name: 'Essentielle', tagline: 'Fiançailles et réceptions intimes', price: '', featured: false,
+        { id: 'essentielle', name: 'Essentielle', tagline: 'Fiançailles et réceptions intimes', price: '', image: '', featured: false,
           features: ['Dîner traditionnel : pastilla, tajine, fruits', 'Service à table', 'Vaisselle et nappage', 'Thé et pâtisseries marocaines'] },
-        { id: 'prestige', name: 'Prestige', tagline: 'La formule mariage la plus demandée', price: '', featured: true,
+        { id: 'prestige', name: 'Prestige', tagline: 'La formule mariage la plus demandée', price: '', image: '', featured: true,
           features: ['Tout de la formule Essentielle', 'Méchoui ou plat royal', 'Buffet de desserts', 'Décoration des tables', 'Tyafer pour la cérémonie'] },
-        { id: 'royale', name: 'Royale', tagline: 'Votre mariage clé en main', price: '', featured: false,
+        { id: 'royale', name: 'Royale', tagline: 'Votre mariage clé en main', price: '', image: '', featured: false,
           features: ['Tout de la formule Prestige', 'Décoration complète de la salle et de la kousha', "Cocktail d'accueil", 'Gâteau des mariés', 'Maître d\'hôtel dédié'] }
       ],
       gallery: [
@@ -304,6 +322,8 @@
       services: content.services,
       packages: content.packages,
       gallery: content.gallery,
+      media: content.media,
+      dishes: defaultDishes(),
       requests: requests,
       events: events,
       staff: staff,
@@ -313,11 +333,20 @@
 
   /* ---------- stockage ---------- */
   var memory = null;
+  // Complète les données enregistrées avant l'ajout de nouvelles fonctions
+  function ensure(d) {
+    if (!d.media) d.media = { logo: '', about: '', hero: [] };
+    if (!d.media.hero) d.media.hero = [];
+    if (!d.dishes) d.dishes = defaultDishes();
+    (d.services || []).forEach(function (x) { if (x.image == null) x.image = ''; });
+    (d.packages || []).forEach(function (x) { if (x.image == null) x.image = ''; });
+    return d;
+  }
   function load() {
     if (memory) return memory;
     try {
       var raw = localStorage.getItem(KEY);
-      if (raw) { memory = JSON.parse(raw); return memory; }
+      if (raw) { memory = ensure(JSON.parse(raw)); return memory; }
     } catch (e) { /* stockage indisponible : on garde la démo en mémoire */ }
     memory = seed();
     save(memory);
@@ -345,6 +374,7 @@
     INV_CATEGORIES: INV_CATEGORIES,
     INV_RULES: INV_RULES,
     EXPENSE_CATEGORIES: EXPENSE_CATEGORIES,
+    DISH_CATEGORIES: DISH_CATEGORIES,
     STATUSES: STATUSES,
     PENDING: PENDING
   };

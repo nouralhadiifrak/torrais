@@ -49,6 +49,10 @@
   /* ---------- services, formules, galerie ---------- */
   function renderServices() {
     $('#servicesGrid').innerHTML = data.services.map(function (sv) {
+      if (sv.image) {
+        return '<article class="service service--photo"><div class="service__img"><img src="' + esc(sv.image) + '" alt="' + esc(sv.title) + '" loading="lazy"></div>' +
+          '<div class="service__body"><h3>' + esc(sv.title) + '</h3><p>' + esc(sv.text) + '</p></div></article>';
+      }
       return '<article class="service"><div class="service__icon">' + (T.icons[sv.icon] || T.icons.deco) + '</div>' +
         '<h3>' + esc(sv.title) + '</h3><p>' + esc(sv.text) + '</p></article>';
     }).join('');
@@ -57,7 +61,8 @@
   function renderPackages() {
     $('#packagesGrid').innerHTML = data.packages.map(function (p) {
       var price = p.price ? esc(p.price) : 'Prix sur devis';
-      return '<article class="package' + (p.featured ? ' package--featured' : '') + '">' +
+      return '<article class="package' + (p.featured ? ' package--featured' : '') + (p.image ? ' package--photo' : '') + '">' +
+        (p.image ? '<div class="package__img"><img src="' + esc(p.image) + '" alt="' + esc(p.name) + '" loading="lazy"></div>' : '') +
         (p.featured ? '<span class="package__badge">La plus demandée</span>' : '') +
         '<h3 class="package__name">' + esc(p.name) + '</h3>' +
         '<p class="package__tagline">' + esc(p.tagline) + '</p>' +
@@ -80,6 +85,60 @@
       return '<button type="button" class="gallery__item" data-index="' + i + '">' + photoInner(g, i) +
         (g.caption ? '<span class="gallery__caption">' + esc(g.caption) + '</span>' : '') + '</button>';
     }).join('');
+  }
+
+  /* ---------- photos : logo, diaporama d'accueil, « Notre maison » ---------- */
+  function renderMedia() {
+    var m = data.media || {};
+    if (m.logo) {
+      $$('.brand__mark').forEach(function (el) {
+        var img = document.createElement('img');
+        img.className = 'brand__logo';
+        img.src = m.logo;
+        img.alt = 'TORRAIS EVENT';
+        el.replaceWith(img);
+      });
+    }
+    if (m.about) {
+      var frame = $('#aboutFrame');
+      frame.classList.add('about__frame--photo');
+      frame.innerHTML = '<img src="' + esc(m.about) + '" alt="TORRAIS EVENT">';
+    }
+    var slides = m.hero || [];
+    if (!slides.length) return;
+    var hero = $('.hero');
+    var box = $('#heroSlides');
+    var dots = $('#heroDots');
+    hero.classList.add('hero--photo');
+    slides.forEach(function (h, i) {
+      var div = document.createElement('div');
+      div.className = 'hero__slide' + (i === 0 ? ' is-active' : '');
+      div.style.backgroundImage = 'url("' + h.src + '")';
+      box.appendChild(div);
+    });
+    if (slides.length < 2) return;
+    dots.innerHTML = slides.map(function (h, i) {
+      return '<button type="button" class="hero__dot' + (i === 0 ? ' is-active' : '') + '" data-slide="' + i + '" aria-label="Photo ' + (i + 1) + '"></button>';
+    }).join('');
+    var current = 0;
+    var timer = null;
+    function show(n) {
+      current = (n + slides.length) % slides.length;
+      $$('.hero__slide', box).forEach(function (el, i) { el.classList.toggle('is-active', i === current); });
+      $$('.hero__dot', dots).forEach(function (el, i) { el.classList.toggle('is-active', i === current); });
+    }
+    function start() {
+      if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      clearInterval(timer);
+      timer = setInterval(function () { show(current + 1); }, 5500);
+    }
+    dots.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-slide]');
+      if (!b) return;
+      show(+b.getAttribute('data-slide'));
+      start();
+    });
+    start();
   }
 
   /* ---------- visionneuse ---------- */
@@ -216,6 +275,7 @@
   /* ---------- démarrage ---------- */
   renderServices();
   renderPackages();
+  renderMedia();
   renderGallery();
   bindSettings();
   paintIcons(document);

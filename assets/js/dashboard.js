@@ -685,6 +685,7 @@
     }, prefill || {});
     ['payments', 'team', 'equipment', 'expenses'].forEach(function (k) { if (!draft[k]) draft[k] = []; });
     ['arrival', 'service', 'menu', 'menuNotes'].forEach(function (k) { if (draft[k] == null) draft[k] = ''; });
+    draft.menuList = String(draft.menu || '').split('\n').map(function (x) { return x.trim(); }).filter(Boolean);
     evTab = tab || 'details';
     var pkgOptions = data.packages.map(function (p) { return p.name; }).concat(['Buffet cocktail', 'Tyafer + décoration', 'Sur mesure']);
     if (draft.package && pkgOptions.indexOf(draft.package) === -1) pkgOptions.push(draft.package);
@@ -715,9 +716,7 @@
             field('Arrivée de l\'équipe', '<input name="arrival" type="time" value="' + esc(draft.arrival) + '">') +
             field('Début du service', '<input name="service" type="time" value="' + esc(draft.service) + '">') +
           '</div>' +
-          field('Menu convenu (un plat par ligne)', '<textarea name="menu" rows="8" placeholder="Pastilla…&#10;Méchoui…">' + esc(draft.menu) + '</textarea>') +
-          '<button type="button" class="btn btn--light btn--sm" data-action="ev-menu-from-package">Reprendre le contenu de la formule</button>' +
-          '<div class="gap"></div>' +
+          '<div id="menuBox"></div>' +
           field('Demandes particulières', '<textarea name="menuNotes" rows="3" placeholder="Allergies, menus spéciaux, tables à part…">' + esc(draft.menuNotes) + '</textarea>') +
         '</div>' +
         '<div class="tabpanel" data-panel="team" id="teamBox"></div>' +
@@ -736,6 +735,7 @@
     form.elements.total.addEventListener('input', function () { renderPayments(); renderProfit(); });
     form.addEventListener('submit', function (e) { e.preventDefault(); saveEvent(); });
     renderEventAvail();
+    renderMenu();
     renderTeam();
     renderEquip();
     renderCosts();
@@ -753,7 +753,7 @@
 
   function showEvTab(tab) {
     evTab = tab;
-    var counts = { team: draft.team.length, equip: draft.equipment.length, costs: draft.expenses.length, pay: draft.payments.length };
+    var counts = { menu: draft.menuList.length, team: draft.team.length, equip: draft.equipment.length, costs: draft.expenses.length, pay: draft.payments.length };
     $('#evTabs').innerHTML = EV_TABS.map(function (t) {
       return '<button type="button" class="tabs__btn' + (t[0] === tab ? ' is-active' : '') + '" data-action="ev-tab" data-tab="' + t[0] + '">' + t[1] +
         (counts[t[0]] ? '<b>' + counts[t[0]] + '</b>' : '') + '</button>';
@@ -783,6 +783,46 @@
   function renderEventAvail() {
     var date = draftDate();
     $('#eventAvail').innerHTML = date ? '<h4 class="sub">Disponibilité</h4>' + availability(date, draft.id, null) : '';
+  }
+
+  /* ----- onglet Menu : choix des plats ----- */
+  function dishKey(n) { return String(n).trim().toLowerCase(); }
+  function renderMenu() {
+    var chosen = draft.menuList.map(dishKey);
+    var known = data.dishes.map(function (d) { return dishKey(d.name); });
+    var extra = draft.menuList.filter(function (n) { return known.indexOf(dishKey(n)) === -1; });
+    var html = '<div class="menu-head"><h4 class="sub">Choisir les plats</h4>' +
+      '<button type="button" class="link" data-action="ev-menu-from-package">Reprendre la formule</button></div>';
+    T.DISH_CATEGORIES.forEach(function (cat) {
+      var list = data.dishes.filter(function (d) { return d.category === cat; });
+      if (cat === 'Autres') list = list.concat(extra.map(function (n) { return { name: n, category: 'Autres' }; }));
+      if (!list.length) return;
+      var n = list.filter(function (d) { return chosen.indexOf(dishKey(d.name)) !== -1; }).length;
+      html += '<div class="dish-group"><p class="dish-group__title"><span>' + esc(cat) + '</span>' + (n ? ' <b>' + n + '</b>' : '') + '</p><div class="pick">' +
+        list.map(function (d) {
+          return '<label class="pick__opt"><input type="checkbox" data-dish="' + esc(d.name) + '"' + (chosen.indexOf(dishKey(d.name)) !== -1 ? ' checked' : '') + '><span>' + esc(d.name) + '</span></label>';
+        }).join('') + '</div></div>';
+    });
+    html += '<div class="add-row add-row--dish">' +
+      '<input id="dishName" placeholder="Autre plat (ex. Pastilla au lait)" aria-label="Nom du plat">' +
+      '<select id="dishCat" aria-label="Catégorie">' + T.DISH_CATEGORIES.map(function (c) { return '<option' + (c === 'Plats' ? ' selected' : '') + '>' + esc(c) + '</option>'; }).join('') + '</select>' +
+      '<button type="button" class="btn btn--light btn--sm" data-action="ev-add-dish">' + icon('plus') + ' Ajouter</button></div>' +
+      '<p class="hint">Un plat ajouté ici reste dans la liste pour les prochains événements.</p>' +
+      '<div id="menuChosen"></div>';
+    $('#menuBox').innerHTML = html;
+    renderMenuChosen();
+  }
+  function renderMenuChosen() {
+    var box = $('#menuChosen');
+    if (!box) return;
+    box.innerHTML = '<h4 class="sub">Menu choisi (' + draft.menuList.length + ')</h4>' +
+      (draft.menuList.length ? '<ol class="menu-list">' + draft.menuList.map(function (n, i) {
+        return '<li><span>' + esc(n) + '</span><span class="menu-list__tools">' +
+          '<button type="button" class="icon-btn icon-btn--sm menu-list__up" data-action="ev-dish-up" data-index="' + i + '" aria-label="Monter"' + (i ? '' : ' disabled') + '>' + ICONS.chevL + '</button>' +
+          '<button type="button" class="icon-btn icon-btn--sm" data-action="ev-dish-remove" data-index="' + i + '" aria-label="Retirer ' + esc(n) + '">' + ICONS.close + '</button></span></li>';
+      }).join('') + '</ol>' : '<p class="empty empty--sm">Cochez les plats ci-dessus.</p>');
+    var tab = $('#evTabs [data-tab="menu"]');
+    if (tab) tab.innerHTML = 'Menu' + (draft.menuList.length ? '<b>' + draft.menuList.length + '</b>' : '');
   }
 
   /* ----- onglet Équipe ----- */
@@ -905,9 +945,10 @@
       clientName: clientName, phone: f.phone.value.trim(), eventType: f.eventType.value, date: date,
       venue: f.venue.value.trim(), guests: +f.guests.value || 0, package: f.package.value,
       total: +f.total.value || 0, status: f.status.value, notes: f.notes.value.trim(), source: f.source.value,
-      arrival: f.arrival.value, service: f.service.value, menu: f.menu.value.trim(), menuNotes: f.menuNotes.value.trim()
+      arrival: f.arrival.value, service: f.service.value, menu: draft.menuList.join('\n'), menuNotes: f.menuNotes.value.trim()
     });
     draft.equipment = draft.equipment.filter(function (q) { return +q.qty > 0; });
+    delete draft.menuList;
     var isNew = !draft.id;
     if (isNew) {
       draft.id = U.uid();
@@ -1203,7 +1244,28 @@
      ========================================================= */
   function viewContent() {
     var s = data.settings;
+    var hero = data.media.hero;
     return '<p class="note">Les modifications sont visibles tout de suite sur le site. <a href="../" target="_blank" rel="noopener">Ouvrir le site ↗</a></p>' +
+
+      '<section class="card"><header class="card__head"><h3>Photos du site</h3><span class="muted">Les photos des services, des formules et de la galerie se changent plus bas</span></header>' +
+        '<h4 class="sub">Diaporama d\'accueil</h4>' +
+        '<p class="hint">Les grandes photos qui défilent en haut du site. Sans photo, le site garde son fond blanc et or.</p>' +
+        '<div class="hero-edit">' + hero.map(function (h, i) {
+          return '<div class="hero-edit__item"><div class="hero-edit__img"><img src="' + esc(h.src) + '" alt=""><span class="hero-edit__num">' + (i + 1) + '</span></div>' +
+            '<div class="hero-edit__tools">' +
+              '<button type="button" class="icon-btn icon-btn--sm" data-action="hero-move" data-index="' + i + '" data-dir="-1" aria-label="Avancer"' + (i ? '' : ' disabled') + '>' + ICONS.chevL + '</button>' +
+              '<button type="button" class="icon-btn icon-btn--sm" data-action="hero-move" data-index="' + i + '" data-dir="1" aria-label="Reculer"' + (i < hero.length - 1 ? '' : ' disabled') + '>' + ICONS.chevR + '</button>' +
+              '<label class="btn btn--light btn--sm">Changer<input type="file" accept="image/*" data-img="hero:' + i + '" hidden></label>' +
+              '<button type="button" class="icon-btn icon-btn--sm" data-action="img-remove" data-target="hero:' + i + '" aria-label="Retirer la photo">' + ICONS.close + '</button>' +
+            '</div></div>';
+        }).join('') +
+          '<label class="hero-edit__add">' + icon('plus') + '<span>Ajouter des photos</span><input type="file" accept="image/*" multiple data-img="hero:add" hidden></label>' +
+        '</div>' +
+        '<div class="photo-row">' +
+          imgSlot('logo', data.media.logo, 'Logo', 'Remplace le « T » en haut du site. Idéalement un PNG sur fond transparent.') +
+          imgSlot('about', data.media.about, 'Photo « Notre maison »', 'La photo à côté de la présentation.') +
+        '</div>' +
+      '</section>' +
 
       '<section class="card"><header class="card__head"><h3>Coordonnées</h3></header>' +
         '<form class="form-grid" id="settingsForm">' +
@@ -1222,6 +1284,7 @@
       '<section class="card"><header class="card__head"><h3>Formules</h3><span class="muted">Laissez le prix vide pour afficher « Prix sur devis »</span></header>' +
         '<div class="editor-grid">' + data.packages.map(function (p, i) {
           return '<div class="editor" data-pkg="' + i + '">' +
+            imgSlot('pkg:' + i, p.image, 'Photo (optionnelle)', '', true) +
             field('Nom', '<input data-k="name" value="' + esc(p.name) + '">') +
             field('Sous-titre', '<input data-k="tagline" value="' + esc(p.tagline) + '">') +
             field('Prix', '<input data-k="price" value="' + esc(p.price) + '" placeholder="Ex. À partir de 350 DH / personne">') +
@@ -1234,7 +1297,7 @@
 
       '<section class="card"><header class="card__head"><h3>Services</h3></header>' +
         '<div class="editor-grid editor-grid--4">' + data.services.map(function (sv, i) {
-          return '<div class="editor" data-svc="' + i + '">' + field('Titre', '<input data-k="title" value="' + esc(sv.title) + '">') +
+          return '<div class="editor" data-svc="' + i + '">' + imgSlot('svc:' + i, sv.image, 'Photo (optionnelle)', 'Sans photo, l\'icône s\'affiche.', true) + field('Titre', '<input data-k="title" value="' + esc(sv.title) + '">') +
             field('Description', '<textarea data-k="text" rows="5">' + esc(sv.text) + '</textarea>') + '</div>';
         }).join('') + '</div>' +
         '<div class="form-actions"><button class="btn btn--primary btn--sm" data-action="save-services">Enregistrer les services</button></div>' +
@@ -1245,7 +1308,8 @@
         '<div class="gal-edit">' + data.gallery.map(function (g, i) {
           return '<div class="gal-item" data-gal="' + i + '"><div class="gal-item__img tone-' + ((g.tone || i) % 8 + 1) + '">' +
             (g.src ? '<img src="' + esc(g.src) + '" alt="">' : '<span>Photo à venir</span>') +
-            '<button class="icon-btn icon-btn--sm gal-item__del" data-action="gallery-remove" data-index="' + i + '" aria-label="Retirer la photo">' + ICONS.close + '</button></div>' +
+            '<button class="icon-btn icon-btn--sm gal-item__del" data-action="gallery-remove" data-index="' + i + '" aria-label="Retirer la photo">' + ICONS.close + '</button>' +
+            '<label class="gal-item__change">' + (g.src ? 'Changer' : 'Choisir une photo') + '<input type="file" accept="image/*" data-img="gal:' + i + '" hidden></label></div>' +
             '<input data-k="caption" value="' + esc(g.caption) + '" placeholder="Légende"></div>';
         }).join('') + '</div>' +
         '<div class="form-actions"><button class="btn btn--primary btn--sm" data-action="save-gallery">Enregistrer les légendes</button></div>' +
@@ -1253,7 +1317,48 @@
       '</section>';
   }
 
-  function resizeImage(file, max) {
+  /* ---------- photos du site ---------- */
+  function imgSlot(target, src, label, help, compact) {
+    return '<div class="img-slot' + (compact ? ' img-slot--compact' : '') + '">' +
+      '<div class="img-slot__thumb' + (target === 'logo' ? ' img-slot__thumb--logo' : '') + '">' + (src ? '<img src="' + esc(src) + '" alt="">' : '<span>Aucune photo</span>') + '</div>' +
+      '<div class="img-slot__body"><strong>' + esc(label) + '</strong>' + (help ? '<span>' + esc(help) + '</span>' : '') +
+        '<div class="img-slot__actions"><label class="btn btn--light btn--sm">' + (src ? 'Changer' : 'Choisir une photo') + '<input type="file" accept="image/*" data-img="' + target + '" hidden></label>' +
+        (src ? '<button type="button" class="btn btn--text btn--danger btn--sm" data-action="img-remove" data-target="' + target + '">Retirer</button>' : '') +
+      '</div></div></div>';
+  }
+  function setImage(target, src) {
+    var parts = target.split(':');
+    var kind = parts[0], i = +parts[1];
+    if (kind === 'logo') data.media.logo = src;
+    else if (kind === 'about') data.media.about = src;
+    else if (kind === 'svc') data.services[i].image = src;
+    else if (kind === 'pkg') data.packages[i].image = src;
+    else if (kind === 'gal') data.gallery[i].src = src;
+    else if (kind === 'hero') {
+      if (parts[1] === 'add') data.media.hero.push({ id: U.uid(), src: src });
+      else if (src) data.media.hero[i].src = src;
+      else data.media.hero.splice(i, 1);
+    }
+  }
+  function handleImageInput(input) {
+    var files = Array.prototype.slice.call(input.files || []);
+    if (!files.length) return;
+    var target = input.dataset.img;
+    var isLogo = target === 'logo';
+    var max = isLogo ? 400 : target.indexOf('hero') === 0 ? 1600 : 1200;
+    toast(files.length > 1 ? 'Préparation de ' + files.length + ' photos…' : 'Préparation de la photo…');
+    Promise.all(files.map(function (f) { return resizeImage(f, max, isLogo ? 'image/png' : 'image/jpeg'); })).then(function (srcs) {
+      var snapshot = JSON.stringify(data);
+      srcs.forEach(function (src) { setImage(target, src); });
+      if (!commit(srcs.length > 1 ? plural(srcs.length, 'photo ajoutée', 'photos ajoutées') + '.' : 'Photo enregistrée.')) {
+        data = JSON.parse(snapshot); normalize();
+        T.store.save(data);
+        render();
+      }
+    }).catch(function () { toast('Impossible de lire cette image.', true); });
+  }
+
+  function resizeImage(file, max, type) {
     return new Promise(function (resolve, reject) {
       var reader = new FileReader();
       reader.onload = function () {
@@ -1264,7 +1369,7 @@
           c.width = Math.round(img.width * k);
           c.height = Math.round(img.height * k);
           c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
-          resolve(c.toDataURL('image/jpeg', 0.78));
+          resolve(type === 'image/png' ? c.toDataURL('image/png') : c.toDataURL('image/jpeg', 0.8));
         };
         img.onerror = reject;
         img.src = reader.result;
@@ -1358,8 +1463,24 @@
       var f = $('#eventForm').elements;
       var pkg = data.packages.filter(function (p) { return p.name === f.package.value; })[0];
       if (!pkg) { toast('Choisissez d\'abord une formule dans l\'onglet Détails.', true); return; }
-      if (f.menu.value.trim() && !window.confirm('Remplacer le menu actuel par le contenu de la formule ' + pkg.name + ' ?')) return;
-      f.menu.value = pkg.features.join('\n');
+      if (draft.menuList.length && !window.confirm('Remplacer le menu actuel par le contenu de la formule ' + pkg.name + ' ?')) return;
+      draft.menuList = pkg.features.slice();
+      renderMenu();
+    },
+    'ev-add-dish': function () {
+      var name = $('#dishName').value.trim();
+      if (!name) { toast('Écrivez le nom du plat.', true); $('#dishName').focus(); return; }
+      if (!data.dishes.some(function (d) { return dishKey(d.name) === dishKey(name); })) data.dishes.push({ name: name, category: $('#dishCat').value });
+      if (draft.menuList.map(dishKey).indexOf(dishKey(name)) === -1) draft.menuList.push(name);
+      renderMenu();
+      setTimeout(function () { var i = $('#dishName'); if (i) i.focus(); }, 0);
+    },
+    'ev-dish-remove': function (el) { draft.menuList.splice(+el.dataset.index, 1); renderMenu(); },
+    'ev-dish-up': function (el) {
+      var i = +el.dataset.index;
+      if (i < 1) return;
+      var x = draft.menuList[i]; draft.menuList[i] = draft.menuList[i - 1]; draft.menuList[i - 1] = x;
+      renderMenuChosen();
     },
     'ev-add-team': function () {
       var s = staffById($('#teamAdd').value);
@@ -1499,6 +1620,18 @@
       $$('[data-gal]').forEach(function (box) { data.gallery[+box.dataset.gal].caption = $('[data-k="caption"]', box).value.trim(); });
       commit('Légendes enregistrées.');
     },
+    'img-remove': function (el) {
+      if (!window.confirm('Retirer cette photo du site ?')) return;
+      setImage(el.dataset.target, '');
+      commit('Photo retirée.');
+    },
+    'hero-move': function (el) {
+      var i = +el.dataset.index, j = i + (+el.dataset.dir);
+      var h = data.media.hero;
+      if (j < 0 || j >= h.length) return;
+      var x = h[i]; h[i] = h[j]; h[j] = x;
+      commit('Ordre du diaporama mis à jour.');
+    },
     'gallery-remove': function (el) {
       if (!window.confirm('Retirer cette photo du site ?')) return;
       data.gallery.splice(+el.dataset.index, 1);
@@ -1553,6 +1686,20 @@
   });
 
   document.addEventListener('change', function (e) {
+    if (draft && e.target.dataset && e.target.dataset.dish != null) {
+      var dname = e.target.dataset.dish;
+      var idx = draft.menuList.map(dishKey).indexOf(dishKey(dname));
+      if (e.target.checked && idx === -1) draft.menuList.push(dname);
+      if (!e.target.checked && idx !== -1) draft.menuList.splice(idx, 1);
+      var group = e.target.closest('.dish-group');
+      if (group) {
+        var cnt = $$('input[data-dish]:checked', group).length;
+        var title = $('.dish-group__title', group);
+        title.innerHTML = '<span>' + esc($('span', title).textContent) + '</span>' + (cnt ? ' <b>' + cnt + '</b>' : '');
+      }
+      renderMenuChosen();
+      return;
+    }
     if (draft && e.target.dataset && e.target.dataset.teamPaid != null) { draft.team[+e.target.dataset.teamPaid].paid = e.target.checked; return; }
     if (e.target.id === 'reqStatus') {
       var r = findReq(e.target.dataset.id);
@@ -1568,6 +1715,7 @@
       openRequest(r.id);
     }
     if (e.target.id === 'reqSource') { state.reqSource = e.target.value; renderRequestList(); return; }
+    if (e.target.dataset && e.target.dataset.img) { handleImageInput(e.target); return; }
     if (e.target.id === 'galleryUpload') {
       var files = Array.prototype.slice.call(e.target.files || []);
       if (!files.length) return;
@@ -1598,6 +1746,7 @@
   });
 
   document.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && e.target.id === 'dishName') { e.preventDefault(); actions['ev-add-dish'](); return; }
     if (e.key === 'Escape' && !$('#sheet').hidden) closeSheet();
   });
 
