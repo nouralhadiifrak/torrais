@@ -578,3 +578,8 @@ p { margin: 0 0 1em; }
 @media (max-width: 900px) { .occ-intro { grid-template-columns: 1fr; gap: 28px; } }
 .nav .nav__menu a:not(.btn) { text-transform: none; letter-spacing: 0; font-size: .9rem; padding: 10px 12px; border-bottom: 0; }
 @media (max-width: 960px) { .nav .nav__menu a:not(.btn) { padding: 10px 8px; } }
+
+/* ---------- vidéo de la salle (fond du héros) ---------- */
+.hero__video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.hero--video .hero__slides::after { z-index: 1; background: linear-gradient(180deg, rgba(28, 22, 16, .40) 0%, rgba(28, 22, 16, .58) 100%); }
+@media (max-width: 700px) { .hero--video .hero__slides::after { background: linear-gradient(180deg, rgba(28, 22, 16, .55) 0%, rgba(28, 22, 16, .68) 100%); } }

@@ -647,3 +647,5 @@ body.sheet-open { overflow: hidden; }
 .faq-edit { display: grid; gap: 12px; }
 .list-remove { margin-top: 2px; }
 .gal-item select { width: 100%; padding: 8px 10px; border-radius: 9px; border: 1px solid var(--line); background: var(--surface-2); font: inherit; font-size: .82rem; color: var(--ink); }
+
+.switch--block { display: flex; margin: 0 0 14px; }

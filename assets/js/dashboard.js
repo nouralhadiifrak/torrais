@@ -1252,7 +1252,8 @@
 
       '<section class="card" id="c-photos"><header class="card__head"><h3>Photos du site</h3><span class="muted">Les photos des services, des formules et de la galerie se changent plus bas</span></header>' +
         '<h4 class="sub">Diaporama d\'accueil</h4>' +
-        '<p class="hint">Les grandes photos qui défilent en haut du site. Sans photo, le site garde son fond blanc et or.</p>' +
+        '<p class="hint">Les grandes photos qui défilent en haut du site. Tant qu\'il n\'y a pas de photo ici, le site affiche la vidéo de la salle (ou le fond blanc et or si elle est désactivée).</p>' +
+        '<label class="switch switch--block"><input type="checkbox" data-action-change="toggle-hero-video"' + (data.media.heroVideo ? ' checked' : '') + '><span>Vidéo « travelling dans la salle » quand il n\'y a pas de photos</span></label>' +
         '<div class="hero-edit">' + hero.map(function (h, i) {
           return '<div class="hero-edit__item"><div class="hero-edit__img"><img src="' + esc(h.src) + '" alt=""><span class="hero-edit__num">' + (i + 1) + '</span></div>' +
             '<div class="hero-edit__tools">' +
@@ -1851,6 +1852,11 @@
     }
     if (e.target.id === 'reqSource') { state.reqSource = e.target.value; renderRequestList(); return; }
     if (e.target.dataset && e.target.dataset.img) { handleImageInput(e.target); return; }
+    if (e.target.dataset && e.target.dataset.actionChange === 'toggle-hero-video') {
+      data.media.heroVideo = e.target.checked;
+      commit(e.target.checked ? 'Vidéo de la salle activée.' : 'Vidéo de la salle désactivée.');
+      return;
+    }
     if (e.target.id === 'galleryUpload') {
       var files = Array.prototype.slice.call(e.target.files || []);
       if (!files.length) return;

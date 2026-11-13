@@ -393,6 +393,7 @@
   function ensure(d) {
     if (!d.media) d.media = { logo: '', about: '', hero: [] };
     if (!d.media.hero) d.media.hero = [];
+    if (d.media.heroVideo == null) d.media.heroVideo = true; // vidéo de la salle en fond quand il n'y a pas de photos
     if (!d.dishes) d.dishes = defaultDishes();
     (d.services || []).forEach(function (x) { if (x.image == null) x.image = ''; });
     (d.packages || []).forEach(function (x) { if (x.image == null) x.image = ''; });

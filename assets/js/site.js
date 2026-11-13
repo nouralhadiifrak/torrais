@@ -304,7 +304,7 @@
       return '<li><span class="icon">' + T.icons.check + '</span><span>' + esc(x) + '</span></li>';
     }).join('');
     $('#occWa').setAttribute('data-wa-text', 'Bonjour TORRAIS EVENT, je souhaite des informations pour : ' + occasion.title.toLowerCase() + '.');
-    var bg = occasion.image || (data.media.hero[0] && data.media.hero[0].src);
+    var bg = occasion.image || (data.media.hero[0] && data.media.hero[0].src) || (data.media.heroVideo ? 'assets/img/salle.jpg' : '');
     if (bg) {
       $('#pageHero').classList.add('page-hero--photo');
       $('#pageHeroBg').style.backgroundImage = 'url("' + bg + '")';
@@ -321,6 +321,7 @@
     }
     var box = $('#heroSlides');
     var slides = m.hero || [];
+    if (box && !slides.length && m.heroVideo) { heroVideo(box); return; }
     if (!box || !slides.length) return;
     var hero = $('.hero');
     var dots = $('#heroDots');
@@ -354,6 +355,33 @@
       start();
     });
     start();
+  }
+
+  // Vidéo « travelling dans la salle » (fond par défaut du héros)
+  function heroVideo(box) {
+    $('.hero').classList.add('hero--photo', 'hero--video');
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) {
+      var still = document.createElement('div');
+      still.className = 'hero__slide is-active';
+      still.style.backgroundImage = 'url("assets/img/salle.jpg")';
+      box.appendChild(still);
+      return;
+    }
+    var v = document.createElement('video');
+    v.className = 'hero__video';
+    v.src = 'assets/video/salle.mp4';
+    v.poster = 'assets/img/salle.jpg';
+    v.muted = true;
+    v.loop = true;
+    v.autoplay = true;
+    v.playsInline = true;
+    v.setAttribute('playsinline', '');
+    v.setAttribute('muted', '');
+    v.setAttribute('preload', 'auto');
+    box.appendChild(v);
+    var p = v.play();
+    if (p && p.catch) p.catch(function () { /* lecture automatique bloquée : l'affiche reste visible */ });
   }
 
   /* ---------- visionneuse ---------- */
