@@ -33,7 +33,7 @@ Une demande envoyée depuis le formulaire du site apparaît directement dans l'e
 
 ## Animations
 
-- **Travelling dans la salle** piloté par le défilement (GSAP + ScrollTrigger) : le haut de la page reste en place pendant que la caméra traverse la salle (`assets/img/salle-1..3.webp`), puis la page continue. Sans GSAP, la vidéo `assets/video/salle.mp4` tourne en boucle.
+- **Photo de la salle** en fond du haut de page tant que le gérant n'a pas ajouté son diaporama (`assets/img/salle.jpg`).
 - **Apparitions douces** des sections au défilement (opacité uniquement : tout reste utilisable au clavier).
 - **Défilement fluide** (Lenis) sur ordinateur uniquement.
 - Aucune animation si le visiteur a activé « réduire les animations ».

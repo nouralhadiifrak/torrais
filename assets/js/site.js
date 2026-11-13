@@ -321,7 +321,7 @@
     }
     var box = $('#heroSlides');
     var slides = m.hero || [];
-    if (box && !slides.length && m.heroVideo) { heroVideo(box); return; }
+    if (box && !slides.length && m.heroVideo) { heroImage(box); return; }
     if (!box || !slides.length) return;
     var hero = $('.hero');
     var dots = $('#heroDots');
@@ -357,49 +357,13 @@
     start();
   }
 
-  // Vidéo « travelling dans la salle » (fond par défaut du héros)
-  function heroVideo(box) {
-    $('.hero').classList.add('hero--photo', 'hero--video');
-    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reduce) {
-      var still = document.createElement('div');
-      still.className = 'hero__slide is-active';
-      still.style.backgroundImage = 'url("assets/img/salle.jpg")';
-      box.appendChild(still);
-      return;
-    }
-    // Avec GSAP : travelling piloté par le défilement (voir motion.js) ; sinon, la vidéo en boucle
-    if (window.gsap && window.ScrollTrigger) {
-      var hero = $('.hero');
-      hero.setAttribute('data-walk', '');
-      hero.classList.add('hero--walk');
-      [1, 2, 3].forEach(function (n) {
-        var layer = document.createElement('div');
-        layer.className = 'walk__layer';
-        layer.style.backgroundImage = 'url("assets/img/salle-' + n + '.webp")';
-        box.appendChild(layer);
-      });
-      var end = document.createElement('div');
-      end.className = 'walk__end';
-      end.innerHTML = '<p class="eyebrow">Bienvenue</p><p class="walk__end-title">Votre réception, du premier regard au dernier détail</p>' +
-        '<a href="#occasions" class="btn btn--gold">Découvrir nos univers</a>';
-      hero.appendChild(end);
-      return;
-    }
-    var v = document.createElement('video');
-    v.className = 'hero__video';
-    v.src = 'assets/video/salle.mp4';
-    v.poster = 'assets/img/salle.jpg';
-    v.muted = true;
-    v.loop = true;
-    v.autoplay = true;
-    v.playsInline = true;
-    v.setAttribute('playsinline', '');
-    v.setAttribute('muted', '');
-    v.setAttribute('preload', 'auto');
-    box.appendChild(v);
-    var p = v.play();
-    if (p && p.catch) p.catch(function () { /* lecture automatique bloquée : l'affiche reste visible */ });
+  // Photo de la salle (fond par défaut du héros, tant que le gérant n'a pas ajouté ses photos)
+  function heroImage(box) {
+    $('.hero').classList.add('hero--photo', 'hero--still');
+    var still = document.createElement('div');
+    still.className = 'hero__slide is-active';
+    still.style.backgroundImage = 'url("assets/img/salle.jpg")';
+    box.appendChild(still);
   }
 
   /* ---------- visionneuse ---------- */
