@@ -368,6 +368,24 @@
       box.appendChild(still);
       return;
     }
+    // Avec GSAP : travelling piloté par le défilement (voir motion.js) ; sinon, la vidéo en boucle
+    if (window.gsap && window.ScrollTrigger) {
+      var hero = $('.hero');
+      hero.setAttribute('data-walk', '');
+      hero.classList.add('hero--walk');
+      [1, 2, 3].forEach(function (n) {
+        var layer = document.createElement('div');
+        layer.className = 'walk__layer';
+        layer.style.backgroundImage = 'url("assets/img/salle-' + n + '.webp")';
+        box.appendChild(layer);
+      });
+      var end = document.createElement('div');
+      end.className = 'walk__end';
+      end.innerHTML = '<p class="eyebrow">Bienvenue</p><p class="walk__end-title">Votre réception, du premier regard au dernier détail</p>' +
+        '<a href="#occasions" class="btn btn--gold">Découvrir nos univers</a>';
+      hero.appendChild(end);
+      return;
+    }
     var v = document.createElement('video');
     v.className = 'hero__video';
     v.src = 'assets/video/salle.mp4';

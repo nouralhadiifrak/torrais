@@ -31,6 +31,14 @@ Démo du site de **TORRAIS EVENT**, traiteur de mariages et d'événements à Ca
 Une demande envoyée depuis le formulaire du site apparaît directement dans l'espace gérant
 (même navigateur). Le bouton « Réinitialiser la démo » remet les données d'exemple.
 
+## Animations
+
+- **Travelling dans la salle** piloté par le défilement (GSAP + ScrollTrigger) : le haut de la page reste en place pendant que la caméra traverse la salle (`assets/img/salle-1..3.webp`), puis la page continue. Sans GSAP, la vidéo `assets/video/salle.mp4` tourne en boucle.
+- **Apparitions douces** des sections au défilement (opacité uniquement : tout reste utilisable au clavier).
+- **Défilement fluide** (Lenis) sur ordinateur uniquement.
+- Aucune animation si le visiteur a activé « réduire les animations ».
+- Bibliothèques incluses dans `assets/vendor/` (GSAP 3.15.0, Lenis 1.3.27, licence MIT).
+
 ## Lancer en local
 
 Aucune installation nécessaire :

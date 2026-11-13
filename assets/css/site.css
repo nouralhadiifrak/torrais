@@ -583,3 +583,15 @@ p { margin: 0 0 1em; }
 .hero__video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .hero--video .hero__slides::after { z-index: 1; background: linear-gradient(180deg, rgba(28, 22, 16, .40) 0%, rgba(28, 22, 16, .58) 100%); }
 @media (max-width: 700px) { .hero--video .hero__slides::after { background: linear-gradient(180deg, rgba(28, 22, 16, .55) 0%, rgba(28, 22, 16, .68) 100%); } }
+
+/* ---------- travelling piloté par le défilement ---------- */
+.hero--walk { min-height: calc(100vh - 110px); min-height: calc(100svh - 110px); display: flex; align-items: center; padding: 90px 0; }
+.hero--walk .hero__inner { width: 100%; }
+.walk__layer { position: absolute; inset: 0; background-size: cover; background-position: center; will-change: transform, opacity; transform-origin: 50% 50%; }
+.walk__layer:first-child { opacity: 1; }
+.hero--walk .hero__slides::after { z-index: 1; }
+.walk__end { position: absolute; left: 0; right: 0; bottom: 14%; z-index: 2; text-align: center; padding: 0 16px; opacity: 0; visibility: hidden; }
+.walk__end .eyebrow { color: var(--gold-light); }
+.walk__end-title { font: 500 clamp(1.8rem, 4.5vw, 3.2rem)/1.15 var(--serif); color: #fff; max-width: 760px; margin: 0 auto 1.6rem; text-shadow: 0 2px 24px rgba(0, 0, 0, .3); }
+@media (max-width: 600px) { .hero--walk { padding: 70px 0; } .walk__end { bottom: 10%; } }
+.hero--walk .hero__slides::after { opacity: var(--walk-dim, 1); }
