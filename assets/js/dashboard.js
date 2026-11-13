@@ -1245,9 +1245,12 @@
   function viewContent() {
     var s = data.settings;
     var hero = data.media.hero;
+    var jumps = [['c-photos', 'Photos'], ['c-coords', 'Coordonnées'], ['c-univers', 'Pages univers'], ['c-formules', 'Formules'], ['c-services', 'Services'],
+      ['c-plats', 'Plats signature'], ['c-chiffres', 'Chiffres'], ['c-avis', 'Avis'], ['c-faq', 'FAQ'], ['c-zones', 'Zones'], ['c-galerie', 'Galerie']];
     return '<p class="note">Les modifications sont visibles tout de suite sur le site. <a href="../" target="_blank" rel="noopener">Ouvrir le site ↗</a></p>' +
+      '<nav class="jumps" aria-label="Aller à une section">' + jumps.map(function (j) { return '<a class="chip" href="#' + j[0] + '">' + j[1] + '</a>'; }).join('') + '</nav>' +
 
-      '<section class="card"><header class="card__head"><h3>Photos du site</h3><span class="muted">Les photos des services, des formules et de la galerie se changent plus bas</span></header>' +
+      '<section class="card" id="c-photos"><header class="card__head"><h3>Photos du site</h3><span class="muted">Les photos des services, des formules et de la galerie se changent plus bas</span></header>' +
         '<h4 class="sub">Diaporama d\'accueil</h4>' +
         '<p class="hint">Les grandes photos qui défilent en haut du site. Sans photo, le site garde son fond blanc et or.</p>' +
         '<div class="hero-edit">' + hero.map(function (h, i) {
@@ -1267,7 +1270,7 @@
         '</div>' +
       '</section>' +
 
-      '<section class="card"><header class="card__head"><h3>Coordonnées</h3></header>' +
+      '<section class="card" id="c-coords"><header class="card__head"><h3>Coordonnées</h3></header>' +
         '<form class="form-grid" id="settingsForm">' +
           field('Nom du gérant', '<input name="owner" value="' + esc(s.owner) + '">') +
           field('Téléphone', '<input name="phone" type="tel" value="' + esc(s.phone) + '">') +
@@ -1281,7 +1284,9 @@
           '<div class="span-2 form-actions"><button type="button" class="btn btn--primary btn--sm" data-action="save-settings">Enregistrer les coordonnées</button></div>' +
         '</form></section>' +
 
-      '<section class="card"><header class="card__head"><h3>Formules</h3><span class="muted">Laissez le prix vide pour afficher « Prix sur devis »</span></header>' +
+      occasionsEditor() +
+
+      '<section class="card" id="c-formules"><header class="card__head"><h3>Formules</h3><span class="muted">Laissez le prix vide pour afficher « Prix sur devis »</span></header>' +
         '<div class="editor-grid">' + data.packages.map(function (p, i) {
           return '<div class="editor" data-pkg="' + i + '">' +
             imgSlot('pkg:' + i, p.image, 'Photo (optionnelle)', '', true) +
@@ -1295,7 +1300,7 @@
         '<div class="form-actions"><button class="btn btn--primary btn--sm" data-action="save-packages">Enregistrer les formules</button></div>' +
       '</section>' +
 
-      '<section class="card"><header class="card__head"><h3>Services</h3></header>' +
+      '<section class="card" id="c-services"><header class="card__head"><h3>Services</h3></header>' +
         '<div class="editor-grid editor-grid--4">' + data.services.map(function (sv, i) {
           return '<div class="editor" data-svc="' + i + '">' + imgSlot('svc:' + i, sv.image, 'Photo (optionnelle)', 'Sans photo, l\'icône s\'affiche.', true) + field('Titre', '<input data-k="title" value="' + esc(sv.title) + '">') +
             field('Description', '<textarea data-k="text" rows="5">' + esc(sv.text) + '</textarea>') + '</div>';
@@ -1303,18 +1308,102 @@
         '<div class="form-actions"><button class="btn btn--primary btn--sm" data-action="save-services">Enregistrer les services</button></div>' +
       '</section>' +
 
-      '<section class="card"><header class="card__head"><h3>Galerie photos</h3>' +
+      siteDishesEditor() + statsEditor() + reviewsEditor() + faqEditor() + zonesEditor() +
+
+      '<section class="card" id="c-galerie"><header class="card__head"><h3>Galerie photos</h3>' +
         '<label class="btn btn--light btn--sm">' + icon('plus') + ' Ajouter des photos<input type="file" id="galleryUpload" accept="image/*" multiple hidden></label></header>' +
         '<div class="gal-edit">' + data.gallery.map(function (g, i) {
           return '<div class="gal-item" data-gal="' + i + '"><div class="gal-item__img tone-' + ((g.tone || i) % 8 + 1) + '">' +
             (g.src ? '<img src="' + esc(g.src) + '" alt="">' : '<span>Photo à venir</span>') +
             '<button class="icon-btn icon-btn--sm gal-item__del" data-action="gallery-remove" data-index="' + i + '" aria-label="Retirer la photo">' + ICONS.close + '</button>' +
             '<label class="gal-item__change">' + (g.src ? 'Changer' : 'Choisir une photo') + '<input type="file" accept="image/*" data-img="gal:' + i + '" hidden></label></div>' +
-            '<input data-k="caption" value="' + esc(g.caption) + '" placeholder="Légende"></div>';
+            '<input data-k="caption" value="' + esc(g.caption) + '" placeholder="Légende">' +
+            '<select data-k="category" aria-label="Catégorie">' + T.GALLERY_CATEGORIES.map(function (c) { return '<option' + (c === g.category ? ' selected' : '') + '>' + esc(c) + '</option>'; }).join('') + '</select></div>';
         }).join('') + '</div>' +
-        '<div class="form-actions"><button class="btn btn--primary btn--sm" data-action="save-gallery">Enregistrer les légendes</button></div>' +
+        '<div class="form-actions"><button class="btn btn--primary btn--sm" data-action="save-gallery">Enregistrer les légendes et catégories</button></div>' +
         '<p class="muted small">Démo : les photos sont gardées dans ce navigateur uniquement. Dans la version finale, elles seront stockées en ligne.</p>' +
       '</section>';
+  }
+
+  /* ---------- éditeurs des sections du site ---------- */
+  function listTools(list, i) {
+    return '<button type="button" class="btn btn--text btn--danger btn--sm list-remove" data-action="site-list-remove" data-list="' + list + '" data-index="' + i + '">' + icon('trash') + ' Supprimer</button>';
+  }
+  function addBtn(list, label) {
+    return '<button type="button" class="btn btn--light btn--sm" data-action="site-list-add" data-list="' + list + '">' + icon('plus') + ' ' + label + '</button>';
+  }
+  function occasionsEditor() {
+    return '<section class="card" id="c-univers"><header class="card__head"><h3>Pages « Nos univers »</h3><span class="muted">Une page par type d\'événement, avec son lien dans le menu du site</span></header>' +
+      '<div class="editor-grid editor-grid--2">' + data.occasions.map(function (o, i) {
+        return '<div class="editor" data-occ="' + i + '">' +
+          imgSlot('occ:' + i, o.image, 'Photo de la page', 'Sans photo, la page utilise la première photo du diaporama.', true) +
+          field('Titre', '<input data-k="title" value="' + esc(o.title) + '">') +
+          field('Accroche', '<input data-k="short" value="' + esc(o.short) + '">') +
+          field('Présentation', '<textarea data-k="text" rows="4">' + esc(o.text) + '</textarea>') +
+          field('Ce que nous proposons (une ligne par élément)', '<textarea data-k="includes" rows="4">' + esc((o.includes || []).join('\n')) + '</textarea>') +
+          '<a class="link small" href="../evenement.html?type=' + esc(o.id) + '" target="_blank" rel="noopener">Voir la page ↗</a></div>';
+      }).join('') + '</div>' +
+      '<div class="form-actions"><button class="btn btn--primary btn--sm" data-action="save-occasions">Enregistrer les pages</button></div></section>';
+  }
+  function siteDishesEditor() {
+    var list = data.site.dishes;
+    return '<section class="card" id="c-plats"><header class="card__head"><h3>Plats signature</h3>' + addBtn('dishes', 'Ajouter un plat') + '</header>' +
+      '<p class="hint">Les plats mis en avant dans le carrousel « Nos plats signature ».</p>' +
+      (list.length ? '<div class="editor-grid">' + list.map(function (d, i) {
+        return '<div class="editor" data-sdish="' + i + '">' + imgSlot('sdish:' + i, d.image, 'Photo du plat', '', true) +
+          field('Nom', '<input data-k="name" value="' + esc(d.name) + '">') +
+          field('Description', '<textarea data-k="text" rows="3">' + esc(d.text) + '</textarea>') + listTools('dishes', i) + '</div>';
+      }).join('') + '</div>' : '<p class="empty empty--sm">Aucun plat : la section est masquée sur le site.</p>') +
+      '<div class="form-actions"><button class="btn btn--primary btn--sm" data-action="save-sdishes">Enregistrer les plats</button></div></section>';
+  }
+  function statsEditor() {
+    return '<section class="card" id="c-chiffres"><header class="card__head"><h3>Chiffres clés</h3><span class="muted">Le bandeau sombre du site. Laissez un chiffre vide pour le masquer.</span></header>' +
+      '<div class="stat-edit">' + data.site.stats.map(function (x, i) {
+        return '<div class="stat-edit__row" data-stat="' + i + '">' + field('Chiffre', '<input data-k="value" value="' + esc(x.value) + '" placeholder="Ex. 250">') +
+          field('Texte', '<input data-k="label" value="' + esc(x.label) + '" placeholder="Ex. mariages réalisés">') + '</div>';
+      }).join('') + '</div>' +
+      '<p class="hint">Mettez uniquement des chiffres vrais (années d\'expérience, nombre de mariages…).</p>' +
+      '<div class="form-actions"><button class="btn btn--primary btn--sm" data-action="save-stats">Enregistrer les chiffres</button></div></section>';
+  }
+  function reviewsEditor() {
+    var list = data.site.reviews;
+    return '<section class="card" id="c-avis"><header class="card__head"><h3>Avis clients</h3>' + addBtn('reviews', 'Ajouter un avis') + '</header>' +
+      '<p class="hint">Recopiez de vrais avis reçus (Instagram, WhatsApp, Google…). La section n\'apparaît sur le site qu\'à partir du premier avis.</p>' +
+      (list.length ? '<div class="editor-grid">' + list.map(function (r, i) {
+        return '<div class="editor" data-review="' + i + '">' +
+          field('Nom du client', '<input data-k="name" value="' + esc(r.name) + '" placeholder="Ex. Salma B.">') +
+          field('Événement', '<input data-k="event" value="' + esc(r.event) + '" placeholder="Ex. Mariage, juin 2026">') +
+          field('Note', '<select data-k="stars">' + [5, 4, 3].map(function (n) { return '<option value="' + n + '"' + (+r.stars === n ? ' selected' : '') + '>' + '★★★★★'.slice(0, n) + '</option>'; }).join('') + '</select>') +
+          field('Avis', '<textarea data-k="text" rows="4">' + esc(r.text) + '</textarea>') + listTools('reviews', i) + '</div>';
+      }).join('') + '</div>' : '<p class="empty empty--sm">Aucun avis pour l\'instant : la section est masquée sur le site.</p>') +
+      (list.length ? '<div class="form-actions"><button class="btn btn--primary btn--sm" data-action="save-reviews">Enregistrer les avis</button></div>' : '') + '</section>';
+  }
+  function faqEditor() {
+    var list = data.site.faq;
+    return '<section class="card" id="c-faq"><header class="card__head"><h3>Questions fréquentes</h3>' + addBtn('faq', 'Ajouter une question') + '</header>' +
+      (list.length ? '<div class="faq-edit">' + list.map(function (f, i) {
+        return '<div class="editor" data-faq="' + i + '">' + field('Question', '<input data-k="q" value="' + esc(f.q) + '">') +
+          field('Réponse', '<textarea data-k="a" rows="3">' + esc(f.a) + '</textarea>') + listTools('faq', i) + '</div>';
+      }).join('') + '</div>' : '<p class="empty empty--sm">Aucune question : la section est masquée sur le site.</p>') +
+      '<div class="form-actions"><button class="btn btn--primary btn--sm" data-action="save-faq">Enregistrer les questions</button></div></section>';
+  }
+  function zonesEditor() {
+    return '<section class="card" id="c-zones"><header class="card__head"><h3>Zones desservies</h3></header>' +
+      field('Villes et quartiers (une par ligne)', '<textarea id="zonesInput" rows="5">' + esc(data.site.zones.join('\n')) + '</textarea>') +
+      '<p class="hint">À vérifier avec Saïd : la liste actuelle est un exemple.</p>' +
+      '<div class="form-actions"><button class="btn btn--primary btn--sm" data-action="save-zones">Enregistrer les zones</button></div></section>';
+  }
+  function readRows(attr, keys) {
+    return $$('[data-' + attr + ']').map(function (box) {
+      var o = {};
+      keys.forEach(function (k) { var el = $('[data-k="' + k + '"]', box); o[k] = el ? el.value.trim() : ''; });
+      return o;
+    });
+  }
+  function syncList(name) {
+    if (name === 'dishes') readRows('sdish', ['name', 'text']).forEach(function (r, i) { Object.assign(data.site.dishes[i], r); });
+    if (name === 'reviews') readRows('review', ['name', 'event', 'stars', 'text']).forEach(function (r, i) { Object.assign(data.site.reviews[i], r, { stars: +r.stars || 5 }); });
+    if (name === 'faq') readRows('faq', ['q', 'a']).forEach(function (r, i) { Object.assign(data.site.faq[i], r); });
   }
 
   /* ---------- photos du site ---------- */
@@ -1334,6 +1423,8 @@
     else if (kind === 'svc') data.services[i].image = src;
     else if (kind === 'pkg') data.packages[i].image = src;
     else if (kind === 'gal') data.gallery[i].src = src;
+    else if (kind === 'occ') data.occasions[i].image = src;
+    else if (kind === 'sdish') data.site.dishes[i].image = src;
     else if (kind === 'hero') {
       if (parts[1] === 'add') data.media.hero.push({ id: U.uid(), src: src });
       else if (src) data.media.hero[i].src = src;
@@ -1617,8 +1708,52 @@
       commit('Services enregistrés.');
     },
     'save-gallery': function () {
-      $$('[data-gal]').forEach(function (box) { data.gallery[+box.dataset.gal].caption = $('[data-k="caption"]', box).value.trim(); });
-      commit('Légendes enregistrées.');
+      $$('[data-gal]').forEach(function (box) {
+        var g = data.gallery[+box.dataset.gal];
+        g.caption = $('[data-k="caption"]', box).value.trim();
+        g.category = $('[data-k="category"]', box).value;
+      });
+      commit('Galerie enregistrée.');
+    },
+    'save-occasions': function () {
+      $$('[data-occ]').forEach(function (box) {
+        var o = data.occasions[+box.dataset.occ];
+        o.title = $('[data-k="title"]', box).value.trim() || o.title;
+        o.short = $('[data-k="short"]', box).value.trim();
+        o.text = $('[data-k="text"]', box).value.trim();
+        o.includes = $('[data-k="includes"]', box).value.split('\n').map(function (x) { return x.trim(); }).filter(Boolean);
+      });
+      commit('Pages enregistrées.');
+    },
+    'save-sdishes': function () { syncList('dishes'); commit('Plats signature enregistrés.'); },
+    'save-reviews': function () { syncList('reviews'); data.site.reviews = data.site.reviews.filter(function (r) { return r.text || r.name; }); commit('Avis enregistrés.'); },
+    'save-faq': function () { syncList('faq'); data.site.faq = data.site.faq.filter(function (f) { return f.q; }); commit('Questions enregistrées.'); },
+    'save-stats': function () {
+      data.site.stats = readRows('stat', ['value', 'label']);
+      commit('Chiffres enregistrés.');
+    },
+    'save-zones': function () {
+      data.site.zones = $('#zonesInput').value.split(/\n|,/).map(function (x) { return x.trim(); }).filter(Boolean);
+      commit('Zones enregistrées.');
+    },
+    'site-list-add': function (el) {
+      var name = el.dataset.list;
+      syncList(name);
+      if (name === 'dishes') data.site.dishes.push({ id: U.uid(), name: '', text: '', image: '' });
+      if (name === 'reviews') data.site.reviews.push({ id: U.uid(), name: '', event: '', stars: 5, text: '' });
+      if (name === 'faq') data.site.faq.push({ q: '', a: '' });
+      render();
+      var boxes = $$('[data-' + { dishes: 'sdish', reviews: 'review', faq: 'faq' }[name] + ']');
+      var last = boxes[boxes.length - 1];
+      if (last) { last.scrollIntoView({ block: 'center' }); var inp = $('input', last); if (inp) inp.focus(); }
+    },
+    'site-list-remove': function (el) {
+      if (!window.confirm('Supprimer cet élément du site ?')) return;
+      var name = el.dataset.list;
+      syncList(name);
+      var arr = name === 'faq' ? data.site.faq : data.site[name];
+      arr.splice(+el.dataset.index, 1);
+      commit('Élément supprimé.');
     },
     'img-remove': function (el) {
       if (!window.confirm('Retirer cette photo du site ?')) return;

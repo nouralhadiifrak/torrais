@@ -96,6 +96,60 @@
     return out;
   }
 
+  /* ---------- pages et sections du site (modifiables dans l'espace gérant) ---------- */
+  var GALLERY_CATEGORIES = ['Mariages', 'Cuisine', 'Tyafer', 'Décoration'];
+  var GALLERY_GUESS = {
+    "Table d'honneur": 'Mariages', 'Buffet marocain': 'Cuisine', 'Tyafer de la henné': 'Tyafer', 'Kousha de la mariée': 'Décoration',
+    'Pastilla royale': 'Cuisine', 'Plateaux de fruits': 'Cuisine', 'Décoration florale': 'Décoration', 'Pâtisseries marocaines': 'Cuisine'
+  };
+  function defaultOccasions() {
+    return [
+      { id: 'mariage', title: 'Mariage & fiançailles', eventType: 'Mariage', galleryCat: 'Mariages', image: '',
+        short: 'Le grand jour, du dîner à la kousha, pensé dans les moindres détails.',
+        text: "Votre mariage mérite une table à la hauteur de l'émotion. Nous composons avec vous un dîner marocain ou international, nous dressons la salle à vos couleurs et notre équipe accompagne vos invités du thé d'accueil jusqu'au gâteau des mariés.",
+        includes: ['Dîner complet : pastilla, méchoui, tajines, desserts', 'Service à table par une équipe dédiée', 'Décoration de la salle et de la kousha', 'Tyafer pour la cérémonie', 'Vaisselle, nappage et mobilier'] },
+      { id: 'henne', title: 'Henné & tyafer', eventType: 'Henné', galleryCat: 'Tyafer', image: '',
+        short: 'Des soirées de henné et des tyafer dans le respect de la tradition.',
+        text: 'Pour la soirée du henné, les fiançailles ou la remise de la dote, nous préparons des tyafer décorés avec soin, une ambiance chaleureuse et une table de douceurs marocaines pour vos invitées.',
+        includes: ['Tyafer décorés selon vos couleurs', 'Décoration et coin henné', 'Thé à la menthe et pâtisseries marocaines', 'Buffet salé et sucré'] },
+      { id: 'famille', title: 'Anniversaires & aqiqa', eventType: 'Anniversaire', galleryCat: 'Cuisine', image: '',
+        short: 'Les fêtes de famille, à la maison ou en salle, sans stress.',
+        text: "Anniversaire, aqiqa, réussite ou retrouvailles : nous livrons et servons chez vous ou dans la salle de votre choix, avec un buffet généreux adapté au nombre d'invités.",
+        includes: ['Buffet salé et sucré', 'Gâteau personnalisé', 'Service sur place', 'Décoration selon le thème'] },
+      { id: 'entreprise', title: "Événements d'entreprise", eventType: "Événement d'entreprise", galleryCat: 'Cuisine', image: '',
+        short: 'Cocktails, séminaires et fins d’année pour vos équipes et vos clients.',
+        text: 'Inauguration, séminaire, fin d’année ou réception de clients : nous proposons des cocktails dînatoires et des buffets élégants, ponctuels et adaptés à votre image.',
+        includes: ['Cocktail dînatoire ou buffet', 'Pauses café', 'Service en tenue', 'Devis rapide et facture'] }
+    ];
+  }
+  function defaultSite() {
+    return {
+      stats: [
+        { value: '11,5 k', label: 'abonnés sur Instagram' },
+        { value: '4', label: 'métiers : traiteur, buffet, tyafer, décoration' },
+        { value: '7j/7', label: 'à votre écoute' },
+        { value: '100 %', label: 'formules sur mesure' }
+      ],
+      zones: ['Casablanca', 'Mohammedia', 'Bouskoura', 'Dar Bouazza', 'Nouaceur', 'Berrechid'],
+      dishes: [
+        { id: uid(), name: 'Pastilla aux fruits de mer', text: 'Feuilles croustillantes, crevettes, calamars et vermicelles parfumés.', image: '' },
+        { id: uid(), name: 'Méchoui', text: 'Agneau rôti lentement, fondant, servi avec cumin et sel.', image: '' },
+        { id: uid(), name: 'Tajine aux pruneaux', text: 'Veau mijoté, pruneaux caramélisés, amandes et sésame.', image: '' },
+        { id: uid(), name: 'Poulet aux olives', text: 'Poulet beldi au citron confit et aux olives violettes.', image: '' },
+        { id: uid(), name: 'Pâtisseries marocaines', text: 'Cornes de gazelle, briouates au miel, ghriba et fekkas.', image: '' },
+        { id: uid(), name: 'Thé à la menthe', text: 'Servi à l’accueil et au dessert, comme il se doit.', image: '' }
+      ],
+      faq: [
+        { q: 'Combien de temps à l’avance faut-il réserver ?', a: 'Pour un mariage, idéalement 3 à 4 mois avant, surtout en été. Pour une petite réception, quelques semaines suffisent souvent : contactez-nous pour vérifier la date.' },
+        { q: 'Est-ce que vous vous déplacez à domicile ?', a: 'Oui. Nous servons en salle comme à domicile, à Casablanca et dans les environs.' },
+        { q: 'Peut-on adapter une formule ?', a: 'Bien sûr. Chaque formule est une base : nous ajustons le menu, la décoration et le service selon vos envies et votre budget.' },
+        { q: 'Comment réserver une date ?', a: 'Envoyez-nous une demande de devis ou écrivez-nous sur WhatsApp. Après validation du devis, un acompte confirme la réservation.' },
+        { q: 'Proposez-vous aussi les tyafer et la décoration seuls ?', a: 'Oui, vous pouvez réserver uniquement les tyafer, la décoration ou un buffet, sans le dîner complet.' }
+      ],
+      reviews: []
+    };
+  }
+
   /* ---------- contenu par défaut du site ---------- */
   function defaultContent() {
     return {
@@ -324,6 +378,8 @@
       gallery: content.gallery,
       media: content.media,
       dishes: defaultDishes(),
+      site: defaultSite(),
+      occasions: defaultOccasions(),
       requests: requests,
       events: events,
       staff: staff,
@@ -340,6 +396,10 @@
     if (!d.dishes) d.dishes = defaultDishes();
     (d.services || []).forEach(function (x) { if (x.image == null) x.image = ''; });
     (d.packages || []).forEach(function (x) { if (x.image == null) x.image = ''; });
+    if (!d.site) d.site = defaultSite();
+    ['stats', 'zones', 'dishes', 'faq', 'reviews'].forEach(function (k) { if (!d.site[k]) d.site[k] = defaultSite()[k]; });
+    if (!d.occasions) d.occasions = defaultOccasions();
+    (d.gallery || []).forEach(function (g) { if (!g.category) g.category = GALLERY_GUESS[g.caption] || 'Mariages'; });
     return d;
   }
   function load() {
@@ -348,7 +408,7 @@
       var raw = localStorage.getItem(KEY);
       if (raw) { memory = ensure(JSON.parse(raw)); return memory; }
     } catch (e) { /* stockage indisponible : on garde la démo en mémoire */ }
-    memory = seed();
+    memory = ensure(seed());
     save(memory);
     return memory;
   }
@@ -357,7 +417,7 @@
     memory = data;
     try { localStorage.setItem(KEY, JSON.stringify(data)); return true; } catch (e) { return false; }
   }
-  function reset() { memory = seed(); save(memory); return memory; }
+  function reset() { memory = ensure(seed()); save(memory); return memory; }
 
   window.Torrais = {
     KEY: KEY,
@@ -375,6 +435,7 @@
     INV_RULES: INV_RULES,
     EXPENSE_CATEGORIES: EXPENSE_CATEGORIES,
     DISH_CATEGORIES: DISH_CATEGORIES,
+    GALLERY_CATEGORIES: GALLERY_CATEGORIES,
     STATUSES: STATUSES,
     PENDING: PENDING
   };

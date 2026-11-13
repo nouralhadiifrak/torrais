@@ -11,7 +11,8 @@ Démo du site de **TORRAIS EVENT**, traiteur de mariages et d'événements à Ca
 
 | Page | Chemin | Description |
 |---|---|---|
-| Site public | `index.html` | Accueil, services, formules (« Prix sur devis »), galerie, étapes, formulaire de devis, contact + carte, boutons WhatsApp / appel |
+| Site public | `index.html` | Barre d'infos, héros (diaporama), notre maison, nos univers, métiers, plats signature, formules (« Prix sur devis »), chiffres clés, réalisations avec filtres, étapes, avis clients (masqués tant qu'il n'y en a pas), FAQ, devis + zones desservies, contact + carte, bandeau WhatsApp / appel |
+| Pages univers | `evenement.html?type=…` | Une page par occasion (mariage, henné, fêtes de famille, entreprise) avec présentation, formules, photos et devis pré-rempli |
 | Espace gérant | `dashboard/` | Connexion (mot de passe démo : `demo`) |
 
 ### Espace gérant

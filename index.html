@@ -4,37 +4,19 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>TORRAIS EVENT — Traiteur mariages et événements à Casablanca</title>
-  <meta name="description" content="TORRAIS EVENT, traiteur à Casablanca : formules mariage, buffet, tyafer et décoration pour vos mariages, fiançailles et événements.">
+  <meta name="description" content="TORRAIS EVENT, traiteur à Casablanca : mariages, fiançailles, henné, tyafer, buffets et décoration. Formules sur mesure, devis gratuit.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/site.css">
 </head>
-<body>
+<body data-page="home">
 
-  <header class="header" id="top">
-    <div class="container header__inner">
-      <a href="#top" class="brand" aria-label="TORRAIS EVENT — accueil">
-        <span class="brand__mark">T</span>
-        <span class="brand__text">TORRAIS <em>EVENT</em></span>
-      </a>
-      <nav class="nav" id="nav" aria-label="Navigation principale">
-        <a href="#services">Services</a>
-        <a href="#formules">Formules</a>
-        <a href="#galerie">Galerie</a>
-        <a href="#etapes">Comment ça marche</a>
-        <a href="#contact">Contact</a>
-        <a href="#devis" class="btn btn--gold btn--sm">Demander un devis</a>
-      </nav>
-      <button class="nav-toggle" id="navToggle" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="nav">
-        <span></span><span></span><span></span>
-      </button>
-    </div>
-  </header>
+  <div id="siteHeader"></div>
 
   <main>
-    <!-- HERO -->
-    <section class="hero">
+    <!-- HÉROS -->
+    <section class="hero" id="top">
       <div class="hero__pattern" aria-hidden="true"></div>
       <div class="hero__slides" id="heroSlides" aria-hidden="true"></div>
       <div class="hero__dots" id="heroDots"></div>
@@ -46,9 +28,7 @@
           <span data-bind="tagline">Réservez la formule mariage à votre service, selon votre choix.</span></p>
         <div class="hero__actions">
           <a href="#devis" class="btn btn--gold">Demander un devis gratuit</a>
-          <a href="#" class="btn btn--outline" data-wa-link data-wa-text="Bonjour TORRAIS EVENT, je souhaite avoir des informations pour un événement.">
-            <span class="icon" data-icon="whatsapp"></span> WhatsApp
-          </a>
+          <a href="#occasions" class="btn btn--outline">Découvrir nos univers</a>
         </div>
         <ul class="hero__badges">
           <li><span class="icon" data-icon="check"></span> Formules sur mesure</li>
@@ -56,12 +36,13 @@
           <li><span class="icon" data-icon="check"></span> Service et décoration inclus</li>
         </ul>
       </div>
+      <a href="#maison" class="hero__scroll" aria-label="Défiler vers la suite"><span></span></a>
     </section>
 
-    <!-- À PROPOS -->
-    <section class="section about">
+    <!-- MAISON -->
+    <section class="section about" id="maison">
       <div class="container about__grid">
-        <div class="about__visual" aria-hidden="true">
+        <div class="about__visual">
           <div class="about__frame" id="aboutFrame">
             <span class="about__monogram">T</span>
             <span class="about__caption">Depuis Casablanca,<br>pour vos plus beaux jours</span>
@@ -71,22 +52,53 @@
           <p class="eyebrow">Notre maison</p>
           <h2 class="section-title">Une table à la hauteur de votre fête</h2>
           <p>Chez TORRAIS EVENT, chaque mariage est unique. Nous préparons une cuisine généreuse et raffinée,
-            nous dressons des tables élégantes et nous prenons soin de vos invités du premier verre de thé jusqu'au dessert.</p>
-          <p>Traiteur, buffet, tyafer et décoration : choisissez une formule complète ou composez la vôtre,
-            selon vos envies et votre budget.</p>
-          <a href="#formules" class="link-arrow">Découvrir nos formules →</a>
+            nous dressons des tables élégantes et nous prenons soin de vos invités, du premier verre de thé jusqu'au dessert.</p>
+          <div class="pillars">
+            <div class="pillar"><span class="pillar__num">01</span><div><h3>Cuisine faite maison</h3><p>Des recettes marocaines et internationales préparées pour chaque événement.</p></div></div>
+            <div class="pillar"><span class="pillar__num">02</span><div><h3>Service attentionné</h3><p>Une équipe présente du début à la fin pour que vous profitiez de votre fête.</p></div></div>
+          </div>
+          <p class="about__sign"><span data-bind="owner">Saïd</span> <small>— TORRAIS EVENT</small></p>
         </div>
       </div>
     </section>
 
-    <!-- SERVICES -->
-    <section class="section section--cream" id="services">
+    <!-- OCCASIONS -->
+    <section class="section section--cream" id="occasions">
       <div class="container">
         <div class="section-head">
-          <p class="eyebrow">Nos services</p>
+          <p class="eyebrow">Nos univers</p>
+          <h2 class="section-title">Pour chaque occasion</h2>
+          <p class="section-sub">Du mariage à la fête de famille, une équipe et une cuisine adaptées à votre événement.</p>
+        </div>
+        <div class="occasions" id="occasionsGrid"></div>
+      </div>
+    </section>
+
+    <!-- SERVICES -->
+    <section class="section section--tight" id="services">
+      <div class="container">
+        <div class="section-head">
+          <p class="eyebrow">Nos métiers</p>
           <h2 class="section-title">Tout pour réussir votre événement</h2>
         </div>
         <div class="services" id="servicesGrid"></div>
+      </div>
+    </section>
+
+    <!-- PLATS SIGNATURE -->
+    <section class="section section--cream" id="carte">
+      <div class="container">
+        <div class="section-head section-head--row">
+          <div>
+            <p class="eyebrow">Notre cuisine</p>
+            <h2 class="section-title">Nos plats signature</h2>
+          </div>
+          <div class="carousel-nav">
+            <button type="button" class="carousel-btn" data-carousel="prev" aria-label="Plats précédents">‹</button>
+            <button type="button" class="carousel-btn" data-carousel="next" aria-label="Plats suivants">›</button>
+          </div>
+        </div>
+        <div class="dishes" id="dishesTrack"></div>
       </div>
     </section>
 
@@ -103,20 +115,26 @@
       </div>
     </section>
 
-    <!-- GALERIE -->
-    <section class="section section--cream" id="galerie">
+    <!-- CHIFFRES -->
+    <section class="stats" id="chiffres">
+      <div class="container stats__grid" id="statsGrid"></div>
+    </section>
+
+    <!-- RÉALISATIONS -->
+    <section class="section" id="galerie">
       <div class="container">
         <div class="section-head">
-          <p class="eyebrow">Galerie</p>
-          <h2 class="section-title">Nos réalisations</h2>
+          <p class="eyebrow">Réalisations</p>
+          <h2 class="section-title">Nos derniers événements</h2>
           <p class="section-sub">Plus de photos sur notre <a href="#" data-bind-href="instagram" target="_blank" rel="noopener">page Instagram</a>.</p>
         </div>
+        <div class="filters" id="galleryFilters" role="tablist" aria-label="Filtrer les photos"></div>
         <div class="gallery" id="galleryGrid"></div>
       </div>
     </section>
 
     <!-- ÉTAPES -->
-    <section class="section" id="etapes">
+    <section class="section section--cream" id="etapes">
       <div class="container">
         <div class="section-head">
           <p class="eyebrow">Comment ça marche</p>
@@ -128,6 +146,29 @@
           <li><span class="steps__num">3</span><h3>Votre formule</h3><p>Vous recevez un devis clair. Un acompte confirme la réservation de votre date.</p></li>
           <li><span class="steps__num">4</span><h3>Le jour J</h3><p>Notre équipe s'occupe de tout. Vous n'avez plus qu'à profiter de votre fête.</p></li>
         </ol>
+      </div>
+    </section>
+
+    <!-- AVIS (affiché seulement quand le gérant a ajouté des avis) -->
+    <section class="section" id="avis" hidden>
+      <div class="container">
+        <div class="section-head">
+          <p class="eyebrow">Avis clients</p>
+          <h2 class="section-title">Ils nous ont fait confiance</h2>
+        </div>
+        <div class="reviews" id="reviewsGrid"></div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="section section--cream" id="faq">
+      <div class="container faq">
+        <div>
+          <p class="eyebrow">Questions fréquentes</p>
+          <h2 class="section-title">Vous vous demandez…</h2>
+          <p class="section-sub">Une autre question ? <a href="#" data-wa-link>Écrivez-nous sur WhatsApp</a>, nous répondons rapidement.</p>
+        </div>
+        <div class="faq__list" id="faqList"></div>
       </div>
     </section>
 
@@ -143,66 +184,12 @@
             <li><span class="icon" data-icon="phone"></span> <a href="#" data-bind-tel="phone" data-bind="phoneDisplay">06 63 35 15 07</a></li>
             <li><span class="icon" data-icon="whatsapp"></span> <a href="#" data-wa-link>Écrire sur WhatsApp</a></li>
           </ul>
+          <div class="zones">
+            <p class="zones__title"><span class="icon" data-icon="pin"></span> Nous intervenons à</p>
+            <ul class="zones__list" id="zonesList"></ul>
+          </div>
         </div>
-
-        <form class="form" id="quoteForm" novalidate>
-          <div class="form__row">
-            <label class="field">
-              <span>Nom complet *</span>
-              <input type="text" name="name" required autocomplete="name" placeholder="Ex. Salma Bennani">
-            </label>
-            <label class="field">
-              <span>Téléphone / WhatsApp *</span>
-              <input type="tel" name="phone" required autocomplete="tel" placeholder="06 XX XX XX XX">
-            </label>
-          </div>
-          <div class="form__row">
-            <label class="field">
-              <span>Type d'événement *</span>
-              <select name="eventType" required id="eventTypeSelect"></select>
-            </label>
-            <label class="field">
-              <span>Date de l'événement *</span>
-              <input type="date" name="date" required id="dateInput">
-            </label>
-          </div>
-          <div class="form__row">
-            <label class="field">
-              <span>Nombre d'invités *</span>
-              <input type="number" name="guests" required min="10" max="2000" step="10" placeholder="Ex. 200">
-            </label>
-            <label class="field">
-              <span>Budget approximatif</span>
-              <select name="budget">
-                <option value="">Je ne sais pas encore</option>
-                <option>Moins de 20 000 DH</option>
-                <option>20 000 – 50 000 DH</option>
-                <option>50 000 – 80 000 DH</option>
-                <option>80 000 – 120 000 DH</option>
-                <option>Plus de 120 000 DH</option>
-              </select>
-            </label>
-          </div>
-          <fieldset class="field field--checks">
-            <legend>Services souhaités</legend>
-            <div class="checks" id="servicesChecks"></div>
-          </fieldset>
-          <label class="field">
-            <span>Votre message</span>
-            <textarea name="message" rows="4" placeholder="Lieu, formule qui vous intéresse, demandes particulières…"></textarea>
-          </label>
-          <p class="form__error" id="formError" role="alert" hidden></p>
-          <button type="submit" class="btn btn--dark btn--block">Envoyer ma demande</button>
-          <p class="form__hint">Réponse rapide · Sans engagement</p>
-        </form>
-
-        <div class="form form--success" id="formSuccess" hidden>
-          <div class="success__icon"><span class="icon" data-icon="check"></span></div>
-          <h3>Merci, votre demande est bien envoyée !</h3>
-          <p>Nous vous recontactons très vite. Pour une réponse encore plus rapide, envoyez-la aussi sur WhatsApp :</p>
-          <a href="#" class="btn btn--wa btn--block" id="successWa"><span class="icon" data-icon="whatsapp"></span> Envoyer sur WhatsApp</a>
-          <button type="button" class="btn btn--ghost btn--block" id="newRequest">Faire une autre demande</button>
-        </div>
+        <div id="quoteMount"></div>
       </div>
     </section>
 
@@ -229,35 +216,7 @@
     </section>
   </main>
 
-  <footer class="footer">
-    <div class="container footer__inner">
-      <div>
-        <span class="brand__text brand__text--light">TORRAIS <em>EVENT</em></span>
-        <p>Traiteur · Tyafer · Buffet · Décoration — <span data-bind="city">Casablanca</span></p>
-      </div>
-      <div class="footer__links">
-        <a href="#" data-bind-href="instagram" target="_blank" rel="noopener" aria-label="Instagram"><span class="icon" data-icon="instagram"></span></a>
-        <a href="#" data-wa-link aria-label="WhatsApp"><span class="icon" data-icon="whatsapp"></span></a>
-        <a href="#" data-bind-tel="phone" aria-label="Appeler"><span class="icon" data-icon="phone"></span></a>
-      </div>
-    </div>
-    <div class="container footer__bottom">
-      <span>© <span id="year"></span> TORRAIS EVENT. Tous droits réservés.</span>
-      <a href="dashboard/" class="footer__admin">Espace gérant</a>
-    </div>
-  </footer>
-
-  <!-- Boutons flottants -->
-  <div class="floating">
-    <a href="#" class="floating__btn floating__btn--call" data-bind-tel="phone" aria-label="Appeler"><span class="icon" data-icon="phone"></span></a>
-    <a href="#" class="floating__btn floating__btn--wa" data-wa-link aria-label="WhatsApp"><span class="icon" data-icon="whatsapp"></span></a>
-  </div>
-
-  <!-- Visionneuse photos -->
-  <div class="lightbox" id="lightbox" hidden>
-    <button class="lightbox__close" id="lightboxClose" aria-label="Fermer">×</button>
-    <figure class="lightbox__figure" id="lightboxFigure"></figure>
-  </div>
+  <div id="siteFooter"></div>
 
   <script src="assets/js/data.js"></script>
   <script src="assets/js/site.js"></script>
