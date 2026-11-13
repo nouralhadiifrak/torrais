@@ -47,6 +47,8 @@
     content: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg>',
     external: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>',
     reset: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4v6h6"/><path d="M4.5 15a8 8 0 1 0 1.5-8.5L4 10"/></svg>',
+    moon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>',
+    sun: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4L6 18M18 6l1.4-1.4"/></svg>',
     logout: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h4"/><path d="M16 16l4-4-4-4"/><path d="M20 12H9"/></svg>',
     plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
     close: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
@@ -204,7 +206,7 @@
     return '' +
       '<div class="welcome"><div><h2>' + hello + ' ' + esc(data.settings.owner) + '</h2><p>' + esc(weekdayDate(TODAY)) + '</p></div>' +
       '<div class="welcome__actions"><button class="btn btn--light" data-action="new-request">' + icon('plus') + ' Nouvelle demande</button>' +
-      '<button class="btn btn--gold" data-action="new-event">' + icon('plus') + ' Nouvel événement</button></div></div>' +
+      '<button class="btn btn--primary" data-action="new-event">' + icon('plus') + ' Nouvel événement</button></div></div>' +
 
       '<div class="kpis">' +
         kpi('Nouvelles demandes', newReqs.length, plural(pendingReqs.length, 'demande') + ' en cours', 'requests', newReqs.length ? 'kpi--alert' : '') +
@@ -323,7 +325,7 @@
           '<input class="search" type="search" id="reqSearch" placeholder="Rechercher un nom, un téléphone…" value="' + esc(state.reqSearch) + '">' +
           '<select class="search search--select" id="reqSource" aria-label="Filtrer par source"><option value="">Toutes les sources</option>' + sourceOptions(state.reqSource, true) + '</select>' +
         '</div>' +
-        '<button class="btn btn--gold btn--sm" data-action="new-request">' + icon('plus') + ' Nouvelle demande</button>' +
+        '<button class="btn btn--primary btn--sm" data-action="new-request">' + icon('plus') + ' Nouvelle demande</button>' +
       '</div><section class="card card--flush"><ul class="rows rows--big" id="reqList"></ul></section>';
   }
   function filterRequests(id) {
@@ -374,8 +376,8 @@
       '<footer class="sheet__foot">' +
         '<button class="btn btn--text btn--danger" data-action="req-delete" data-id="' + r.id + '">' + icon('trash') + ' Supprimer</button>' +
         (linked
-          ? '<button class="btn btn--gold" data-action="open-event" data-id="' + linked.id + '">Voir l\'événement</button>'
-          : '<button class="btn btn--gold" data-action="req-convert" data-id="' + r.id + '">Confirmer & créer l\'événement</button>') +
+          ? '<button class="btn btn--primary" data-action="open-event" data-id="' + linked.id + '">Voir l\'événement</button>'
+          : '<button class="btn btn--primary" data-action="req-convert" data-id="' + r.id + '">Confirmer & créer l\'événement</button>') +
       '</footer>'
     );
   }
@@ -408,7 +410,7 @@
         '<div id="reqAvail"></div>' +
       '</form>' +
       '<footer class="sheet__foot"><span class="muted small">Le client sera ajouté à la liste des clients.</span>' +
-        '<button class="btn btn--gold" data-action="req-form-save">Enregistrer la demande</button></footer>'
+        '<button class="btn btn--primary" data-action="req-form-save">Enregistrer la demande</button></footer>'
     );
     var form = $('#reqForm');
     function avail() {
@@ -582,7 +584,7 @@
         (pend.length ? '<ul class="rows">' + pend.map(requestRow).join('') + '</ul>' : empty('Aucune demande en attente pour cette date.')) +
       '</div>' +
       '<footer class="sheet__foot"><button class="btn btn--light" data-action="new-request" data-date="' + date + '">' + icon('plus') + ' Demande</button>' +
-      '<button class="btn btn--gold" data-action="new-event" data-date="' + date + '">' + icon('plus') + ' Événement</button></footer>'
+      '<button class="btn btn--primary" data-action="new-event" data-date="' + date + '">' + icon('plus') + ' Événement</button></footer>'
     );
   }
 
@@ -658,7 +660,7 @@
       '</div>' +
       '<div class="toolbar"><div class="chips">' + filters.map(function (f) {
         return '<button class="chip' + (state.evFilter === f.id ? ' is-active' : '') + '" data-action="ev-filter" data-filter="' + f.id + '">' + f.label + '</button>';
-      }).join('') + '</div><button class="btn btn--gold btn--sm" data-action="new-event">' + icon('plus') + ' Nouvel événement</button></div>' +
+      }).join('') + '</div><button class="btn btn--primary btn--sm" data-action="new-event">' + icon('plus') + ' Nouvel événement</button></div>' +
       '<section class="card card--flush"><ul class="rows rows--big">' + (list.length ? list.map(eventMoneyRow).join('') : '<li>' + empty('Aucun événement.') + '</li>') + '</ul></section>';
   }
 
@@ -726,7 +728,7 @@
       '<div class="profit-bar" id="profitBar"></div>' +
       '<footer class="sheet__foot">' +
         (existing ? '<button class="btn btn--text btn--danger" data-action="ev-delete" data-id="' + existing.id + '">' + icon('trash') + ' Supprimer</button>' : '<span></span>') +
-        '<button class="btn btn--gold" data-action="ev-save">Enregistrer</button>' +
+        '<button class="btn btn--primary" data-action="ev-save">Enregistrer</button>' +
       '</footer>'
     );
     var form = $('#eventForm');
@@ -946,7 +948,7 @@
         return sum((e.team || []).filter(function (t) { return t.paid; }), function (t) { return t.pay; });
       })) + '</strong><span class="kpi__sub">Toutes les paies réglées</span></div></div>' +
       '<div class="toolbar"><p class="muted">Chaque personne est payée à l\'événement. Affectez l\'équipe depuis la fiche de chaque événement.</p>' +
-      '<button class="btn btn--gold btn--sm" data-action="staff-new">' + icon('plus') + ' Ajouter une personne</button></div>';
+      '<button class="btn btn--primary btn--sm" data-action="staff-new">' + icon('plus') + ' Ajouter une personne</button></div>';
     if (!data.staff.length) return html + '<section class="card">' + empty('Aucune personne dans l\'équipe.') + '</section>';
     roles.forEach(function (role) {
       var list = data.staff.filter(function (s) { return s.role === role; });
@@ -986,7 +988,7 @@
       '</form>' +
       '<footer class="sheet__foot">' +
         (s ? '<button class="btn btn--text btn--danger" data-action="staff-delete" data-id="' + s.id + '">' + icon('trash') + ' Supprimer</button>' : '<span></span>') +
-        '<button class="btn btn--gold" data-action="staff-save">Enregistrer</button></footer>'
+        '<button class="btn btn--primary" data-action="staff-save">Enregistrer</button></footer>'
     );
     $('#staffForm').addEventListener('submit', function (e) { e.preventDefault(); actions['staff-save'](); });
   }
@@ -1021,7 +1023,7 @@
     data.inventory.forEach(function (i) { if (cats.indexOf(i.category) === -1) cats.push(i.category); });
     var html = (short.length ? '<div class="avail avail--busy avail--block">' + ICONS.alert + '<div><strong>Stock insuffisant sur ' + plural(Object.keys(short.reduce(function (m, x) { m[x.date] = 1; return m; }, {})).length, 'jour') + ' à venir</strong><ul>' + shortageList(short) + '</ul><span>Prévoyez une location, ou modifiez le matériel réservé dans la fiche des événements.</span></div></div>' : '') +
       '<div class="toolbar"><p class="muted">Ce que vous possédez. « Réservé au maximum » montre le jour à venir le plus chargé.</p>' +
-      '<button class="btn btn--gold btn--sm" data-action="item-new">' + icon('plus') + ' Ajouter un article</button></div>';
+      '<button class="btn btn--primary btn--sm" data-action="item-new">' + icon('plus') + ' Ajouter un article</button></div>';
     if (!data.inventory.length) return html + '<section class="card">' + empty('Aucun article en stock.') + '</section>';
     cats.forEach(function (cat) {
       var list = data.inventory.filter(function (i) { return i.category === cat; });
@@ -1065,7 +1067,7 @@
       '</form>' +
       '<footer class="sheet__foot">' +
         (it ? '<button class="btn btn--text btn--danger" data-action="item-delete" data-id="' + it.id + '">' + icon('trash') + ' Supprimer</button>' : '<span></span>') +
-        '<button class="btn btn--gold" data-action="item-save">Enregistrer</button></footer>'
+        '<button class="btn btn--primary" data-action="item-save">Enregistrer</button></footer>'
     );
     $('#itemForm').addEventListener('submit', function (e) { e.preventDefault(); actions['item-save'](); });
   }
@@ -1214,7 +1216,7 @@
           field('Adresse (pour la carte)', '<input name="address" value="' + esc(s.address) + '">') +
           field('Horaires', '<input name="hours" value="' + esc(s.hours) + '">') +
           field('Phrase d\'accroche', '<input name="tagline" value="' + esc(s.tagline) + '">', 'span-2') +
-          '<div class="span-2 form-actions"><button type="button" class="btn btn--gold btn--sm" data-action="save-settings">Enregistrer les coordonnées</button></div>' +
+          '<div class="span-2 form-actions"><button type="button" class="btn btn--primary btn--sm" data-action="save-settings">Enregistrer les coordonnées</button></div>' +
         '</form></section>' +
 
       '<section class="card"><header class="card__head"><h3>Formules</h3><span class="muted">Laissez le prix vide pour afficher « Prix sur devis »</span></header>' +
@@ -1227,7 +1229,7 @@
             '<label class="switch"><input type="checkbox" data-k="featured"' + (p.featured ? ' checked' : '') + '><span>Mettre en avant</span></label>' +
             '</div>';
         }).join('') + '</div>' +
-        '<div class="form-actions"><button class="btn btn--gold btn--sm" data-action="save-packages">Enregistrer les formules</button></div>' +
+        '<div class="form-actions"><button class="btn btn--primary btn--sm" data-action="save-packages">Enregistrer les formules</button></div>' +
       '</section>' +
 
       '<section class="card"><header class="card__head"><h3>Services</h3></header>' +
@@ -1235,7 +1237,7 @@
           return '<div class="editor" data-svc="' + i + '">' + field('Titre', '<input data-k="title" value="' + esc(sv.title) + '">') +
             field('Description', '<textarea data-k="text" rows="5">' + esc(sv.text) + '</textarea>') + '</div>';
         }).join('') + '</div>' +
-        '<div class="form-actions"><button class="btn btn--gold btn--sm" data-action="save-services">Enregistrer les services</button></div>' +
+        '<div class="form-actions"><button class="btn btn--primary btn--sm" data-action="save-services">Enregistrer les services</button></div>' +
       '</section>' +
 
       '<section class="card"><header class="card__head"><h3>Galerie photos</h3>' +
@@ -1246,7 +1248,7 @@
             '<button class="icon-btn icon-btn--sm gal-item__del" data-action="gallery-remove" data-index="' + i + '" aria-label="Retirer la photo">' + ICONS.close + '</button></div>' +
             '<input data-k="caption" value="' + esc(g.caption) + '" placeholder="Légende"></div>';
         }).join('') + '</div>' +
-        '<div class="form-actions"><button class="btn btn--gold btn--sm" data-action="save-gallery">Enregistrer les légendes</button></div>' +
+        '<div class="form-actions"><button class="btn btn--primary btn--sm" data-action="save-gallery">Enregistrer les légendes</button></div>' +
         '<p class="muted small">Démo : les photos sont gardées dans ce navigateur uniquement. Dans la version finale, elles seront stockées en ligne.</p>' +
       '</section>';
   }
@@ -1517,6 +1519,29 @@
     }
   };
 
+  /* ---------- thème clair / sombre ---------- */
+  function isDark() {
+    var t = document.documentElement.getAttribute('data-theme');
+    if (t) return t === 'dark';
+    return !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  }
+  function renderThemeToggle() {
+    var dark = isDark();
+    $('#themeToggle').innerHTML = icon(dark ? 'sun' : 'moon') + (dark ? 'Mode clair' : 'Mode sombre');
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', dark ? '#12161d' : '#f3f5f8');
+  }
+  actions['toggle-theme'] = function () {
+    var next = isDark() ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    try { localStorage.setItem('torrais_theme', next); } catch (e) { /* ignore */ }
+    renderThemeToggle();
+  };
+  if (window.matchMedia) {
+    var mq = window.matchMedia('(prefers-color-scheme: dark)');
+    if (mq.addEventListener) mq.addEventListener('change', function () { if ($('#themeToggle')) renderThemeToggle(); });
+  }
+
   function findReq(id) { return data.requests.filter(function (r) { return r.id === id; })[0]; }
 
   document.addEventListener('click', function (e) {
@@ -1603,6 +1628,7 @@
       if (!el.querySelector('.ic')) el.insertAdjacentHTML('afterbegin', icon(el.getAttribute('data-icon-before')));
     });
     data = T.store.fresh(); normalize();
+    renderThemeToggle();
     render();
   }
 

@@ -7,8 +7,13 @@
   <meta name="robots" content="noindex, nofollow">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/dashboard.css">
+  <meta name="theme-color" content="#f3f5f8">
+  <script>
+    // Applique le thème choisi avant l'affichage (évite un flash de couleur)
+    try { var t = localStorage.getItem('torrais_theme'); if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t); } catch (e) {}
+  </script>
 </head>
 <body>
 
@@ -23,7 +28,7 @@
         <input type="password" id="loginPass" autocomplete="current-password" placeholder="••••••">
       </label>
       <p class="login__error" id="loginError" hidden>Mot de passe incorrect.</p>
-      <button class="btn btn--gold btn--block" type="submit">Se connecter</button>
+      <button class="btn btn--primary btn--block" type="submit">Se connecter</button>
       <p class="login__hint">Version démo — mot de passe : <strong>demo</strong></p>
       <a class="login__back" href="../">← Retour au site</a>
     </form>
@@ -39,6 +44,7 @@
       <nav class="sidebar__nav" id="sideNav"></nav>
       <div class="sidebar__foot">
         <a href="../" target="_blank" rel="noopener" class="sidebar__link" data-icon-before="external">Voir le site</a>
+        <button type="button" class="sidebar__link theme-toggle" data-action="toggle-theme" id="themeToggle"></button>
         <button type="button" class="sidebar__link" data-action="reset-demo" data-icon-before="reset">Réinitialiser la démo</button>
         <button type="button" class="sidebar__link" data-action="logout" data-icon-before="logout">Déconnexion</button>
       </div>
