@@ -49,6 +49,7 @@
           '<a href="' + HOME + '#formules">Formules</a>' +
           '<a href="' + HOME + '#galerie">Réalisations</a>' +
           reviewsLink +
+          '<a href="composer.html"' + (PAGE === 'composer' ? ' aria-current="page"' : '') + '>Composer</a>' +
           '<a href="' + HOME + '#contact">Contact</a>' +
           '<a href="#devis" class="btn btn--gold btn--sm">Devis gratuit</a>' +
         '</nav>' +
@@ -73,7 +74,7 @@
           '</div></div>' +
         '<div><h3>Nos univers</h3><ul>' + data.occasions.map(function (o) { return '<li><a href="' + occUrl(o) + '">' + esc(o.title) + '</a></li>'; }).join('') + '</ul></div>' +
         '<div><h3>Le site</h3><ul>' +
-          '<li><a href="' + HOME + '#formules">Formules</a></li><li><a href="' + HOME + '#galerie">Réalisations</a></li>' +
+          '<li><a href="composer.html">Composez votre mariage</a></li><li><a href="' + HOME + '#formules">Formules</a></li><li><a href="' + HOME + '#galerie">Réalisations</a></li>' +
           '<li><a href="' + HOME + '#faq">Questions fréquentes</a></li><li><a href="#devis">Devis gratuit</a></li></ul></div>' +
         '<div><h3>Contact</h3><ul class="footer__contact">' +
           '<li><a href="#" data-bind-tel="phone" data-bind="phoneDisplay"></a></li>' +
@@ -189,6 +190,7 @@
           return '<li><span class="icon">' + T.icons.check + '</span><span>' + esc(f) + '</span></li>';
         }).join('') + '</ul>' +
         '<a href="#devis" class="btn ' + (p.featured ? 'btn--gold' : 'btn--outline') + ' btn--block" data-package="' + esc(p.name) + '">Demander un devis</a>' +
+        (data.pricing && data.pricing.packages[p.id] ? '<a class="package__compose" href="composer.html?formule=' + encodeURIComponent(p.id) + '">Composer avec cette formule →</a>' : '') +
         '</article>';
     }).join('');
   }

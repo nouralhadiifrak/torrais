@@ -150,6 +150,31 @@
     };
   }
 
+  /* ---------- prix du simulateur « Composez votre mariage » (prix de démonstration) ---------- */
+  // unit : 'pers' (par invité), 'table' (par table de 10), 'forfait' (une fois), 'unite' (au nombre choisi)
+  function defaultPricing() {
+    return {
+      packages: {
+        essentielle: { min: 180, max: 250, includes: [] },
+        prestige: { min: 280, max: 380, includes: ['mechoui', 'desserts', 'deco_tables'] },
+        royale: { min: 420, max: 600, includes: ['cocktail', 'mechoui', 'desserts', 'gateau', 'deco_tables', 'deco_salle', 'kousha', 'maitre'] },
+        surmesure: { min: 120, max: 180, includes: [] }
+      },
+      options: [
+        { id: 'cocktail', group: 'Menu', name: "Cocktail d'accueil", text: 'Jus frais, briouates, mini pastillas', unit: 'pers', min: 40, max: 60 },
+        { id: 'mechoui', group: 'Menu', name: 'Méchoui', text: 'Agneau rôti lentement', unit: 'pers', min: 60, max: 90 },
+        { id: 'pastilla_mer', group: 'Menu', name: 'Pastilla aux fruits de mer', text: 'En entrée, à la place de la pastilla au poulet', unit: 'pers', min: 35, max: 50 },
+        { id: 'desserts', group: 'Menu', name: 'Buffet de desserts', text: 'Pâtisseries marocaines et gâteaux', unit: 'pers', min: 30, max: 45 },
+        { id: 'gateau', group: 'Menu', name: 'Gâteau des mariés', text: 'Pièce montée personnalisée', unit: 'forfait', min: 1500, max: 3000 },
+        { id: 'deco_tables', group: 'Décoration', name: 'Décoration des tables', text: 'Centres de table, fleurs, nappage', unit: 'table', min: 150, max: 250 },
+        { id: 'kousha', group: 'Décoration', name: 'Kousha de la mariée', text: 'Trône et décor de la scène', unit: 'forfait', min: 3000, max: 6000 },
+        { id: 'deco_salle', group: 'Décoration', name: 'Décoration complète de la salle', text: 'Entrée, lumières, fleurs, scène', unit: 'forfait', min: 8000, max: 15000 },
+        { id: 'tyafer', group: 'Décoration', name: 'Tyafer décorés', text: 'Pour la henné, les fiançailles ou la dote', unit: 'unite', min: 250, max: 400 },
+        { id: 'maitre', group: 'Service', name: "Maître d'hôtel dédié", text: 'Coordonne le service toute la soirée', unit: 'forfait', min: 800, max: 1200 }
+      ]
+    };
+  }
+
   /* ---------- contenu par défaut du site ---------- */
   function defaultContent() {
     return {
@@ -380,6 +405,7 @@
       dishes: defaultDishes(),
       site: defaultSite(),
       occasions: defaultOccasions(),
+      pricing: defaultPricing(),
       requests: requests,
       events: events,
       staff: staff,
@@ -400,6 +426,7 @@
     if (!d.site) d.site = defaultSite();
     ['stats', 'zones', 'dishes', 'faq', 'reviews'].forEach(function (k) { if (!d.site[k]) d.site[k] = defaultSite()[k]; });
     if (!d.occasions) d.occasions = defaultOccasions();
+    if (!d.pricing) d.pricing = defaultPricing();
     (d.gallery || []).forEach(function (g) { if (!g.category) g.category = GALLERY_GUESS[g.caption] || 'Mariages'; });
     return d;
   }

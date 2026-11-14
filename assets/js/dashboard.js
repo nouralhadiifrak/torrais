@@ -365,6 +365,9 @@
           info('Services', (r.services || []).join(', ') || '—') +
         '</dl>' +
         (r.message ? '<div class="quote">« ' + esc(r.message) + ' »</div>' : '') +
+        (r.composition && r.composition.length ? '<h4 class="sub">Composition (simulateur du site)</h4><div class="compo">' + r.composition.map(function (l) {
+          return '<div class="compo__line' + (l.included ? ' is-inc' : '') + '"><span>' + esc(l.label) + (l.detail ? ' <small>' + esc(l.detail) + '</small>' : '') + '</span><b>' + (l.included ? 'Inclus' : U.formatDH(l.min) + ' – ' + U.formatDH(l.max)) + '</b></div>';
+        }).join('') + (r.estimate ? '<div class="compo__total"><span>Estimation montrée au client</span><b>' + U.formatDH(r.estimate.min) + ' – ' + U.formatDH(r.estimate.max) + '</b></div>' : '') + '</div>' : '') +
         '<h4 class="sub">Disponibilité de la date</h4>' + availability(r.date, null, r.id) +
         '<h4 class="sub">Suivi</h4>' +
         '<label class="field"><span>Statut</span><select id="reqStatus" data-id="' + r.id + '">' +
@@ -1246,7 +1249,7 @@
     var s = data.settings;
     var hero = data.media.hero;
     var jumps = [['c-photos', 'Photos'], ['c-coords', 'Coordonnées'], ['c-univers', 'Pages univers'], ['c-formules', 'Formules'], ['c-services', 'Services'],
-      ['c-plats', 'Plats signature'], ['c-chiffres', 'Chiffres'], ['c-avis', 'Avis'], ['c-faq', 'FAQ'], ['c-zones', 'Zones'], ['c-galerie', 'Galerie']];
+      ['c-simulateur', 'Simulateur'], ['c-plats', 'Plats signature'], ['c-chiffres', 'Chiffres'], ['c-avis', 'Avis'], ['c-faq', 'FAQ'], ['c-zones', 'Zones'], ['c-galerie', 'Galerie']];
     return '<p class="note">Les modifications sont visibles tout de suite sur le site. <a href="../" target="_blank" rel="noopener">Ouvrir le site ↗</a></p>' +
       '<nav class="jumps" aria-label="Aller à une section">' + jumps.map(function (j) { return '<a class="chip" href="#' + j[0] + '">' + j[1] + '</a>'; }).join('') + '</nav>' +
 
@@ -1309,7 +1312,7 @@
         '<div class="form-actions"><button class="btn btn--primary btn--sm" data-action="save-services">Enregistrer les services</button></div>' +
       '</section>' +
 
-      siteDishesEditor() + statsEditor() + reviewsEditor() + faqEditor() + zonesEditor() +
+      pricingEditor() + siteDishesEditor() + statsEditor() + reviewsEditor() + faqEditor() + zonesEditor() +
 
       '<section class="card" id="c-galerie"><header class="card__head"><h3>Galerie photos</h3>' +
         '<label class="btn btn--light btn--sm">' + icon('plus') + ' Ajouter des photos<input type="file" id="galleryUpload" accept="image/*" multiple hidden></label></header>' +
@@ -1346,6 +1349,37 @@
       }).join('') + '</div>' +
       '<div class="form-actions"><button class="btn btn--primary btn--sm" data-action="save-occasions">Enregistrer les pages</button></div></section>';
   }
+  function pricingEditor() {
+    var P = data.pricing;
+    var UNITS = [['pers', 'par invité'], ['table', 'par table de 10'], ['forfait', 'forfait'], ['unite', "à l'unité"]];
+    var pk = data.packages.map(function (p) { return { id: p.id, name: p.name }; }).concat([{ id: 'surmesure', name: 'Sur mesure' }])
+      .filter(function (p) { return P.packages[p.id]; });
+    return '<section class="card" id="c-simulateur"><header class="card__head"><h3>Simulateur « Composez votre mariage »</h3>' +
+      '<a class="link small" href="../composer.html" target="_blank" rel="noopener">Ouvrir le simulateur ↗</a></header>' +
+      '<p class="hint">Les prix servent uniquement à l\'estimation montrée au client. Prix de démonstration : à remplacer par vos vrais prix.</p>' +
+      '<h4 class="sub">Prix par invité de chaque formule</h4>' +
+      '<div class="price-grid">' + pk.map(function (p) {
+        var x = P.packages[p.id];
+        return '<div class="price-row" data-ppk="' + esc(p.id) + '"><strong>' + esc(p.name) + '</strong>' +
+          '<label>de <input type="number" min="0" step="10" data-k="min" value="' + x.min + '"></label>' +
+          '<label>à <input type="number" min="0" step="10" data-k="max" value="' + x.max + '"> DH</label>' +
+          '<div class="price-inc">' + P.options.map(function (o) {
+            return '<label class="pick__opt"><input type="checkbox" data-inc="' + esc(o.id) + '"' + (x.includes.indexOf(o.id) !== -1 ? ' checked' : '') + '><span>' + esc(o.name) + '</span></label>';
+          }).join('') + '</div></div>';
+      }).join('') + '</div>' +
+      '<p class="hint">Les options cochées sont comprises dans la formule (le client les voit « incluses »).</p>' +
+      '<h4 class="sub">Options</h4>' +
+      '<div class="price-opts">' + P.options.map(function (o) {
+        return '<div class="price-opt" data-popt="' + esc(o.id) + '">' +
+          '<label class="switch"><input type="checkbox" data-k="active"' + (o.active !== false ? ' checked' : '') + '><span></span></label>' +
+          '<input data-k="name" value="' + esc(o.name) + '" aria-label="Nom de l\'option">' +
+          '<select data-k="unit" aria-label="Unité">' + UNITS.map(function (u) { return '<option value="' + u[0] + '"' + (o.unit === u[0] ? ' selected' : '') + '>' + u[1] + '</option>'; }).join('') + '</select>' +
+          '<label>de <input type="number" min="0" step="10" data-k="min" value="' + o.min + '"></label>' +
+          '<label>à <input type="number" min="0" step="10" data-k="max" value="' + o.max + '"> DH</label></div>';
+      }).join('') + '</div>' +
+      '<div class="form-actions"><button class="btn btn--primary btn--sm" data-action="save-pricing">Enregistrer les prix</button></div></section>';
+  }
+
   function siteDishesEditor() {
     var list = data.site.dishes;
     return '<section class="card" id="c-plats"><header class="card__head"><h3>Plats signature</h3>' + addBtn('dishes', 'Ajouter un plat') + '</header>' +
@@ -1725,6 +1759,24 @@
         o.includes = $('[data-k="includes"]', box).value.split('\n').map(function (x) { return x.trim(); }).filter(Boolean);
       });
       commit('Pages enregistrées.');
+    },
+    'save-pricing': function () {
+      var P = data.pricing;
+      $$('[data-ppk]').forEach(function (row) {
+        var x = P.packages[row.dataset.ppk];
+        x.min = +$('[data-k="min"]', row).value || 0;
+        x.max = Math.max(x.min, +$('[data-k="max"]', row).value || 0);
+        x.includes = $$('[data-inc]', row).filter(function (c) { return c.checked; }).map(function (c) { return c.dataset.inc; });
+      });
+      $$('[data-popt]').forEach(function (row) {
+        var o = P.options.filter(function (x) { return x.id === row.dataset.popt; })[0];
+        o.active = $('[data-k="active"]', row).checked;
+        o.name = $('[data-k="name"]', row).value.trim() || o.name;
+        o.unit = $('[data-k="unit"]', row).value;
+        o.min = +$('[data-k="min"]', row).value || 0;
+        o.max = Math.max(o.min, +$('[data-k="max"]', row).value || 0);
+      });
+      commit('Prix du simulateur enregistrés.');
     },
     'save-sdishes': function () { syncList('dishes'); commit('Plats signature enregistrés.'); },
     'save-reviews': function () { syncList('reviews'); data.site.reviews = data.site.reviews.filter(function (r) { return r.text || r.name; }); commit('Avis enregistrés.'); },
