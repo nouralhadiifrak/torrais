@@ -674,3 +674,9 @@ body.sheet-open { overflow: hidden; }
   .price-opt { grid-template-columns: auto minmax(0, 1fr); }
   .price-opt select, .price-opt label:not(.switch) { grid-column: span 1; }
 }
+
+/* ---------- emblème TORRAIS EVENT ---------- */
+.sidebar__mark, .login__mark { background: #16130f; border-color: #16130f; overflow: hidden; }
+.sidebar__mark img { width: 32px; height: auto; display: block; }
+.login__mark { width: 76px; height: 76px; }
+.login__mark img { width: 58px; height: auto; display: block; }

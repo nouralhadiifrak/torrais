@@ -57,6 +57,19 @@
     }
   });
   // Les photos de la galerie sont redessinées quand on change de filtre : elles doivent rester visibles
+  // Filet de sécurité : après un saut (touche Fin, lien, retour arrière…), tout ce qui est à l'écran apparaît
+  function revealVisible() {
+    var vh = window.innerHeight;
+    var late = items.filter(function (el) {
+      if (+getComputedStyle(el).opacity > 0.5) return false;
+      var r = el.getBoundingClientRect();
+      return r.top < vh && r.bottom > 0;
+    });
+    if (late.length) gsap.to(late, { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out', stagger: 0.04, overwrite: true, clearProps: 'transform' });
+  }
+  ScrollTrigger.addEventListener('scrollEnd', revealVisible);
+  window.addEventListener('load', function () { setTimeout(revealVisible, 300); });
+
   // Un élément qui reçoit le focus (clavier) apparaît tout de suite
   document.addEventListener('focusin', function (e) {
     var it = items.filter(function (el) { return el.contains(e.target); })[0];

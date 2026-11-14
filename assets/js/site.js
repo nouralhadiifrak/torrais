@@ -23,15 +23,15 @@
 
   /* ---------- en-tête et pied de page (communs aux pages) ---------- */
   function renderChrome() {
-    var logo = data.media && data.media.logo
-      ? '<img class="brand__logo" src="' + esc(data.media.logo) + '" alt="TORRAIS EVENT">'
-      : '<span class="brand__mark">T</span>';
+    // Logo : celui envoyé par le gérant, sinon l'emblème doré de TORRAIS EVENT
+    var logo = '<img class="brand__logo" src="' + esc(data.media && data.media.logo ? data.media.logo : 'assets/img/brand/logo-mark.webp') + '" alt="" width="320" height="297">';
     var occLinks = data.occasions.map(function (o) {
       return '<a href="' + occUrl(o) + '"' + (occasion && occasion.id === o.id ? ' aria-current="page"' : '') + '>' + esc(o.title) + '</a>';
     }).join('');
     var reviewsLink = (data.site.reviews || []).length ? '<a href="' + HOME + '#avis">Avis</a>' : '';
 
     $('#siteHeader').innerHTML =
+      '<a class="skip-link" href="#contenu">Aller au contenu</a>' +
       '<div class="topbar"><div class="container topbar__inner">' +
         '<span class="topbar__item"><span class="icon" data-icon="clock"></span><span data-bind="hours"></span></span>' +
         '<span class="topbar__item topbar__item--city"><span class="icon" data-icon="pin"></span>Traiteur à <span data-bind="city"></span></span>' +
@@ -41,7 +41,7 @@
         '</span>' +
       '</div></div>' +
       '<header class="header"><div class="container header__inner">' +
-        '<a href="' + (HOME || '#top') + '" class="brand" aria-label="TORRAIS EVENT — accueil">' + logo + '<span class="brand__text">TORRAIS <em>EVENT</em></span></a>' +
+        '<a href="' + (HOME || '#top') + '" class="brand" aria-label="TORRAIS EVENT — accueil">' + logo + '<span class="brand__text" aria-hidden="true">TORRAIS <em>EVENT</em></span></a>' +
         '<nav class="nav" id="nav" aria-label="Navigation principale">' +
           '<div class="nav__drop"><button type="button" class="nav__droptoggle" aria-expanded="false">Nos univers <span aria-hidden="true">▾</span></button>' +
             '<div class="nav__menu">' + occLinks + '</div></div>' +
@@ -65,7 +65,7 @@
         '</div>' +
       '</div></section>' +
       '<footer class="footer"><div class="container footer__grid">' +
-        '<div class="footer__brand"><span class="brand__text brand__text--light">TORRAIS <em>EVENT</em></span>' +
+        '<div class="footer__brand"><img class="footer__logo" src="assets/img/brand/logo.webp" width="900" height="614" alt="TORRAIS EVENT" loading="lazy">' +
           '<p>Traiteur de mariages et d\'événements à <span data-bind="city"></span>. Traiteur · Tyafer · Buffet · Décoration.</p>' +
           '<div class="footer__links">' +
             '<a href="#" data-bind-href="instagram" target="_blank" rel="noopener" aria-label="Instagram"><span class="icon" data-icon="instagram"></span></a>' +
@@ -83,6 +83,13 @@
       '</div>' +
       '<div class="container footer__bottom"><span>© <span id="year"></span> TORRAIS EVENT. Tous droits réservés.</span>' +
         '<a href="dashboard/" class="footer__admin">Espace gérant</a></div></footer>' +
+      // Barre d'actions sur téléphone : les trois gestes utiles, avec leurs libellés
+      (PAGE === 'composer' ? '' :
+        '<nav class="mbar" aria-label="Actions rapides">' +
+          '<a class="mbar__btn mbar__btn--main" href="' + (PAGE === 'home' || PAGE === 'occasion' ? '#devis' : HOME + '#devis') + '">Devis gratuit</a>' +
+          '<a class="mbar__btn" href="#" data-wa-link><span class="icon" data-icon="whatsapp"></span>WhatsApp</a>' +
+          '<a class="mbar__btn" href="#" data-bind-tel="phone"><span class="icon" data-icon="phone"></span>Appeler</a>' +
+        '</nav>') +
       '<div class="floating">' +
         '<a href="#" class="floating__btn floating__btn--call" data-bind-tel="phone" aria-label="Appeler"><span class="icon" data-icon="phone"></span></a>' +
         '<a href="#" class="floating__btn floating__btn--wa" data-wa-link aria-label="WhatsApp"><span class="icon" data-icon="whatsapp"></span></a>' +
@@ -443,7 +450,7 @@
           '<label class="field"><span>Date de l\'événement *</span><input type="date" name="date" required min="' + U.iso(new Date()) + '"></label>' +
         '</div>' +
         '<div class="form__row">' +
-          '<label class="field"><span>Nombre d\'invités *</span><input type="number" name="guests" required min="10" max="2000" step="10" placeholder="Ex. 200"></label>' +
+          '<label class="field"><span>Nombre d\'invités *</span><input type="number" name="guests" inputmode="numeric" required min="10" max="2000" step="10" placeholder="Ex. 200"></label>' +
           '<label class="field"><span>Budget approximatif</span><select name="budget"><option value="">Je ne sais pas encore</option>' +
             '<option>Moins de 20 000 DH</option><option>20 000 – 50 000 DH</option><option>50 000 – 80 000 DH</option><option>80 000 – 120 000 DH</option><option>Plus de 120 000 DH</option></select></label>' +
         '</div>' +

@@ -8,6 +8,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/img/brand/favicon-32.png">
+  <link rel="apple-touch-icon" href="assets/img/brand/apple-touch-icon.png">
+  <meta name="theme-color" content="#16130f">
   <link rel="stylesheet" href="assets/vendor/lenis.css">
   <link rel="stylesheet" href="assets/css/site.css">
 </head>
@@ -15,7 +18,7 @@
 
   <div id="siteHeader"></div>
 
-  <main>
+  <main id="contenu">
     <!-- HÉROS -->
     <section class="hero" id="top">
       <div class="hero__pattern" aria-hidden="true"></div>
@@ -23,8 +26,7 @@
       <div class="hero__dots" id="heroDots"></div>
       <div class="container hero__inner">
         <p class="eyebrow">Traiteur · Tyafer · Buffet · Décoration</p>
-        <h1 class="hero__title">TORRAIS <span>EVENT</span></h1>
-        <div class="ornament" aria-hidden="true"><span></span>✦<span></span></div>
+        <h1 class="hero__title hero__title--logo"><img src="assets/img/brand/logo.webp" width="900" height="614" alt="TORRAIS EVENT"></h1>
         <p class="hero__lead">Traiteur de mariages et d'événements à <strong data-bind="city">Casablanca</strong>.
           <span data-bind="tagline">Réservez la formule mariage à votre service, selon votre choix.</span></p>
         <div class="hero__actions">
@@ -39,6 +41,27 @@
       </div>
       <a href="#maison" class="hero__scroll" aria-label="Défiler vers la suite"><span></span></a>
     </section>
+
+    <!-- RACCOURCIS : les 3 actions principales, tout de suite visibles -->
+    <nav class="quick" aria-label="Accès rapides">
+      <div class="container quick__grid">
+        <a class="quick__card quick__card--main" href="composer.html">
+          <span class="quick__icon" data-icon="deco"></span>
+          <span class="quick__text"><strong>Composer mon mariage</strong><span>Estimation immédiate en 1 minute</span></span>
+          <span class="quick__arrow" aria-hidden="true">→</span>
+        </a>
+        <a class="quick__card" href="#formules">
+          <span class="quick__icon" data-icon="traiteur"></span>
+          <span class="quick__text"><strong>Voir les formules</strong><span>Essentielle, Prestige, Royale</span></span>
+          <span class="quick__arrow" aria-hidden="true">→</span>
+        </a>
+        <a class="quick__card" href="#" data-wa-link data-wa-text="Bonjour TORRAIS EVENT, je voudrais des informations pour un événement.">
+          <span class="quick__icon" data-icon="whatsapp"></span>
+          <span class="quick__text"><strong>Écrire à Saïd</strong><span>Réponse rapide sur WhatsApp</span></span>
+          <span class="quick__arrow" aria-hidden="true">→</span>
+        </a>
+      </div>
+    </nav>
 
     <!-- MAISON -->
     <section class="section about" id="maison">
