@@ -32,6 +32,8 @@
     reqSource: '',
     evFilter: 'avenir',
     clientSearch: '',
+    teamRole: '',
+    teamSearch: '',
     finYear: NOW.getFullYear()
   };
 
@@ -79,6 +81,8 @@
 
   function $(sel, root) { return (root || document).querySelector(sel); }
   function $$(sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
+  ICONS.print = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M6 14h12v7H6z"/></svg>';
+  ICONS.doc = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h6"/></svg>';
   function icon(name, cls) { return '<span class="ic' + (cls ? ' ' + cls : '') + '">' + (ICONS[name] || '') + '</span>'; }
   function sum(arr, fn) { return arr.reduce(function (s, x) { return s + (+fn(x) || 0); }, 0); }
   function byDate(a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : 0; }
@@ -173,6 +177,7 @@
     $('#view').innerHTML = views[state.view]();
     if (state.view === 'requests') renderRequestList();
     if (state.view === 'clients') renderClientList();
+    if (state.view === 'team') renderTeamList();
   }
 
   function go(view) {
@@ -556,23 +561,29 @@
   }
 
   function calList() {
-    var y = state.calYear;
-    var list = activeEvents().filter(function (e) { return +e.date.slice(0, 4) === y; }).sort(byDate);
-    if (!list.length) return '<section class="card">' + empty('Aucun événement en ' + y + '.') + '</section>';
-    var html = '';
-    var current = -1;
-    list.forEach(function (e) {
-      var m = +e.date.slice(5, 7) - 1;
-      if (m !== current) {
-        if (current !== -1) html += '</ul></section>';
-        var monthList = list.filter(function (x) { return +x.date.slice(5, 7) - 1 === m; });
-        html += '<section class="card"><header class="card__head"><h3>' + MONTHS[m] + ' ' + y + '</h3><span class="muted">' +
-          plural(monthList.length, 'événement') + ' · ' + U.formatDH(sum(monthList, function (x) { return x.total; })) + '</span></header><ul class="rows">';
-        current = m;
-      }
-      html += eventRow(e);
-    });
-    return html + '</ul></section>';
+    var all = activeEvents();
+    if (!all.length) return '<section class="card">' + empty('Aucun événement.') + '</section>';
+    var upcoming = all.filter(function (e) { return e.date >= TODAY; }).sort(byDate);
+    var past = all.filter(function (e) { return e.date < TODAY; }).sort(function (a, b) { return byDate(b, a); });
+    function groups(list) {
+      var html = '';
+      var cur = '';
+      list.forEach(function (e) {
+        var ym = e.date.slice(0, 7);
+        if (ym !== cur) {
+          if (cur) html += '</ul></section>';
+          var monthList = list.filter(function (x) { return x.date.slice(0, 7) === ym; });
+          html += '<section class="card"><header class="card__head"><h3>' + MONTHS[+ym.slice(5, 7) - 1] + ' ' + ym.slice(0, 4) + '</h3><span class="muted">' +
+            plural(monthList.length, 'événement') + ' · ' + U.formatDH(sum(monthList, function (x) { return x.total; })) + '</span></header><ul class="rows">';
+          cur = ym;
+        }
+        html += eventRow(e);
+      });
+      return html + (cur ? '</ul></section>' : '');
+    }
+    return '<h3 class="list-title">À venir <span class="muted">· le plus proche en premier · ' + plural(upcoming.length, 'événement') + '</span></h3>' +
+      (upcoming.length ? groups(upcoming) : '<section class="card">' + empty('Aucun événement à venir.') + '</section>') +
+      (past.length ? '<details class="past-list"><summary>Événements passés (' + past.length + ') · le plus récent en premier</summary>' + groups(past) + '</details>' : '');
   }
 
   function openDay(date) {
@@ -678,7 +689,7 @@
 
   var draft = null;
   var evTab = 'details';
-  var EV_TABS = [['details', 'Détails'], ['menu', 'Menu'], ['team', 'Équipe'], ['equip', 'Matériel'], ['costs', 'Dépenses'], ['pay', 'Paiements']];
+  var EV_TABS = [['details', 'Détails'], ['menu', 'Menu'], ['team', 'Équipe'], ['equip', 'Matériel'], ['costs', 'Dépenses'], ['pay', 'Paiements'], ['quote', 'Devis']];
 
   function openEventForm(id, prefill, tab) {
     var existing = id && data.events.filter(function (e) { return e.id === id; })[0];
@@ -689,6 +700,12 @@
     ['payments', 'team', 'equipment', 'expenses'].forEach(function (k) { if (!draft[k]) draft[k] = []; });
     ['arrival', 'service', 'menu', 'menuNotes'].forEach(function (k) { if (draft[k] == null) draft[k] = ''; });
     draft.menuList = String(draft.menu || '').split('\n').map(function (x) { return x.trim(); }).filter(Boolean);
+    draft.menuDetails = {};
+    (draft.menuItems || []).forEach(function (m) {
+      if (!m || !m.name) return;
+      if (draft.menuList.map(dishKey).indexOf(dishKey(m.name)) === -1) draft.menuList.push(m.name);
+      draft.menuDetails[dishKey(m.name)] = { qty: m.qty || '', kg: m.kg || '', model: m.model || '', shape: m.shape || '' };
+    });
     evTab = tab || 'details';
     var pkgOptions = data.packages.map(function (p) { return p.name; }).concat(['Buffet cocktail', 'Tyafer + décoration', 'Sur mesure']);
     if (draft.package && pkgOptions.indexOf(draft.package) === -1) pkgOptions.push(draft.package);
@@ -726,6 +743,7 @@
         '<div class="tabpanel" data-panel="equip" id="equipBox"></div>' +
         '<div class="tabpanel" data-panel="costs" id="costsBox"></div>' +
         '<div class="tabpanel" data-panel="pay" id="paymentsBox"></div>' +
+        '<div class="tabpanel" data-panel="quote" id="quoteBox"></div>' +
       '</form>' +
       '<div class="profit-bar" id="profitBar"></div>' +
       '<footer class="sheet__foot">' +
@@ -743,6 +761,7 @@
     renderEquip();
     renderCosts();
     renderPayments();
+    renderQuote();
     showEvTab(evTab);
   }
 
@@ -756,7 +775,7 @@
 
   function showEvTab(tab) {
     evTab = tab;
-    var counts = { menu: draft.menuList.length, team: draft.team.length, equip: draft.equipment.length, costs: draft.expenses.length, pay: draft.payments.length };
+    var counts = { menu: draft.menuList.length, team: draft.team.length, equip: draft.equipment.length, costs: draft.expenses.length, pay: draft.payments.length, quote: draft.quote ? draft.quote.lines.length : 0 };
     $('#evTabs').innerHTML = EV_TABS.map(function (t) {
       return '<button type="button" class="tabs__btn' + (t[0] === tab ? ' is-active' : '') + '" data-action="ev-tab" data-tab="' + t[0] + '">' + t[1] +
         (counts[t[0]] ? '<b>' + counts[t[0]] + '</b>' : '') + '</button>';
@@ -815,14 +834,43 @@
     $('#menuBox').innerHTML = html;
     renderMenuChosen();
   }
+  var DISH_MODELS = ['Grand plateau', 'Plateau moyen', 'Plat individuel', 'Buffet', 'Verrine', 'Pièce montée', 'Tajine en terre', 'Panier', 'Corbeille'];
+  var DISH_SHAPES = ['Ronde', 'Carrée', 'Rectangulaire', 'Ovale', 'Cœur', 'Individuelle', 'Étagée'];
+  function dishDetail(name) {
+    var k = dishKey(name);
+    if (!draft.menuDetails[k]) draft.menuDetails[k] = { qty: '', kg: '', model: '', shape: '' };
+    return draft.menuDetails[k];
+  }
+  function dishSummary(m) {
+    var parts = [];
+    if (m.qty) parts.push(m.qty + ' pièce' + (+m.qty > 1 ? 's' : ''));
+    if (m.kg) parts.push(String(m.kg).replace('.', ',') + ' kg');
+    if (m.model) parts.push(m.model);
+    if (m.shape) parts.push('forme ' + m.shape.toLowerCase());
+    return parts.join(' · ');
+  }
+  function menuItemsOf(d) {
+    return d.menuList.map(function (n) { var x = dishDetail(n); return { name: n, qty: x.qty, kg: x.kg, model: x.model, shape: x.shape }; });
+  }
   function renderMenuChosen() {
     var box = $('#menuChosen');
     if (!box) return;
     box.innerHTML = '<h4 class="sub">Menu choisi (' + draft.menuList.length + ')</h4>' +
-      (draft.menuList.length ? '<ol class="menu-list">' + draft.menuList.map(function (n, i) {
-        return '<li><span>' + esc(n) + '</span><span class="menu-list__tools">' +
+      (draft.menuList.length ? '<p class="hint">Pour chaque plat : le nombre, les kilos, le modèle de présentation et la forme. Tout est facultatif.</p>' +
+      '<datalist id="dishModels">' + DISH_MODELS.map(function (m) { return '<option value="' + esc(m) + '">'; }).join('') + '</datalist>' +
+      '<datalist id="dishShapes">' + DISH_SHAPES.map(function (m) { return '<option value="' + esc(m) + '">'; }).join('') + '</datalist>' +
+      '<ol class="menu-list menu-list--detail">' + draft.menuList.map(function (n, i) {
+        var x = dishDetail(n);
+        var k = esc(dishKey(n));
+        return '<li><div class="menu-list__row"><span class="menu-list__name">' + esc(n) + '</span><span class="menu-list__tools">' +
           '<button type="button" class="icon-btn icon-btn--sm menu-list__up" data-action="ev-dish-up" data-index="' + i + '" aria-label="Monter"' + (i ? '' : ' disabled') + '>' + ICONS.chevL + '</button>' +
-          '<button type="button" class="icon-btn icon-btn--sm" data-action="ev-dish-remove" data-index="' + i + '" aria-label="Retirer ' + esc(n) + '">' + ICONS.close + '</button></span></li>';
+          '<button type="button" class="icon-btn icon-btn--sm" data-action="ev-dish-remove" data-index="' + i + '" aria-label="Retirer ' + esc(n) + '">' + ICONS.close + '</button></span></div>' +
+          '<div class="dish-spec">' +
+            '<label><span>Nombre</span><input type="number" min="0" inputmode="numeric" placeholder="—" value="' + esc(x.qty) + '" data-dish-key="' + k + '" data-dish-field="qty"></label>' +
+            '<label><span>Kilos</span><input type="number" min="0" step="0.5" inputmode="decimal" placeholder="—" value="' + esc(x.kg) + '" data-dish-key="' + k + '" data-dish-field="kg"></label>' +
+            '<label><span>Modèle</span><input list="dishModels" placeholder="Ex. Grand plateau" value="' + esc(x.model) + '" data-dish-key="' + k + '" data-dish-field="model"></label>' +
+            '<label><span>Forme</span><input list="dishShapes" placeholder="Ex. Ronde" value="' + esc(x.shape) + '" data-dish-key="' + k + '" data-dish-field="shape"></label>' +
+          '</div></li>';
       }).join('') + '</ol>' : '<p class="empty empty--sm">Cochez les plats ci-dessus.</p>');
     var tab = $('#evTabs [data-tab="menu"]');
     if (tab) tab.innerHTML = 'Menu' + (draft.menuList.length ? '<b>' + draft.menuList.length + '</b>' : '');
@@ -888,6 +936,13 @@
         '<input type="number" id="equipQty" min="1" placeholder="Qté" aria-label="Quantité">' +
         '<button type="button" class="btn btn--light btn--sm" data-action="ev-add-equip">' + icon('plus') + ' Ajouter</button>' : '') +
       '</div>' +
+      '<details class="new-item"' + (free.length ? '' : ' open') + '><summary>' + icon('plus') + ' Article qui n\'est pas dans la liste</summary>' +
+        '<div class="add-row add-row--newitem">' +
+          '<input id="newEqName" placeholder="Nom (ex. Lustres en cristal)" aria-label="Nom du nouvel article">' +
+          '<select id="newEqCat" aria-label="Catégorie">' + T.INV_CATEGORIES.map(function (c) { return '<option>' + esc(c) + '</option>'; }).join('') + '</select>' +
+          '<input type="number" id="newEqQty" min="1" placeholder="Qté" aria-label="Quantité pour cet événement">' +
+          '<button type="button" class="btn btn--light btn--sm" data-action="ev-new-equip">' + icon('plus') + ' Créer et ajouter</button>' +
+        '</div><p class="hint">L\'article est aussi ajouté à votre stock (page Matériel), avec cette quantité.</p></details>' +
       '<button type="button" class="btn btn--light btn--sm" data-action="ev-suggest-equip">Proposer selon le nombre d\'invités</button>';
     $('#equipBox').innerHTML = html;
   }
@@ -934,6 +989,276 @@
       '</div>';
   }
 
+  /* ----- onglet Devis ----- */
+  var UNITS = ['pers', 'table', 'unité', 'forfait', 'kg', 'jour'];
+  var DEFAULT_TERMS = [
+    'Le nombre définitif d\'invités est confirmé au plus tard 10 jours avant l\'événement. Toute personne en plus est facturée au prix par personne du devis.',
+    'L\'acompte versé à la signature confirme la réservation de la date. Il n\'est pas remboursable en cas d\'annulation à moins de 30 jours de l\'événement.',
+    'Le solde est réglé au plus tard le jour de l\'événement, avant le début du service.',
+    'Le matériel prêté (vaisselle, nappage, mobilier) reste la propriété du traiteur. Toute pièce cassée ou manquante est facturée.',
+    'L\'accès à la salle, l\'eau et l\'électricité sur place sont à la charge du client.'
+  ].join('\n');
+  function quoteNumber() {
+    data.quoteSeq = (data.quoteSeq || 0) + 1;
+    return 'D-' + NOW.getFullYear() + '-' + String(data.quoteSeq).padStart(3, '0');
+  }
+  function freshQuote() {
+    var g = draftGuests();
+    var t = draftTotal();
+    var f = $('#eventForm');
+    var pkg = f ? f.elements.package.value : draft.package;
+    var type = f ? f.elements.eventType.value : draft.eventType;
+    var lines = [];
+    if (t || g) {
+      lines.push({ label: pkg ? 'Formule ' + pkg : 'Prestation traiteur — ' + type, detail: 'Repas complet, service à table, vaisselle et nappage', qty: g || 1, unit: g ? 'pers' : 'forfait', price: g && t ? Math.round(t / g) : t });
+    } else {
+      lines.push({ label: 'Prestation traiteur — ' + type, detail: 'Repas complet, service à table, vaisselle et nappage', qty: 1, unit: 'pers', price: 0 });
+    }
+    return { number: quoteNumber(), date: TODAY, validity: 30, lines: lines, discount: 0, vat: 0, deposit: 30, clientAddress: '', clientId: '', showMenu: true, showEquip: true, terms: DEFAULT_TERMS };
+  }
+  function quoteTotals(q) {
+    var sub = sum(q.lines, function (l) { return (+l.qty || 0) * (+l.price || 0); });
+    var ht = Math.max(0, sub - (+q.discount || 0));
+    var vat = Math.round(ht * (+q.vat || 0) / 100);
+    var ttc = ht + vat;
+    return { sub: sub, ht: ht, vat: vat, ttc: ttc, deposit: Math.round(ttc * (+q.deposit || 0) / 100) };
+  }
+  function renderQuote() {
+    var box = $('#quoteBox');
+    if (!box) return;
+    if (!draft.quote) {
+      box.innerHTML = '<div class="quote-empty">' + icon('doc') + '<div><strong>Préparez un devis détaillé pour ce client</strong>' +
+        '<p>Il reprend la formule, le prix par personne, le menu et le matériel. Vous pourrez l\'envoyer sur WhatsApp ou l\'imprimer en devis ou en contrat à signer.</p>' +
+        '<button type="button" class="btn btn--primary btn--sm" data-action="q-create">Créer le devis</button></div></div>';
+      return;
+    }
+    var q = draft.quote;
+    var opts = data.pricing.options;
+    box.innerHTML =
+      '<div class="quote-head"><div><small>Devis n°</small><strong>' + esc(q.number) + '</strong></div>' +
+        '<label class="field field--inline"><span>Date</span><input type="date" data-q="date" value="' + esc(q.date) + '"></label>' +
+        '<label class="field field--inline"><span>Valable (jours)</span><input type="number" min="1" data-q="validity" value="' + esc(q.validity) + '"></label></div>' +
+      '<h4 class="sub">Lignes du devis</h4>' +
+      '<div class="qlines">' +
+        
+        q.lines.map(function (l, i) {
+          return '<div class="qline">' +
+            '<div class="qline__label"><input data-ql="' + i + '" data-k="label" value="' + esc(l.label) + '" placeholder="Désignation (ex. Formule Prestige)" aria-label="Désignation">' +
+              '<input class="qline__detail" data-ql="' + i + '" data-k="detail" value="' + esc(l.detail || '') + '" placeholder="Détail (facultatif)" aria-label="Détail"></div>' +
+            '<label class="qf"><span>Qté</span><input type="number" min="0" data-ql="' + i + '" data-k="qty" value="' + esc(l.qty) + '"></label>' +
+            '<label class="qf"><span>Unité</span><select data-ql="' + i + '" data-k="unit">' + UNITS.concat(UNITS.indexOf(l.unit) === -1 && l.unit ? [l.unit] : []).map(function (u) { return '<option' + (u === l.unit ? ' selected' : '') + '>' + esc(u) + '</option>'; }).join('') + '</select></label>' +
+            '<label class="qf"><span>Prix unit. (DH)</span><input type="number" min="0" step="10" data-ql="' + i + '" data-k="price" value="' + esc(l.price) + '"></label>' +
+            '<strong class="qline__amount" data-ql-amount="' + i + '">' + U.formatDH((+l.qty || 0) * (+l.price || 0)) + '</strong>' +
+            '<button type="button" class="icon-btn icon-btn--sm" data-action="q-del-line" data-index="' + i + '" aria-label="Supprimer la ligne">' + ICONS.close + '</button></div>';
+        }).join('') +
+      '</div>' +
+      '<div class="add-row add-row--quote">' +
+        '<select id="qOption" aria-label="Ajouter une prestation"><option value="">Ajouter une prestation du simulateur…</option>' +
+          opts.map(function (o, i) { return '<option value="' + i + '">' + esc(o.group + ' · ' + o.name) + '</option>'; }).join('') + '</select>' +
+        '<button type="button" class="btn btn--light btn--sm" data-action="q-add-option">' + icon('plus') + ' Ajouter</button>' +
+        '<button type="button" class="btn btn--light btn--sm" data-action="q-add-line">' + icon('plus') + ' Ligne libre</button>' +
+      '</div>' +
+      '<div class="quote-grid">' +
+        '<div class="form-grid">' +
+          field('Remise (DH)', '<input type="number" min="0" step="100" data-q="discount" value="' + esc(q.discount) + '">') +
+          field('TVA', '<select data-q="vat">' + [0, 10, 20].map(function (v) { return '<option value="' + v + '"' + (+q.vat === v ? ' selected' : '') + '>' + (v ? v + ' %' : 'Sans TVA') + '</option>'; }).join('') + '</select>') +
+          field('Acompte à la signature', '<select data-q="deposit">' + [0, 20, 30, 40, 50].map(function (v) { return '<option value="' + v + '"' + (+q.deposit === v ? ' selected' : '') + '>' + (v ? v + ' %' : 'Aucun') + '</option>'; }).join('') + '</select>') +
+          field('CIN du client', '<input data-q="clientId" value="' + esc(q.clientId) + '" placeholder="Pour le contrat">') +
+          field('Adresse du client', '<input data-q="clientAddress" value="' + esc(q.clientAddress) + '" placeholder="Pour le contrat">', 'span-2') +
+        '</div>' +
+        '<div class="quote-totals" id="quoteTotals"></div>' +
+      '</div>' +
+      '<div class="quote-checks">' +
+        '<label class="line__check"><input type="checkbox" data-q="showMenu"' + (q.showMenu ? ' checked' : '') + '><span>Afficher le menu (' + draft.menuList.length + ' plats)</span></label>' +
+        '<label class="line__check"><input type="checkbox" data-q="showEquip"' + (q.showEquip ? ' checked' : '') + '><span>Afficher le matériel fourni (' + draft.equipment.length + ')</span></label>' +
+      '</div>' +
+      field('Conditions (une par ligne — elles deviennent les articles du contrat)', '<textarea data-q="terms" rows="6">' + esc(q.terms) + '</textarea>') +
+      '<div class="quote-actions">' +
+        '<button type="button" class="btn btn--wa" data-action="q-whatsapp">' + icon('whatsapp') + ' Envoyer par WhatsApp</button>' +
+        '<button type="button" class="btn btn--light" data-action="q-print" data-mode="devis">' + icon('print') + ' Imprimer le devis</button>' +
+        '<button type="button" class="btn btn--light" data-action="q-print" data-mode="contrat">' + icon('doc') + ' Imprimer en contrat</button>' +
+      '</div>' +
+      '<p class="hint">L\'impression ouvre une page prête à imprimer ou à enregistrer en PDF (choisissez « Enregistrer au format PDF »).</p>';
+    renderQuoteTotals();
+  }
+  function renderQuoteTotals() {
+    var el = $('#quoteTotals');
+    if (!el || !draft.quote) return;
+    var q = draft.quote;
+    var t = quoteTotals(q);
+    var price = draftTotal();
+    el.innerHTML =
+      '<div><span>Sous-total</span><strong>' + U.formatDH(t.sub) + '</strong></div>' +
+      (+q.discount ? '<div><span>Remise</span><strong>− ' + U.formatDH(q.discount) + '</strong></div>' : '') +
+      (+q.vat ? '<div><span>Total HT</span><strong>' + U.formatDH(t.ht) + '</strong></div><div><span>TVA ' + q.vat + ' %</span><strong>' + U.formatDH(t.vat) + '</strong></div>' : '') +
+      '<div class="quote-totals__ttc"><span>Total' + (+q.vat ? ' TTC' : '') + '</span><strong>' + U.formatDH(t.ttc) + '</strong></div>' +
+      (+q.deposit ? '<div><span>Acompte ' + q.deposit + ' %</span><strong>' + U.formatDH(t.deposit) + '</strong></div>' : '') +
+      (t.ttc !== price ? '<p class="quote-totals__warn">Le prix de l\'événement est de ' + U.formatDH(price) + '.<button type="button" class="link" data-action="q-sync">Utiliser ' + U.formatDH(t.ttc) + ' comme prix</button></p>' : '<p class="quote-totals__ok">Identique au prix de l\'événement.</p>');
+    var tab = $('#evTabs [data-tab="quote"]');
+    if (tab) tab.innerHTML = 'Devis<b>' + q.lines.length + '</b>';
+  }
+
+  /* chiffres en lettres (pour le contrat) */
+  function numberWords(n) {
+    n = Math.round(+n || 0);
+    if (n === 0) return 'zéro';
+    var U1 = ['', 'un', 'deux', 'trois', 'quatre', 'cinq', 'six', 'sept', 'huit', 'neuf', 'dix', 'onze', 'douze', 'treize', 'quatorze', 'quinze', 'seize'];
+    var D = ['', 'dix', 'vingt', 'trente', 'quarante', 'cinquante', 'soixante'];
+    function below100(x) {
+      if (x <= 16) return U1[x];
+      if (x < 20) return 'dix-' + U1[x - 10];
+      var d = Math.floor(x / 10), u = x % 10;
+      if (d === 7 || d === 9) { var base = d === 7 ? 'soixante' : 'quatre-vingt'; var r = x - (d === 7 ? 60 : 80); return base + (r === 1 && d === 7 ? ' et ' : '-') + below100(r); }
+      if (d === 8) return 'quatre-vingt' + (u ? '-' + U1[u] : 's');
+      return D[d] + (u === 1 ? ' et un' : u ? '-' + U1[u] : '');
+    }
+    function below1000(x) {
+      var c = Math.floor(x / 100), r = x % 100;
+      var out = c ? (c === 1 ? 'cent' : U1[c] + ' cent' + (r ? '' : 's')) : '';
+      return (out + (r ? (out ? ' ' : '') + below100(r) : '')).trim();
+    }
+    var parts = [];
+    var m = Math.floor(n / 1000000), k = Math.floor(n % 1000000 / 1000), r = n % 1000;
+    if (m) parts.push(m === 1 ? 'un million' : below1000(m) + ' millions');
+    if (k) parts.push(k === 1 ? 'mille' : below1000(k).replace(/cents$/, 'cent') + ' mille');
+    if (r) parts.push(below1000(r));
+    return parts.join(' ');
+  }
+
+  function quoteContext() {
+    var f = $('#eventForm').elements;
+    return {
+      client: f.clientName.value.trim() || 'Client', phone: f.phone.value.trim(), type: f.eventType.value, date: f.date.value,
+      venue: f.venue.value.trim(), guests: +f.guests.value || 0, pkg: f.package.value, arrival: f.arrival.value, service: f.service.value,
+      menuNotes: f.menuNotes.value.trim()
+    };
+  }
+  function quoteLineText(l) {
+    var amount = (+l.qty || 0) * (+l.price || 0);
+    return l.label + (l.detail ? ' (' + l.detail + ')' : '') + ' : ' + (l.unit === 'forfait' && +l.qty === 1 ? '' : l.qty + ' ' + l.unit + ' × ' + U.formatDH(l.price) + ' = ') + U.formatDH(amount);
+  }
+  function quoteWhatsappText() {
+    var q = draft.quote, c = quoteContext(), t = quoteTotals(q), st = data.settings;
+    var out = [];
+    out.push('Bonjour ' + c.client + ',');
+    out.push('Voici votre devis ' + (st.businessName || 'TORRAIS EVENT') + ' n° ' + q.number + ' :');
+    out.push('');
+    out.push('*' + c.type + (c.date ? ' — ' + weekdayDate(c.date) : '') + '*');
+    if (c.venue) out.push('Lieu : ' + c.venue);
+    if (c.guests) out.push('Invités : ' + c.guests);
+    out.push('');
+    out.push('*Détail*');
+    q.lines.forEach(function (l) { out.push('• ' + quoteLineText(l)); });
+    if (q.showMenu && draft.menuList.length) {
+      out.push('');
+      out.push('*Menu*');
+      menuItemsOf(draft).forEach(function (m) { var d = dishSummary(m); out.push('• ' + m.name + (d ? ' — ' + d : '')); });
+    }
+    out.push('');
+    out.push('Sous-total : ' + U.formatDH(t.sub));
+    if (+q.discount) out.push('Remise : − ' + U.formatDH(q.discount));
+    if (+q.vat) out.push('TVA ' + q.vat + ' % : ' + U.formatDH(t.vat));
+    out.push('*Total' + (+q.vat ? ' TTC' : '') + ' : ' + U.formatDH(t.ttc) + '*');
+    if (+q.deposit) out.push('Acompte à la réservation (' + q.deposit + ' %) : ' + U.formatDH(t.deposit));
+    out.push('');
+    out.push('Devis valable ' + q.validity + ' jours.');
+    out.push('Merci pour votre confiance — ' + (st.owner || '') + ', ' + (st.businessName || 'TORRAIS EVENT') + ' · ' + U.formatPhone(st.phone));
+    return out.join('\n');
+  }
+
+  function quoteDocument(mode) {
+    var q = draft.quote, c = quoteContext(), t = quoteTotals(q), st = data.settings;
+    var contract = mode === 'contrat';
+    var logo = new URL('../assets/img/brand/logo.webp', window.location.href).href;
+    var paid = sum(draft.payments, function (x) { return x.amount; });
+    var until = U.iso(new Date(U.parseISO(q.date).getTime() + (+q.validity || 30) * 86400000));
+    var terms = String(q.terms || '').split('\n').map(function (x) { return x.trim(); }).filter(Boolean);
+    var legal = [st.ice ? 'ICE ' + st.ice : '', st.rc ? 'RC ' + st.rc : '', st.idf ? 'IF ' + st.idf : '', st.patente ? 'Patente ' + st.patente : ''].filter(Boolean).join(' · ');
+    var menu = q.showMenu ? menuItemsOf(draft) : [];
+    var equip = q.showEquip ? draft.equipment.filter(function (x) { return +x.qty > 0 && itemById(x.itemId); }) : [];
+    var h = function (x) { return esc(x == null ? '' : String(x)); };
+    var info = [['Client', c.client], ['Téléphone', U.formatPhone(c.phone)], q.clientId ? ['CIN', q.clientId] : null, q.clientAddress ? ['Adresse', q.clientAddress] : null].filter(Boolean);
+    var evInfo = [['Événement', c.type], ['Date', c.date ? weekdayDate(c.date) : 'À définir'], ['Lieu', c.venue || 'À définir'], ['Invités', c.guests || '—'],
+      c.service ? ['Début du service', c.service.replace(':', 'h')] : null, c.arrival ? ['Arrivée de l\'équipe', c.arrival.replace(':', 'h')] : null].filter(Boolean);
+    var kv = function (rows) { return rows.map(function (r) { return '<div><span>' + h(r[0]) + '</span><strong>' + h(r[1]) + '</strong></div>'; }).join(''); };
+
+    var body = '<header class="top"><img src="' + logo + '" alt="' + h(st.businessName || 'TORRAIS EVENT') + '">' +
+      '<div class="biz"><strong>' + h(st.businessName || 'TORRAIS EVENT') + '</strong><span>Traiteur · Tyafer · Buffet · Décoration</span>' +
+      '<span>' + h(st.address || st.city || '') + '</span><span>Tél. ' + h(U.formatPhone(st.phone)) + (st.email ? ' · ' + h(st.email) : '') + '</span>' + (legal ? '<span>' + h(legal) + '</span>' : '') + '</div>' +
+      '<div class="doc"><h1>' + (contract ? 'Contrat de prestation' : 'Devis') + '</h1><span>N° ' + h(q.number) + '</span><span>Du ' + h(U.formatDate(q.date)) + '</span>' +
+      (contract ? '' : '<span>Valable jusqu\'au ' + h(U.formatDate(until)) + '</span>') + '</div></header>';
+
+    if (contract) {
+      body += '<p class="parties"><strong>Entre les soussignés :</strong><br>' + h(st.businessName || 'TORRAIS EVENT') + ', représenté par ' + h(st.owner || 'son gérant') + ', ci-après « le Traiteur »,<br>' +
+        'et ' + h(c.client) + (q.clientId ? ', CIN ' + h(q.clientId) : '') + (q.clientAddress ? ', demeurant ' + h(q.clientAddress) : '') + ', ci-après « le Client ».<br>Il a été convenu ce qui suit.</p>';
+    }
+    body += '<section class="two"><div class="box"><h2>Client</h2>' + kv(info) + '</div><div class="box"><h2>Événement</h2>' + kv(evInfo) + '</div></section>';
+    if (contract) body += '<h3 class="art">Article 1 — Objet</h3><p>Le Traiteur s\'engage à assurer la prestation décrite ci-dessous pour l\'événement du Client, selon le détail et les prix suivants.</p>';
+
+    body += '<table class="lines"><thead><tr><th>Désignation</th><th class="r">Qté</th><th>Unité</th><th class="r">Prix unitaire</th><th class="r">Montant</th></tr></thead><tbody>' +
+      q.lines.map(function (l) {
+        return '<tr><td><strong>' + h(l.label) + '</strong>' + (l.detail ? '<small>' + h(l.detail) + '</small>' : '') + '</td><td class="r">' + h(l.qty) + '</td><td>' + h(l.unit) + '</td><td class="r">' + h(U.formatDH(l.price)) + '</td><td class="r">' + h(U.formatDH((+l.qty || 0) * (+l.price || 0))) + '</td></tr>';
+      }).join('') + '</tbody></table>';
+
+    body += '<section class="sum"><div class="words">Arrêté' + (contract ? ' le présent contrat' : ' le présent devis') + ' à la somme de <strong>' + h(numberWords(t.ttc)) + ' dirhams</strong>' + (+q.vat ? ' TTC' : '') + '.</div><div class="tot">' +
+      '<div><span>Sous-total</span><strong>' + h(U.formatDH(t.sub)) + '</strong></div>' +
+      (+q.discount ? '<div><span>Remise</span><strong>− ' + h(U.formatDH(q.discount)) + '</strong></div>' : '') +
+      (+q.vat ? '<div><span>Total HT</span><strong>' + h(U.formatDH(t.ht)) + '</strong></div><div><span>TVA ' + h(q.vat) + ' %</span><strong>' + h(U.formatDH(t.vat)) + '</strong></div>' : '') +
+      '<div class="big"><span>Total' + (+q.vat ? ' TTC' : '') + '</span><strong>' + h(U.formatDH(t.ttc)) + '</strong></div>' +
+      (+q.deposit ? '<div><span>Acompte à la signature (' + h(q.deposit) + ' %)</span><strong>' + h(U.formatDH(t.deposit)) + '</strong></div>' : '') +
+      (paid ? '<div><span>Déjà versé</span><strong>' + h(U.formatDH(paid)) + '</strong></div><div><span>Reste à payer</span><strong>' + h(U.formatDH(Math.max(0, t.ttc - paid))) + '</strong></div>' : '') +
+      '</div></section>';
+
+    var art = 2;
+    if (menu.length) {
+      body += (contract ? '<h3 class="art">Article ' + (art++) + ' — Menu</h3>' : '<h2 class="sec">Menu</h2>') +
+        '<table class="menu"><thead><tr><th>Plat</th><th class="r">Nombre</th><th class="r">Kilos</th><th>Modèle</th><th>Forme</th></tr></thead><tbody>' +
+        menu.map(function (m) { return '<tr><td>' + h(m.name) + '</td><td class="r">' + h(m.qty || '—') + '</td><td class="r">' + h(m.kg ? String(m.kg).replace('.', ',') + ' kg' : '—') + '</td><td>' + h(m.model || '—') + '</td><td>' + h(m.shape || '—') + '</td></tr>'; }).join('') +
+        '</tbody></table>' + (c.menuNotes ? '<p class="note"><strong>Demandes particulières :</strong> ' + h(c.menuNotes) + '</p>' : '');
+    }
+    if (equip.length) {
+      body += (contract ? '<h3 class="art">Article ' + (art++) + ' — Matériel fourni</h3>' : '<h2 class="sec">Matériel fourni</h2>') +
+        '<ul class="equip">' + equip.map(function (x) { return '<li><span>' + h(itemById(x.itemId).name) + '</span><strong>' + h(x.qty) + '</strong></li>'; }).join('') + '</ul>';
+    }
+    if (contract) {
+      body += '<h3 class="art">Article ' + (art++) + ' — Prix et paiement</h3><p>Le prix total de la prestation est de <strong>' + h(U.formatDH(t.ttc)) + '</strong>' + (+q.vat ? ' TTC' : '') + '.' +
+        (+q.deposit ? ' Un acompte de ' + h(q.deposit) + ' %, soit ' + h(U.formatDH(t.deposit)) + ', est versé à la signature du présent contrat.' : '') +
+        (paid ? ' Le Client a déjà versé ' + h(U.formatDH(paid)) + '.' : '') + '</p>';
+      terms.forEach(function (x) { body += '<h3 class="art">Article ' + (art++) + '</h3><p>' + h(x) + '</p>'; });
+      body += '<p class="place">Fait à ' + h(st.city || 'Casablanca') + ', le ' + h(U.formatDate(TODAY)) + ', en deux exemplaires.</p>' +
+        '<section class="sign"><div><strong>Le Traiteur</strong><span>' + h(st.owner || '') + ' — ' + h(st.businessName || '') + '</span><em>Signature et cachet</em></div>' +
+        '<div><strong>Le Client</strong><span>' + h(c.client) + '</span><em>Signature précédée de « Lu et approuvé »</em></div></section>';
+    } else {
+      if (terms.length) body += '<h2 class="sec">Conditions</h2><ol class="terms">' + terms.map(function (x) { return '<li>' + h(x) + '</li>'; }).join('') + '</ol>';
+      body += '<section class="sign"><div><strong>' + h(st.businessName || 'TORRAIS EVENT') + '</strong><em>Signature et cachet</em></div><div><strong>Bon pour accord — le Client</strong><em>Date et signature</em></div></section>';
+    }
+    body += '<footer class="foot">' + h(st.businessName || 'TORRAIS EVENT') + ' · ' + h(st.city || '') + ' · ' + h(U.formatPhone(st.phone)) + (st.instagram ? ' · ' + h(String(st.instagram).replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '')) : '') + '</footer>';
+
+    var css = '@page{size:A4;margin:14mm}*{box-sizing:border-box}body{font-family:Inter,system-ui,sans-serif;color:#2b2622;font-size:10pt;line-height:1.45;margin:0;background:#fff}' +
+      '.bar{position:sticky;top:0;display:flex;gap:8px;justify-content:center;padding:10px;background:#16130f}.bar button{font:inherit;font-weight:600;padding:9px 18px;border-radius:8px;border:0;cursor:pointer;background:#c9a45c;color:#16130f}.bar button+button{background:#3a332b;color:#f4ead7}' +
+      '.page{max-width:186mm;margin:0 auto;padding:18px 0}' +
+      '.top{display:grid;grid-template-columns:auto 1fr auto;gap:18px;align-items:center;background:#16130f;color:#f4ead7;border-radius:10px;padding:14px 18px}.top img{width:110px;height:auto}' +
+      '.biz{display:flex;flex-direction:column;font-size:8.5pt;color:#d8c8a8}.biz strong{font-family:Georgia,serif;font-size:13pt;color:#fff;letter-spacing:.04em}' +
+      '.doc{text-align:right;display:flex;flex-direction:column;font-size:8.5pt;color:#d8c8a8}.doc h1{font-family:Georgia,serif;font-size:17pt;color:#e7c98a;margin:0 0 2px;font-weight:700}' +
+      '.parties{margin:14px 0 4px}.two{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}.box{border:1px solid #e3d8c4;border-radius:8px;padding:10px 12px}' +
+      '.box h2,.sec{font-family:Georgia,serif;font-size:11.5pt;color:#7a5b24;margin:0 0 6px}.sec{margin:16px 0 6px;border-bottom:1.5px solid #b08a45;padding-bottom:3px}' +
+      '.box div{display:flex;justify-content:space-between;gap:10px;padding:2px 0;font-size:9pt}.box span{color:#7a6f63}.box strong{text-align:right}' +
+      'table{width:100%;border-collapse:collapse;margin:6px 0}th{background:#16130f;color:#f4ead7;text-align:left;font-size:8.3pt;font-weight:600;padding:6px 8px}td{border-bottom:1px solid #eadfcb;padding:6px 8px;vertical-align:top;font-size:9.2pt}' +
+      'td small{display:block;color:#7a6f63;font-size:8.2pt}.r{text-align:right;white-space:nowrap}tbody tr:nth-child(even) td{background:#faf6ef}tr{break-inside:avoid}' +
+      '.sum{display:grid;grid-template-columns:1fr 250px;gap:16px;align-items:start;margin:8px 0 4px}.words{font-size:9pt;color:#4a423b;padding-top:6px}' +
+      '.tot div{display:flex;justify-content:space-between;padding:3px 0;font-size:9.3pt}.tot .big{border-top:2px solid #16130f;margin-top:4px;padding-top:6px;font-size:12pt}.tot .big strong{color:#7a5b24}' +
+      '.equip{columns:2;list-style:none;padding:0;margin:4px 0}.equip li{display:flex;justify-content:space-between;border-bottom:1px dotted #e3d8c4;padding:3px 0;break-inside:avoid;font-size:9.2pt}' +
+      '.art{font-size:10pt;margin:12px 0 2px;color:#16130f}.art+p,.parties+p{margin:0 0 4px}.note{font-size:9pt}.terms{padding-left:18px;font-size:9pt;color:#4a423b}.terms li{margin:3px 0}' +
+      '.place{margin-top:14px}.sign{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:18px;break-inside:avoid}.sign div{border:1px solid #e3d8c4;border-radius:8px;padding:10px 12px;height:110px;display:flex;flex-direction:column}' +
+      '.sign span{font-size:8.6pt;color:#7a6f63}.sign em{margin-top:auto;font-size:8pt;color:#9a8f82}.foot{margin-top:18px;text-align:center;font-size:8pt;color:#9a8f82;border-top:1px solid #eadfcb;padding-top:8px}' +
+      '@media print{.bar{display:none}.page{padding:0}}@media (max-width:640px){.top,.two,.sum,.sign{grid-template-columns:1fr}.doc{text-align:left}.equip{columns:1}.page{padding:12px}}';
+    return '<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' +
+      h((contract ? 'Contrat ' : 'Devis ') + q.number + ' — ' + c.client) + '</title><style>' + css + '</style></head><body>' +
+      '<div class="bar"><button onclick="window.print()">Imprimer / PDF</button><button onclick="window.close()">Fermer</button></div>' +
+      '<main class="page">' + body + '</main>' +
+      '<script>window.addEventListener("load",function(){setTimeout(function(){window.print()},300)});<\/script></body></html>';
+  }
+
   function saveEvent() {
     var f = $('#eventForm').elements;
     var clientName = f.clientName.value.trim();
@@ -950,8 +1275,11 @@
       total: +f.total.value || 0, status: f.status.value, notes: f.notes.value.trim(), source: f.source.value,
       arrival: f.arrival.value, service: f.service.value, menu: draft.menuList.join('\n'), menuNotes: f.menuNotes.value.trim()
     });
+    draft.menuItems = menuItemsOf(draft);
+    if (!draft.quote) delete draft.quote;
     draft.equipment = draft.equipment.filter(function (q) { return +q.qty > 0; });
     delete draft.menuList;
+    delete draft.menuDetails;
     var isNew = !draft.id;
     if (isNew) {
       draft.id = U.uid();
@@ -994,20 +1322,38 @@
       '<div class="toolbar"><p class="muted">Chaque personne est payée à l\'événement. Affectez l\'équipe depuis la fiche de chaque événement.</p>' +
       '<button class="btn btn--primary btn--sm" data-action="staff-new">' + icon('plus') + ' Ajouter une personne</button></div>';
     if (!data.staff.length) return html + '<section class="card">' + empty('Aucune personne dans l\'équipe.') + '</section>';
-    roles.forEach(function (role) {
-      var list = data.staff.filter(function (s) { return s.role === role; });
-      html += '<section class="card card--flush"><header class="card__head card__head--pad"><h3>' + esc(role) + '</h3><span class="muted">' + list.length + '</span></header><ul class="rows rows--big">' +
-        list.map(function (s) {
-          var as = staffAssignments(s.id);
-          var next = as.filter(function (a) { return a.event.date >= TODAY; });
-          var owed = staffOwed(s.id);
-          return '<li><div class="row row--static"><button class="row__open" data-action="staff-open" data-id="' + s.id + '"><div class="avatar">' + esc(s.name.charAt(0).toUpperCase()) + '</div>' +
-            '<div class="row__main"><strong>' + esc(s.name) + '</strong><span>' + esc(U.formatPhone(s.phone) || 'Pas de téléphone') + ' · ' + U.formatDH(s.rate) + ' par événement</span>' +
-            '<span class="row__rel">' + (next.length ? plural(next.length, 'événement') + ' à venir · prochain le ' + U.formatDate(next[0].event.date, { day: 'numeric', month: 'short' }) : 'Aucun événement à venir') + '</span></div></button>' +
-            '<div class="row__side">' + (owed ? '<span class="amount amount--due">' + U.formatDH(owed) + '</span><button class="btn btn--light btn--sm" data-action="staff-pay" data-id="' + s.id + '">Marquer payé</button>' : '<span class="badge badge--paid">À jour</span>') + '</div></div></li>';
-        }).join('') + '</ul></section>';
-    });
+    if (state.teamRole && roles.indexOf(state.teamRole) === -1) state.teamRole = '';
+    html += '<div class="toolbar"><div class="chips">' +
+      '<button class="chip' + (!state.teamRole ? ' is-active' : '') + '" data-action="team-role" data-role="">Tous <b>' + data.staff.length + '</b></button>' +
+      roles.map(function (r) {
+        var n = data.staff.filter(function (s) { return s.role === r; }).length;
+        return '<button class="chip' + (state.teamRole === r ? ' is-active' : '') + '" data-action="team-role" data-role="' + esc(r) + '">' + esc(r) + ' <b>' + n + '</b></button>';
+      }).join('') + '</div>' +
+      '<input class="search" type="search" id="teamSearch" placeholder="Rechercher un nom, un téléphone…" value="' + esc(state.teamSearch) + '"></div>' +
+      '<section class="card card--flush"><ul class="rows rows--big" id="teamList"></ul></section>';
     return html;
+  }
+
+  function teamRow(s) {
+    var as = staffAssignments(s.id);
+    var next = as.filter(function (a) { return a.event.date >= TODAY; });
+    var owed = staffOwed(s.id);
+    return '<li><div class="row row--static"><button class="row__open" data-action="staff-open" data-id="' + s.id + '"><div class="avatar">' + esc(s.name.charAt(0).toUpperCase()) + '</div>' +
+      '<div class="row__main"><strong>' + esc(s.name) + ' <span class="role-tag">' + esc(s.role) + '</span></strong><span>' + esc(U.formatPhone(s.phone) || 'Pas de téléphone') + ' · ' + U.formatDH(s.rate) + ' par événement</span>' +
+      '<span class="row__rel">' + (next.length ? plural(next.length, 'événement') + ' à venir · prochain le ' + U.formatDate(next[0].event.date, { day: 'numeric', month: 'short' }) : 'Aucun événement à venir') + '</span></div></button>' +
+      '<div class="row__side">' + (owed ? '<span class="amount amount--due">' + U.formatDH(owed) + '</span><button class="btn btn--light btn--sm" data-action="staff-pay" data-id="' + s.id + '">Marquer payé</button>' : '<span class="badge badge--paid">À jour</span>') + '</div></div></li>';
+  }
+  function renderTeamList() {
+    var box = $('#teamList');
+    if (!box) return;
+    var q = state.teamSearch.trim().toLowerCase();
+    var qd = U.digits(q);
+    var list = data.staff.filter(function (s) {
+      if (state.teamRole && s.role !== state.teamRole) return false;
+      if (!q) return true;
+      return s.name.toLowerCase().indexOf(q) !== -1 || (qd && U.digits(s.phone).indexOf(qd) !== -1);
+    }).sort(function (a, b) { return a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' }); });
+    box.innerHTML = list.length ? list.map(teamRow).join('') : '<li>' + empty('Personne ne correspond.') + '</li>';
   }
 
   function openStaff(id) {
@@ -1067,7 +1413,14 @@
     data.inventory.forEach(function (i) { if (cats.indexOf(i.category) === -1) cats.push(i.category); });
     var html = (short.length ? '<div class="avail avail--busy avail--block">' + ICONS.alert + '<div><strong>Stock insuffisant sur ' + plural(Object.keys(short.reduce(function (m, x) { m[x.date] = 1; return m; }, {})).length, 'jour') + ' à venir</strong><ul>' + shortageList(short) + '</ul><span>Prévoyez une location, ou modifiez le matériel réservé dans la fiche des événements.</span></div></div>' : '') +
       '<div class="toolbar"><p class="muted">Ce que vous possédez. « Réservé au maximum » montre le jour à venir le plus chargé.</p>' +
-      '<button class="btn btn--primary btn--sm" data-action="item-new">' + icon('plus') + ' Ajouter un article</button></div>';
+      '<button class="btn btn--primary btn--sm" data-action="item-new">' + icon('plus') + ' Fiche complète</button></div>' +
+      '<section class="card quick-item"><h3>Ajouter un nouvel article</h3><p class="muted">Un article qui n\'existe pas encore dans la liste.</p>' +
+        '<div class="add-row add-row--newitem">' +
+          '<input id="qiName" placeholder="Nom (ex. Lustres en cristal)" aria-label="Nom de l\'article">' +
+          '<select id="qiCat" aria-label="Catégorie">' + T.INV_CATEGORIES.map(function (c) { return '<option>' + esc(c) + '</option>'; }).join('') + '</select>' +
+          '<input type="number" id="qiQty" min="0" placeholder="Stock" aria-label="Quantité en stock">' +
+          '<button type="button" class="btn btn--primary btn--sm" data-action="item-quick">' + icon('plus') + ' Ajouter</button>' +
+        '</div></section>';
     if (!data.inventory.length) return html + '<section class="card">' + empty('Aucun article en stock.') + '</section>';
     cats.forEach(function (cat) {
       var list = data.inventory.filter(function (i) { return i.category === cat; });
@@ -1285,6 +1638,11 @@
           field('Adresse (pour la carte)', '<input name="address" value="' + esc(s.address) + '">') +
           field('Horaires', '<input name="hours" value="' + esc(s.hours) + '">') +
           field('Phrase d\'accroche', '<input name="tagline" value="' + esc(s.tagline) + '">', 'span-2') +
+          '<p class="span-2 hint">Pour les devis et contrats (facultatif) :</p>' +
+          field('ICE', '<input name="ice" value="' + esc(s.ice || '') + '" inputmode="numeric">') +
+          field('Registre de commerce (RC)', '<input name="rc" value="' + esc(s.rc || '') + '">') +
+          field('Identifiant fiscal (IF)', '<input name="idf" value="' + esc(s.idf || '') + '" inputmode="numeric">') +
+          field('Patente', '<input name="patente" value="' + esc(s.patente || '') + '" inputmode="numeric">') +
           '<div class="span-2 form-actions"><button type="button" class="btn btn--primary btn--sm" data-action="save-settings">Enregistrer les coordonnées</button></div>' +
         '</form></section>' +
 
@@ -1624,6 +1982,18 @@
       draft.equipment.push({ itemId: it.id, qty: qty });
       renderEquip(); showEvTab('equip');
     },
+    'ev-new-equip': function () {
+      var name = $('#newEqName').value.trim();
+      var qty = +$('#newEqQty').value;
+      if (!name) { toast('Écrivez le nom de l\'article.', true); $('#newEqName').focus(); return; }
+      if (!qty || qty <= 0) { toast('Indiquez la quantité.', true); $('#newEqQty').focus(); return; }
+      var it = data.inventory.filter(function (x) { return x.name.trim().toLowerCase() === name.toLowerCase(); })[0];
+      if (!it) { it = { id: U.uid(), name: name, category: $('#newEqCat').value, qty: qty, rule: '' }; data.inventory.push(it); T.store.save(data); }
+      var line = draft.equipment.filter(function (q) { return q.itemId === it.id; })[0];
+      if (line) line.qty = qty; else draft.equipment.push({ itemId: it.id, qty: qty });
+      renderEquip(); showEvTab('equip');
+      toast('« ' + it.name + ' » ajouté au stock et à l\'événement.');
+    },
     'ev-del-equip': function (el) { draft.equipment.splice(+el.dataset.index, 1); renderEquip(); showEvTab('equip'); },
     'ev-suggest-equip': function () {
       var guests = draftGuests();
@@ -1684,6 +2054,49 @@
     },
 
     'item-new': function () { openItem(null); },
+    'item-quick': function () {
+      var name = $('#qiName').value.trim();
+      if (!name) { toast('Écrivez le nom de l\'article.', true); $('#qiName').focus(); return; }
+      if (data.inventory.some(function (x) { return x.name.trim().toLowerCase() === name.toLowerCase(); })) { toast('Cet article existe déjà dans la liste.', true); return; }
+      data.inventory.push({ id: U.uid(), name: name, category: $('#qiCat').value, qty: +$('#qiQty').value || 0, rule: '' });
+      commit('« ' + name + ' » ajouté au stock.');
+      setTimeout(function () { var i = $('#qiName'); if (i) i.focus(); }, 0);
+    },
+    'team-role': function (el) {
+      state.teamRole = el.dataset.role;
+      $$('[data-action="team-role"]').forEach(function (b) { b.classList.toggle('is-active', b === el); });
+      renderTeamList();
+    },
+    'q-create': function () { draft.quote = freshQuote(); renderQuote(); showEvTab('quote'); },
+    'q-add-line': function () { draft.quote.lines.push({ label: '', detail: '', qty: 1, unit: 'forfait', price: 0 }); renderQuote(); showEvTab('quote'); var ins = $$('#quoteBox [data-k="label"]'); if (ins.length) ins[ins.length - 1].focus(); },
+    'q-add-option': function () {
+      var o = data.pricing.options[+$('#qOption').value];
+      if (!o || $('#qOption').value === '') { toast('Choisissez une prestation dans la liste.', true); return; }
+      var g = draftGuests();
+      var qty = o.unit === 'pers' ? (g || 1) : o.unit === 'table' ? Math.max(1, Math.ceil((g || 10) / 10)) : 1;
+      var unit = o.unit === 'unite' ? 'unité' : o.unit;
+      draft.quote.lines.push({ label: o.name, detail: o.text || '', qty: qty, unit: unit, price: Math.round(((+o.min || 0) + (+o.max || 0)) / 2) });
+      renderQuote(); showEvTab('quote');
+    },
+    'q-del-line': function (el) { draft.quote.lines.splice(+el.dataset.index, 1); renderQuote(); showEvTab('quote'); },
+    'q-sync': function () {
+      var t = quoteTotals(draft.quote).ttc;
+      $('#eventForm').elements.total.value = t;
+      renderPayments(); renderProfit(); renderQuoteTotals();
+      toast('Prix de l\'événement : ' + U.formatDH(t) + '.');
+    },
+    'q-whatsapp': function () {
+      var phone = $('#eventForm').elements.phone.value.trim();
+      if (!U.digits(phone)) { toast('Ajoutez le téléphone du client dans l\'onglet Détails.', true); return; }
+      window.open(U.waLink(phone, quoteWhatsappText()), '_blank', 'noopener');
+    },
+    'q-print': function (el) {
+      var w = window.open('', '_blank');
+      if (!w) { toast('Autorisez les fenêtres pop-up pour imprimer.', true); return; }
+      w.document.open();
+      w.document.write(quoteDocument(el.dataset.mode));
+      w.document.close();
+    },
     'item-open': function (el) { openItem(el.dataset.id); },
     'item-save': function () {
       var form = $('#itemForm');
@@ -1718,7 +2131,7 @@
 
     'save-settings': function () {
       var f = $('#settingsForm').elements;
-      ['owner', 'phone', 'whatsapp', 'email', 'instagram', 'city', 'address', 'hours', 'tagline'].forEach(function (k) {
+      ['owner', 'phone', 'whatsapp', 'email', 'instagram', 'city', 'address', 'hours', 'tagline', 'ice', 'rc', 'idf', 'patente'].forEach(function (k) {
         data.settings[k] = f[k].value.trim();
       });
       commit('Coordonnées enregistrées.');
@@ -1889,6 +2302,8 @@
       return;
     }
     if (draft && e.target.dataset && e.target.dataset.teamPaid != null) { draft.team[+e.target.dataset.teamPaid].paid = e.target.checked; return; }
+    if (draft && draft.quote && e.target.dataset && e.target.dataset.q && e.target.type === 'checkbox') { draft.quote[e.target.dataset.q] = e.target.checked; return; }
+    if (draft && draft.quote && e.target.tagName === 'SELECT' && (e.target.dataset.q || e.target.dataset.ql != null)) { quoteInput(e.target); return; }
     if (e.target.id === 'reqStatus') {
       var r = findReq(e.target.dataset.id);
       var next = e.target.value;
@@ -1934,12 +2349,33 @@
       var st = $('[data-eq-status="' + ds.eqQty + '"]');
       if (st) st.innerHTML = equipStatus(draft.equipment[+ds.eqQty]);
     }
+    if (draft && ds.dishKey != null) { var dd = draft.menuDetails[ds.dishKey] || (draft.menuDetails[ds.dishKey] = { qty: '', kg: '', model: '', shape: '' }); dd[ds.dishField] = e.target.value.trim(); return; }
+    if (draft && draft.quote && (ds.q || ds.ql != null) && e.target.type !== 'checkbox') { quoteInput(e.target); return; }
+    if (e.target.id === 'teamSearch') { state.teamSearch = e.target.value; renderTeamList(); }
     if (e.target.id === 'reqSearch') { state.reqSearch = e.target.value; renderRequestList(); }
     if (e.target.id === 'clientSearch') { state.clientSearch = e.target.value; renderClientList(); }
   });
 
+  function quoteInput(el) {
+    var ds = el.dataset;
+    var num = el.type === 'number' || ds.q === 'vat' || ds.q === 'deposit';
+    var v = num ? (el.value === '' ? '' : +el.value) : el.value;
+    if (ds.ql != null) {
+      var l = draft.quote.lines[+ds.ql];
+      l[ds.k] = v;
+      var a = $('[data-ql-amount="' + ds.ql + '"]');
+      if (a) a.textContent = U.formatDH((+l.qty || 0) * (+l.price || 0));
+    } else {
+      draft.quote[ds.q] = v;
+    }
+    renderQuoteTotals();
+  }
+
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Enter' && e.target.id === 'dishName') { e.preventDefault(); actions['ev-add-dish'](); return; }
+    if (e.key === 'Enter' && (e.target.id === 'qiName' || e.target.id === 'qiQty')) { e.preventDefault(); actions['item-quick'](); return; }
+    if (e.key === 'Enter' && (e.target.id === 'newEqName' || e.target.id === 'newEqQty')) { e.preventDefault(); actions['ev-new-equip'](); return; }
+    if (e.key === 'Enter' && draft && e.target.closest && e.target.closest('#quoteBox, #menuChosen') && e.target.tagName === 'INPUT') { e.preventDefault(); return; }
     if (e.key === 'Escape' && !$('#sheet').hidden) closeSheet();
   });
 

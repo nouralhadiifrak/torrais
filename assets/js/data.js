@@ -68,7 +68,7 @@
   ];
   var PENDING = ['nouveau', 'contacte', 'devis'];
   // D'où vient la demande / la réservation
-  var ROLES = ['Chef cuisinier', 'Cuisinier', 'Serveur', "Maître d'hôtel", 'Décorateur', 'Chauffeur', 'Autre'];
+  var ROLES = ['Chef cuisinier', 'Cuisinier', 'Aide-cuisinier', 'Serveur', "Maître d'hôtel", 'Musicien', 'Négafa', 'Photographe', 'Décorateur', 'Chauffeur', 'Plongeur', 'Autre'];
   var INV_CATEGORIES = ['Mobilier', 'Linge', 'Vaisselle', 'Service', 'Tyafer', 'Décoration', 'Autre'];
   var EXPENSE_CATEGORIES = ['Ingrédients', 'Location', 'Transport', 'Décoration', 'Autre'];
   // Quantité habituelle d'un article selon l'événement (pour la proposition automatique)

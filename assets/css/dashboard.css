@@ -680,3 +680,81 @@ body.sheet-open { overflow: hidden; }
 .sidebar__mark img { width: 32px; height: auto; display: block; }
 .login__mark { width: 76px; height: 76px; }
 .login__mark img { width: 58px; height: auto; display: block; }
+
+/* ---------- Calendrier : liste « le plus proche d'abord » ---------- */
+.list-title { font-size: 1rem; font-weight: 600; margin: 4px 0 12px; color: var(--ink); }
+.list-title .muted { font-weight: 400; font-size: .85rem; }
+.past-list { margin-top: 18px; }
+.past-list > summary { cursor: pointer; font-weight: 600; font-size: .92rem; color: var(--ink-soft); padding: 12px 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; margin-bottom: 12px; }
+.past-list[open] > summary { margin-bottom: 14px; }
+
+/* ---------- Plats : détails ---------- */
+.menu-list--detail li { display: block; padding: 10px 12px; position: relative; padding-left: 44px; }
+.menu-list--detail li::before { position: absolute; left: 12px; top: 12px; }
+.menu-list__row { display: flex; align-items: center; gap: 10px; }
+.menu-list__name { flex: 1; min-width: 0; font-weight: 500; }
+.dish-spec { display: grid; grid-template-columns: 80px 80px 1fr 1fr; gap: 8px; margin-top: 8px; }
+.dish-spec label { display: flex; flex-direction: column; gap: 3px; font-size: .7rem; color: var(--muted); }
+.dish-spec input { width: 100%; padding: 7px 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface-2); font: inherit; font-size: .84rem; color: var(--ink); }
+.dish-spec input:focus { outline: none; border-color: var(--accent); background: var(--surface); }
+@media (max-width: 560px) { .dish-spec { grid-template-columns: 1fr 1fr; } }
+
+/* ---------- Équipe ---------- */
+.role-tag { display: inline-block; margin-left: 6px; padding: 1px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent-strong); font-size: .7rem; font-weight: 600; vertical-align: 1px; }
+
+/* ---------- Matériel : nouvel article ---------- */
+.quick-item h3 { margin: 0 0 2px; font-size: .95rem; }
+.quick-item .muted { margin: 0 0 10px; font-size: .82rem; }
+.quick-item .add-row { margin-bottom: 0; }
+.add-row--newitem { display: grid; grid-template-columns: 1.6fr 1fr 90px auto; }
+.add-row--newitem input[type="number"] { flex: auto; }
+@media (max-width: 560px) { .add-row--newitem { grid-template-columns: 1fr 1fr; } .add-row--newitem input:first-child, .add-row--newitem .btn { grid-column: span 2; } }
+.new-item { margin: 4px 0 12px; }
+.new-item > summary { cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-size: .84rem; font-weight: 500; color: var(--accent-strong); padding: 6px 0; list-style: none; }
+.new-item > summary::-webkit-details-marker { display: none; }
+.new-item > summary .ic svg { width: 15px; height: 15px; }
+.new-item[open] > summary { margin-bottom: 8px; }
+
+/* ---------- Devis ---------- */
+.quote-empty { display: flex; gap: 14px; align-items: flex-start; background: var(--surface-2); border: 1px dashed var(--line); border-radius: 14px; padding: 18px; }
+.quote-empty > .ic svg { width: 28px; height: 28px; color: var(--accent); }
+.quote-empty p { margin: 4px 0 12px; color: var(--muted); font-size: .86rem; }
+.quote-head { display: flex; gap: 14px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 6px; }
+.quote-head > div { display: flex; flex-direction: column; margin-right: auto; }
+.quote-head small { color: var(--muted); font-size: .72rem; }
+.quote-head strong { font-size: 1.05rem; letter-spacing: .02em; }
+.field--inline { margin: 0; }
+.field--inline input { width: 150px; }
+.qlines { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; margin-bottom: 10px; }
+.qline { display: grid; grid-template-columns: 70px 1fr 1fr minmax(90px, auto) 30px; gap: 6px 8px; align-items: center; padding: 10px; }
+.qline + .qline { border-top: 1px solid var(--line); }
+.qline--head { display: none; }
+.qline input, .qline select { width: 100%; min-width: 0; padding: 7px 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface-2); font: inherit; font-size: .84rem; color: var(--ink); }
+.qline input:focus, .qline select:focus { outline: none; border-color: var(--accent); background: var(--surface); }
+.qline input[type="number"] { text-align: right; }
+.qline__label { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1.3fr; gap: 6px; }
+.qline__label input:first-child { font-weight: 500; }
+.qline .qline__detail { font-size: .8rem; color: var(--ink-soft); }
+.qline__amount { text-align: right; font-size: .9rem; white-space: nowrap; align-self: end; padding-bottom: 8px; }
+.qf { display: flex; flex-direction: column; gap: 3px; font-size: .7rem; color: var(--muted); min-width: 0; }
+.qline > .icon-btn { align-self: end; margin-bottom: 4px; }
+@media (max-width: 640px) {
+  .qline__label { grid-template-columns: 1fr; }
+  .qline { grid-template-columns: 1fr 1fr 1fr 30px; }
+  .qline__amount { grid-column: 1 / 4; text-align: left; }
+}
+.add-row--quote { display: grid; grid-template-columns: 1fr auto auto; }
+@media (max-width: 560px) { .add-row--quote { grid-template-columns: 1fr 1fr; } .add-row--quote select { grid-column: span 2; } }
+.quote-grid { display: grid; grid-template-columns: 1fr 260px; gap: 16px; align-items: start; margin: 6px 0 12px; }
+@media (max-width: 760px) { .quote-grid { grid-template-columns: 1fr; } }
+.quote-totals { background: var(--surface-2); border-radius: 12px; padding: 12px 14px; }
+.quote-totals > div { display: flex; justify-content: space-between; gap: 10px; padding: 4px 0; font-size: .86rem; }
+.quote-totals > div span { color: var(--muted); }
+.quote-totals__ttc { border-top: 1px solid var(--line); margin-top: 4px; padding-top: 8px !important; font-size: 1rem !important; }
+.quote-totals__ttc span { color: var(--ink) !important; font-weight: 600; }
+.quote-totals__ttc strong { color: var(--accent-strong); }
+.quote-totals__warn, .quote-totals__ok { margin: 8px 0 0; font-size: .78rem; color: var(--muted); }
+.quote-totals__warn .link { display: block; margin-top: 3px; font-size: .8rem; }
+.quote-checks { display: flex; gap: 18px; flex-wrap: wrap; margin: 0 0 12px; }
+.quote-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+@media (max-width: 560px) { .quote-actions .btn { flex: 1 1 100%; justify-content: center; } }
