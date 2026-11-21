@@ -798,11 +798,13 @@ p { margin: 0 0 1em; }
 /* ---------- barre d'actions sur téléphone ---------- */
 .mbar { display: none; }
 @media (max-width: 760px) {
-  .mbar { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 8px; position: fixed; left: 0; right: 0; bottom: 0; z-index: 65; padding: 10px 12px calc(10px + env(safe-area-inset-bottom)); background: rgba(22, 19, 15, .97); border-top: 1px solid rgba(216, 191, 138, .2); box-shadow: 0 -8px 24px rgba(0, 0, 0, .18); }
+  .mbar { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; position: fixed; left: 0; right: 0; bottom: 0; z-index: 65; padding: 10px 12px calc(10px + env(safe-area-inset-bottom)); background: rgba(22, 19, 15, .97); border-top: 1px solid rgba(216, 191, 138, .2); box-shadow: 0 -8px 24px rgba(0, 0, 0, .18); }
   .mbar__btn { display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 46px; border-radius: 12px; text-decoration: none; font-weight: 600; font-size: .86rem; color: #fff; border: 1px solid rgba(255, 255, 255, .18); }
   .mbar__btn .icon { width: 18px; height: 18px; color: var(--gold-light); }
   .mbar__btn--main { background: var(--gold); border-color: var(--gold); }
-  .floating { display: none; }
+  .floating { bottom: calc(80px + env(safe-area-inset-bottom)); right: 14px; }
+  body[data-page="composer"] .floating { bottom: 14px; }
+  .mbar__btn { padding: 0 8px; text-align: center; line-height: 1.2; }
   body:not([data-page="composer"]) .footer { padding-bottom: 96px; }
 }
 /* contraste : textes secondaires et petits libellés dorés un peu plus foncés */
@@ -872,3 +874,8 @@ html.is-intro:not(.intro-reveal) .hero__inner > *, html.is-intro:not(.intro-reve
   .occasions--zigzag .occasion p { font-size: .8rem; line-height: 1.45; margin-bottom: .6rem; }
   .occasions--zigzag .occasion__more { font-size: .74rem; }
 }
+
+/* un seul bouton flottant : WhatsApp */
+.floating__btn--wa { width: 58px; height: 58px; }
+.floating__btn--wa .icon { width: 30px; height: 30px; }
+@media (max-width: 760px) { .floating__btn--wa { width: 54px; height: 54px; } .floating__btn--wa .icon { width: 28px; height: 28px; } }

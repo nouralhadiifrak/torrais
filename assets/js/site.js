@@ -83,15 +83,13 @@
       '</div>' +
       '<div class="container footer__bottom"><span>© <span id="year"></span> TORRAIS EVENT. Tous droits réservés.</span>' +
         '<a href="dashboard/" class="footer__admin">Espace gérant</a></div></footer>' +
-      // Barre d'actions sur téléphone : les trois gestes utiles, avec leurs libellés
+      // Barre d'actions sur téléphone : devis et simulateur (WhatsApp reste en bouton flottant)
       (PAGE === 'composer' ? '' :
         '<nav class="mbar" aria-label="Actions rapides">' +
           '<a class="mbar__btn mbar__btn--main" href="' + (PAGE === 'home' || PAGE === 'occasion' ? '#devis' : HOME + '#devis') + '">Devis gratuit</a>' +
-          '<a class="mbar__btn" href="#" data-wa-link><span class="icon" data-icon="whatsapp"></span>WhatsApp</a>' +
-          '<a class="mbar__btn" href="#" data-bind-tel="phone"><span class="icon" data-icon="phone"></span>Appeler</a>' +
+          '<a class="mbar__btn" href="composer.html">Composer votre événement</a>' +
         '</nav>') +
       '<div class="floating">' +
-        '<a href="#" class="floating__btn floating__btn--call" data-bind-tel="phone" aria-label="Appeler"><span class="icon" data-icon="phone"></span></a>' +
         '<a href="#" class="floating__btn floating__btn--wa" data-wa-link aria-label="WhatsApp"><span class="icon" data-icon="whatsapp"></span></a>' +
       '</div>' +
       '<div class="lightbox" id="lightbox" hidden><button class="lightbox__close" id="lightboxClose" aria-label="Fermer">×</button>' +
