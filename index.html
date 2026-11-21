@@ -55,80 +55,25 @@
       <a href="#maison" class="hero__scroll" aria-label="Défiler vers la suite"><span></span></a>
     </section>
 
-    <!-- RACCOURCIS : les 3 actions principales, tout de suite visibles -->
-    <nav class="quick" aria-label="Accès rapides">
-      <div class="container quick__grid">
-        <a class="quick__card quick__card--main" href="composer.html">
-          <span class="quick__icon" data-icon="deco"></span>
-          <span class="quick__text"><strong>Composer mon mariage</strong><span>Estimation immédiate en 1 minute</span></span>
-          <span class="quick__arrow" aria-hidden="true">→</span>
-        </a>
-        <a class="quick__card" href="#formules">
-          <span class="quick__icon" data-icon="traiteur"></span>
-          <span class="quick__text"><strong>Voir les packs</strong><span>Essentiel, Villa, Salle de fête</span></span>
-          <span class="quick__arrow" aria-hidden="true">→</span>
-        </a>
-        <a class="quick__card" href="#" data-wa-link data-wa-text="Bonjour TORRAIS EVENT, je voudrais des informations pour un événement.">
-          <span class="quick__icon" data-icon="whatsapp"></span>
-          <span class="quick__text"><strong>Écrire à Saïd</strong><span>Réponse rapide sur WhatsApp</span></span>
-          <span class="quick__arrow" aria-hidden="true">→</span>
-        </a>
-      </div>
-    </nav>
-
-    <!-- SERVICES PAR OCCASION : juste sous le héros -->
+    <!-- 1. NOS SERVICES -->
     <section class="section section--cream" id="occasions">
       <div class="container">
         <div class="section-head">
           <p class="eyebrow">Nos services</p>
           <h2 class="section-title">Pour chaque occasion</h2>
-          <p class="section-sub">Du mariage aux moments de recueillement, une équipe et une cuisine adaptées à chaque événement.</p>
+          <p class="section-sub">Mariage, baptême, entreprise ou fête privée : une équipe et une cuisine adaptées à votre événement.</p>
         </div>
         <div class="occasions occasions--zigzag" id="occasionsGrid"></div>
       </div>
     </section>
 
-    <!-- MAISON -->
-    <section class="section about" id="maison">
-      <div class="container about__grid">
-        <div class="about__visual">
-          <div class="about__frame" id="aboutFrame">
-            <span class="about__monogram">T</span>
-            <span class="about__caption">Depuis Casablanca,<br>pour vos plus beaux jours</span>
-          </div>
-        </div>
-        <div>
-          <p class="eyebrow">Notre maison</p>
-          <h2 class="section-title">Une table à la hauteur de votre fête</h2>
-          <p>Chez TORRAIS EVENT, chaque mariage est unique. Nous préparons une cuisine généreuse et raffinée,
-            nous dressons des tables élégantes et nous prenons soin de vos invités, du premier verre de thé jusqu'au dessert.</p>
-          <div class="pillars">
-            <div class="pillar"><span class="pillar__num">01</span><div><h3>Cuisine faite maison</h3><p>Des recettes marocaines et internationales préparées pour chaque événement.</p></div></div>
-            <div class="pillar"><span class="pillar__num">02</span><div><h3>Service attentionné</h3><p>Une équipe présente du début à la fin pour que vous profitiez de votre fête.</p></div></div>
-          </div>
-          <p class="about__sign"><span data-bind="owner">Saïd</span> <small>— TORRAIS EVENT</small></p>
-        </div>
-      </div>
-    </section>
-
-    <!-- SERVICES -->
-    <section class="section section--tight" id="services">
-      <div class="container">
-        <div class="section-head">
-          <p class="eyebrow">Nos métiers</p>
-          <h2 class="section-title">Tout pour réussir votre événement</h2>
-        </div>
-        <div class="services" id="servicesGrid"></div>
-      </div>
-    </section>
-
-    <!-- PLATS SIGNATURE -->
-    <section class="section section--cream" id="carte">
+    <!-- 2. NOS MENUS -->
+    <section class="section" id="carte">
       <div class="container">
         <div class="section-head section-head--row">
           <div>
             <p class="eyebrow">Notre cuisine</p>
-            <h2 class="section-title">Nos plats signature</h2>
+            <h2 class="section-title">Nos menus</h2>
           </div>
           <div class="carousel-nav">
             <button type="button" class="carousel-btn" data-carousel="prev" aria-label="Plats précédents">‹</button>
@@ -139,35 +84,53 @@
       </div>
     </section>
 
-    <!-- FORMULES -->
-    <section class="section" id="formules">
+    <!-- 3. DEUX OPTIONS : composer / devis -->
+    <section class="section section--cream" id="devis">
       <div class="container">
         <div class="section-head">
-          <p class="eyebrow">Packs mariage</p>
-          <h2 class="section-title">Choisissez votre pack</h2>
-          <p class="section-sub">Trois packs tout compris : neggafa, décoration, caméra, musique, dîner et douceurs. Choisissez votre menu, le prix s'affiche.</p>
+          <p class="eyebrow">Votre événement</p>
+          <h2 class="section-title">Comment voulez-vous commencer&nbsp;?</h2>
         </div>
-        <div class="packs" id="packagesGrid"></div>
-        <p class="packages__note">Prix « à partir de » : le prix final dépend du nombre de tables et des options. Vous préférez un pack sur mesure ? <a href="#devis">Décrivez-nous votre projet</a>.</p>
-        <div class="composer-teaser">
-          <div><p class="eyebrow">Nouveau</p><h3>Composez votre mariage en 1 minute</h3>
-            <p>Choisissez votre formule, votre menu, la décoration et les tyafer : vous voyez tout de suite une estimation, puis vous l'envoyez sur WhatsApp.</p></div>
-          <a href="composer.html" class="btn btn--gold">Composer mon mariage →</a>
+        <div class="choice">
+          <a class="choice__card choice__card--dark" href="composer.html">
+            <span class="choice__icon" data-icon="deco"></span>
+            <span class="choice__text"><strong>Composer votre événement</strong><span>Choisissez votre pack, votre menu et vos options : vous voyez tout de suite une estimation.</span></span>
+            <span class="choice__go" aria-hidden="true">→</span>
+          </a>
+          <button type="button" class="choice__card" id="openDevis" aria-expanded="false" aria-controls="devisPanel">
+            <span class="choice__icon" data-icon="traiteur"></span>
+            <span class="choice__text"><strong>Demander un devis</strong><span>Décrivez votre événement en 1 minute : Saïd vous rappelle avec un devis gratuit.</span></span>
+            <span class="choice__go" aria-hidden="true">↓</span>
+          </button>
+        </div>
+        <div class="devis-panel section--gold" id="devisPanel" hidden>
+          <div class="devis">
+            <div class="devis__intro">
+              <p class="eyebrow eyebrow--light">Devis gratuit</p>
+              <h2 class="section-title">Parlez-nous de votre événement</h2>
+              <p>Réservez tôt : les dates de mariage partent souvent plusieurs mois à l'avance.
+                Nous vous répondons rapidement, par téléphone ou sur WhatsApp.</p>
+              <ul class="devis__contact">
+                <li><span class="icon" data-icon="phone"></span> <a href="#" data-bind-tel="phone" data-bind="phoneDisplay">06 63 35 15 07</a></li>
+                <li><span class="icon" data-icon="whatsapp"></span> <a href="#" data-wa-link>Écrire sur WhatsApp</a></li>
+              </ul>
+              <div class="zones">
+                <p class="zones__title"><span class="icon" data-icon="pin"></span> Nous intervenons à</p>
+                <ul class="zones__list" id="zonesList"></ul>
+              </div>
+            </div>
+            <div id="quoteMount"></div>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- CHIFFRES -->
-    <section class="stats" id="chiffres">
-      <div class="container stats__grid" id="statsGrid"></div>
-    </section>
-
-    <!-- RÉALISATIONS -->
+    <!-- 4. GALERIE -->
     <section class="section" id="galerie">
       <div class="container">
         <div class="section-head">
-          <p class="eyebrow">Réalisations</p>
-          <h2 class="section-title">Nos derniers événements</h2>
+          <p class="eyebrow">Galerie</p>
+          <h2 class="section-title">Nos événements</h2>
           <p class="section-sub">Plus de photos sur notre <a href="#" data-bind-href="instagram" target="_blank" rel="noopener">page Instagram</a>.</p>
         </div>
         <div class="filters" id="galleryFilters" role="tablist" aria-label="Filtrer les photos"></div>
@@ -175,35 +138,20 @@
       </div>
     </section>
 
-    <!-- ÉTAPES -->
-    <section class="section section--cream" id="etapes">
+    <!-- 5. AVIS GOOGLE (affiché seulement quand le gérant a ajouté de vrais avis) -->
+    <section class="section section--cream" id="avis" hidden>
       <div class="container">
         <div class="section-head">
-          <p class="eyebrow">Comment ça marche</p>
-          <h2 class="section-title">De la demande au jour J</h2>
-        </div>
-        <ol class="steps">
-          <li><span class="steps__num">1</span><h3>Votre demande</h3><p>Remplissez le formulaire ou écrivez-nous sur WhatsApp avec la date et le nombre d'invités.</p></li>
-          <li><span class="steps__num">2</span><h3>On en parle</h3><p>Nous vous rappelons pour comprendre vos envies : menu, décoration, tyafer, budget.</p></li>
-          <li><span class="steps__num">3</span><h3>Votre formule</h3><p>Vous recevez un devis clair. Un acompte confirme la réservation de votre date.</p></li>
-          <li><span class="steps__num">4</span><h3>Le jour J</h3><p>Notre équipe s'occupe de tout. Vous n'avez plus qu'à profiter de votre fête.</p></li>
-        </ol>
-      </div>
-    </section>
-
-    <!-- AVIS (affiché seulement quand le gérant a ajouté des avis) -->
-    <section class="section" id="avis" hidden>
-      <div class="container">
-        <div class="section-head">
-          <p class="eyebrow">Avis clients</p>
+          <p class="eyebrow">Avis Google</p>
           <h2 class="section-title">Ils nous ont fait confiance</h2>
         </div>
         <div class="reviews" id="reviewsGrid"></div>
+        <p class="reviews__more" id="reviewsMore" hidden><a class="btn btn--outline" href="#" target="_blank" rel="noopener" id="reviewsLink">Voir tous nos avis sur Google</a></p>
       </div>
     </section>
 
-    <!-- FAQ -->
-    <section class="section section--cream" id="faq">
+    <!-- 6. FAQ -->
+    <section class="section" id="faq">
       <div class="container faq">
         <div>
           <p class="eyebrow">Questions fréquentes</p>
@@ -211,49 +159,6 @@
           <p class="section-sub">Une autre question ? <a href="#" data-wa-link>Écrivez-nous sur WhatsApp</a>, nous répondons rapidement.</p>
         </div>
         <div class="faq__list" id="faqList"></div>
-      </div>
-    </section>
-
-    <!-- DEVIS -->
-    <section class="section section--gold" id="devis">
-      <div class="container devis">
-        <div class="devis__intro">
-          <p class="eyebrow eyebrow--light">Devis gratuit</p>
-          <h2 class="section-title">Parlez-nous de votre événement</h2>
-          <p>Réservez tôt : les dates de mariage partent souvent plusieurs mois à l'avance.
-            Nous vous répondons rapidement, par téléphone ou sur WhatsApp.</p>
-          <ul class="devis__contact">
-            <li><span class="icon" data-icon="phone"></span> <a href="#" data-bind-tel="phone" data-bind="phoneDisplay">06 63 35 15 07</a></li>
-            <li><span class="icon" data-icon="whatsapp"></span> <a href="#" data-wa-link>Écrire sur WhatsApp</a></li>
-          </ul>
-          <div class="zones">
-            <p class="zones__title"><span class="icon" data-icon="pin"></span> Nous intervenons à</p>
-            <ul class="zones__list" id="zonesList"></ul>
-          </div>
-        </div>
-        <div id="quoteMount"></div>
-      </div>
-    </section>
-
-    <!-- CONTACT -->
-    <section class="section" id="contact">
-      <div class="container contact">
-        <div>
-          <p class="eyebrow">Contact</p>
-          <h2 class="section-title">Retrouvez-nous</h2>
-          <ul class="contact__list">
-            <li><span class="icon" data-icon="phone"></span><div><strong><span data-bind="owner">Saïd</span></strong><a href="#" data-bind-tel="phone" data-bind="phoneDisplay">06 63 35 15 07</a></div></li>
-            <li><span class="icon" data-icon="whatsapp"></span><div><strong>WhatsApp</strong><a href="#" data-wa-link data-bind="whatsappDisplay">06 63 35 15 07</a></div></li>
-            <li><span class="icon" data-icon="instagram"></span><div><strong>Instagram</strong><a href="#" data-bind-href="instagram" target="_blank" rel="noopener">@torrais.event</a></div></li>
-            <li data-hide-empty="email"><span class="icon" data-icon="mail"></span><div><strong>E-mail</strong><a href="#" data-bind-mail="email" data-bind="email"></a></div></li>
-            <li><span class="icon" data-icon="pin"></span><div><strong>Adresse</strong><span data-bind="address">Casablanca, Maroc</span></div></li>
-            <li><span class="icon" data-icon="clock"></span><div><strong>Horaires</strong><span data-bind="hours">Tous les jours, de 9h à 21h</span></div></li>
-          </ul>
-        </div>
-        <div class="contact__map">
-          <iframe id="mapFrame" title="Carte : TORRAIS EVENT à Casablanca" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
-            src="https://maps.google.com/maps?q=Casablanca%2C%20Maroc&z=12&output=embed"></iframe>
-        </div>
       </div>
     </section>
   </main>

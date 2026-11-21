@@ -28,6 +28,8 @@
     var occLinks = data.occasions.map(function (o) {
       return '<a href="' + occUrl(o) + '"' + (occasion && occasion.id === o.id ? ' aria-current="page"' : '') + '>' + esc(o.title) + '</a>';
     }).join('');
+    var mariage = data.occasions.filter(function (o) { return o.id === 'mariage'; })[0];
+    var PACKS_URL = (mariage ? occUrl(mariage) : 'evenement.html?type=mariage') + '#formules';
     var reviewsLink = (data.site.reviews || []).length ? '<a href="' + HOME + '#avis">Avis</a>' : '';
 
     $('#siteHeader').innerHTML =
@@ -45,9 +47,9 @@
         '<nav class="nav" id="nav" aria-label="Navigation principale">' +
           '<div class="nav__drop"><button type="button" class="nav__droptoggle" aria-expanded="false">Nos services <span aria-hidden="true">▾</span></button>' +
             '<div class="nav__menu">' + occLinks + '</div></div>' +
-          '<a href="' + HOME + '#services">Métiers</a>' +
-          '<a href="' + HOME + '#formules">Packs</a>' +
-          '<a href="' + HOME + '#galerie">Réalisations</a>' +
+          '<a href="' + HOME + '#carte">Nos menus</a>' +
+          '<a href="' + PACKS_URL + '">Packs mariage</a>' +
+          '<a href="' + HOME + '#galerie">Galerie</a>' +
           reviewsLink +
           '<a href="composer.html"' + (PAGE === 'composer' ? ' aria-current="page"' : '') + '>Composer</a>' +
           '<a href="' + HOME + '#contact">Contact</a>' +
@@ -64,7 +66,7 @@
           '<a href="#" class="btn btn--light" data-bind-tel="phone"><span class="icon" data-icon="phone"></span> Appeler</a>' +
         '</div>' +
       '</div></section>' +
-      '<footer class="footer"><div class="container footer__grid">' +
+      '<footer class="footer" id="contact"><div class="container footer__grid">' +
         '<div class="footer__brand"><img class="footer__logo" src="assets/img/brand/logo.webp" width="900" height="614" alt="TORRAIS EVENT" loading="lazy">' +
           '<p>Traiteur de mariages et d\'événements à <span data-bind="city"></span>. Traiteur · Tyafer · Buffet · Décoration.</p>' +
           '<div class="footer__links">' +
@@ -74,8 +76,8 @@
           '</div></div>' +
         '<div><h3>Nos services</h3><ul>' + data.occasions.map(function (o) { return '<li><a href="' + occUrl(o) + '">' + esc(o.title) + '</a></li>'; }).join('') + '</ul></div>' +
         '<div><h3>Le site</h3><ul>' +
-          '<li><a href="composer.html">Composez votre mariage</a></li><li><a href="' + HOME + '#formules">Formules</a></li><li><a href="' + HOME + '#galerie">Réalisations</a></li>' +
-          '<li><a href="' + HOME + '#faq">Questions fréquentes</a></li><li><a href="#devis">Devis gratuit</a></li></ul></div>' +
+          '<li><a href="' + HOME + '#carte">Nos menus</a></li><li><a href="' + PACKS_URL + '">Packs mariage</a></li><li><a href="composer.html">Composer votre événement</a></li>' +
+          '<li><a href="' + HOME + '#galerie">Galerie</a></li><li><a href="' + HOME + '#faq">Questions fréquentes</a></li><li><a href="' + (PAGE === 'home' || PAGE === 'occasion' ? '#devis' : HOME + '#devis') + '">Devis gratuit</a></li></ul></div>' +
         '<div><h3>Contact</h3><ul class="footer__contact">' +
           '<li><a href="#" data-bind-tel="phone" data-bind="phoneDisplay"></a></li>' +
           '<li data-hide-empty="email"><a href="#" data-bind-mail="email" data-bind="email"></a></li>' +
@@ -296,6 +298,10 @@
     var list = (data.site.reviews || []).filter(function (r) { return r.text; });
     if (!list.length) return;
     $('#avis').hidden = false;
+    if (data.settings.googleReviews) {
+      $('#reviewsLink').href = data.settings.googleReviews;
+      $('#reviewsMore').hidden = false;
+    }
     box.innerHTML = list.map(function (r) {
       var stars = Math.max(1, Math.min(5, +r.stars || 5));
       return '<figure class="review"><div class="review__stars" aria-label="' + stars + ' étoiles sur 5">' + '★★★★★'.slice(0, stars) + '<span>' + '★★★★★'.slice(stars) + '</span></div>' +
@@ -321,6 +327,40 @@
     box.innerHTML = z.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('');
   }
 
+  /* ---------- accueil : « Demander un devis » ouvre le formulaire ---------- */
+  function initDevisChoice() {
+    var panel = $('#devisPanel');
+    var btn = $('#openDevis');
+    if (!panel || !btn) return;
+    function open(scroll) {
+      panel.hidden = false;
+      btn.setAttribute('aria-expanded', 'true');
+      btn.classList.add('is-open');
+      if (window.ScrollTrigger) window.ScrollTrigger.refresh();
+      if (scroll) {
+        var lenis = window.TorraisMotion && window.TorraisMotion.lenis;
+        setTimeout(function () {
+          if (lenis) lenis.scrollTo(panel); else panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          var first = panel.querySelector('input, select, textarea');
+          if (first) setTimeout(function () { first.focus({ preventScroll: true }); }, 600);
+        }, 30);
+      }
+    }
+    btn.addEventListener('click', function () {
+      if (panel.hidden) open(true);
+      else { panel.hidden = true; btn.setAttribute('aria-expanded', 'false'); btn.classList.remove('is-open'); }
+    });
+    // tous les liens « #devis » de la page (bouton du héros, barre du bas, menu) ouvrent aussi le formulaire
+    document.addEventListener('click', function (e) {
+      var a = e.target.closest('a[href="#devis"]');
+      if (!a) return;
+      e.preventDefault();
+      open(true);
+      history.replaceState(null, '', '#devis');
+    }, true);
+    if (window.location.hash === '#devis') open(true);
+  }
+
   /* ---------- page « univers » ---------- */
   function renderOccasionPage() {
     if (!occasion) return;
@@ -332,6 +372,8 @@
     $('#occIncludes').innerHTML = (occasion.includes || []).map(function (x) {
       return '<li><span class="icon">' + T.icons.check + '</span><span>' + esc(x) + '</span></li>';
     }).join('');
+    var packs = $('#formules');
+    if (packs) packs.hidden = occasion.id !== 'mariage';
     $('#occWa').setAttribute('data-wa-text', 'Bonjour TORRAIS EVENT, je souhaite des informations pour : ' + occasion.title.toLowerCase() + '.');
     var bg = occasion.image || (data.media.hero[0] && data.media.hero[0].src) || (data.media.heroVideo ? 'assets/img/salle.jpg' : '');
     if (bg) {
@@ -590,6 +632,7 @@
   renderFilters();
   renderGallery();
   renderReviews();
+  initDevisChoice();
   renderFaq();
   renderZones();
   renderMedia();

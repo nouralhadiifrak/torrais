@@ -1643,6 +1643,7 @@
           field('Registre de commerce (RC)', '<input name="rc" value="' + esc(s.rc || '') + '">') +
           field('Identifiant fiscal (IF)', '<input name="idf" value="' + esc(s.idf || '') + '" inputmode="numeric">') +
           field('Patente', '<input name="patente" value="' + esc(s.patente || '') + '" inputmode="numeric">') +
+          field('Lien de vos avis Google (facultatif)', '<input name="googleReviews" value="' + esc(s.googleReviews || '') + '" placeholder="https://g.page/…">', 'span-2') +
           '<div class="span-2 form-actions"><button type="button" class="btn btn--primary btn--sm" data-action="save-settings">Enregistrer les coordonnées</button></div>' +
         '</form></section>' +
 
@@ -2138,7 +2139,7 @@
 
     'save-settings': function () {
       var f = $('#settingsForm').elements;
-      ['owner', 'phone', 'whatsapp', 'email', 'instagram', 'city', 'address', 'hours', 'tagline', 'ice', 'rc', 'idf', 'patente'].forEach(function (k) {
+      ['owner', 'phone', 'whatsapp', 'email', 'instagram', 'city', 'address', 'hours', 'tagline', 'ice', 'rc', 'idf', 'patente', 'googleReviews'].forEach(function (k) {
         data.settings[k] = f[k].value.trim();
       });
       commit('Coordonnées enregistrées.');

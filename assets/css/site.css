@@ -911,3 +911,31 @@ html.is-intro:not(.intro-reveal) .hero__inner > *, html.is-intro:not(.intro-reve
 .pack__price strong { font: 600 2.1rem/1.1 var(--serif); color: var(--gold-dark); white-space: nowrap; }
 #formules .packages__note { text-align: center; }
 @media (max-width: 980px) { .packs { grid-template-columns: 1fr; max-width: 480px; margin: 0 auto; } }
+
+/* ---------- Accueil : deux options (composer / devis) ---------- */
+.choice { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; max-width: 980px; margin: 0 auto; }
+.choice__card { display: flex; align-items: center; gap: 16px; padding: 24px 24px; min-height: 120px; border-radius: 18px; border: 1px solid var(--line); background: var(--white); color: var(--ink); text-decoration: none; text-align: left; font: inherit; cursor: pointer; box-shadow: 0 10px 30px rgba(74, 58, 35, .07); transition: transform .25s, box-shadow .25s, border-color .25s; }
+.choice__card:hover { transform: translateY(-3px); border-color: var(--gold-light); box-shadow: 0 16px 40px rgba(74, 58, 35, .12); }
+.choice__card--dark { background: var(--night); border-color: var(--night); color: #fff; }
+.choice__icon { width: 54px; height: 54px; border-radius: 50%; display: grid; place-items: center; background: var(--gold-soft); color: var(--gold-dark); flex-shrink: 0; }
+.choice__icon svg { width: 26px; height: 26px; }
+.choice__card--dark .choice__icon { background: var(--gold); color: #fff; }
+.choice__text { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0; }
+.choice__text strong { font: 500 1.45rem/1.15 var(--serif); }
+.choice__text span { font-size: .86rem; color: var(--muted); line-height: 1.45; }
+.choice__card--dark .choice__text span { color: rgba(255, 255, 255, .72); }
+.choice__go { font-size: 1.3rem; color: var(--gold-dark); transition: transform .25s; }
+.choice__card--dark .choice__go { color: var(--gold-light); }
+.choice__card:hover .choice__go { transform: translateX(4px); }
+#openDevis:hover .choice__go, #openDevis.is-open .choice__go { transform: translateY(3px); }
+#openDevis.is-open { border-color: var(--gold); }
+.devis-panel { margin-top: 26px; border-radius: 22px; padding: 44px 40px; }
+@media (max-width: 760px) {
+  .choice { grid-template-columns: 1fr; gap: 12px; }
+  .choice__card { padding: 18px; min-height: 0; }
+  .choice__text strong { font-size: 1.3rem; }
+  .devis-panel { padding: 28px 18px; border-radius: 18px; margin-top: 18px; }
+}
+.reviews__more { text-align: center; margin: 28px 0 0; }
+/* le héros enchaîne directement sur les services */
+.hero + #occasions { padding-top: 80px; }

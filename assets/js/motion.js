@@ -43,7 +43,7 @@
   /* ---------- apparitions douces ---------- */
   var REVEAL = [
     '.section-head', '.about__visual', '.about__grid > div:last-child > *', '.occasion', '.service', '.dish', '.package', '.stat',
-    '.steps li', '.review', '.faq__item', '.occ-intro > *', '.devis__intro', '#quoteMount', '.contact__list li', '.contact__map', '.cta-band__inner > *',
+    '.steps li', '.review', '.faq__item', '.occ-intro > *', '.choice__card', '.contact__list li', '.contact__map', '.cta-band__inner > *',
     '#galleryGrid .gallery__item', '.filters'
   ].join(',');
   var items = $$(REVEAL).filter(function (el) { return !el.closest('.hero'); });

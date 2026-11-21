@@ -119,38 +119,31 @@
   }
   function defaultOccasions() {
     return [
-      { id: 'mariage', title: 'Mariage', eventType: 'Mariage', galleryCat: 'Mariages', image: '',
+      { id: 'mariage', title: 'Mariage / Fiançailles', eventType: 'Mariage', galleryCat: 'Mariages', image: '',
         short: 'Le grand jour, du dîner à la kousha, pensé dans les moindres détails.',
-        text: "Votre mariage mérite une table à la hauteur de l'émotion. Nous composons avec vous un dîner marocain ou international, nous dressons la salle à vos couleurs et notre équipe accompagne vos invités du thé d'accueil jusqu'au gâteau des mariés.",
-        includes: ['Dîner complet : pastilla, méchoui, tajines, desserts', 'Service à table par une équipe dédiée', 'Décoration de la salle et de la kousha', 'Tyafer pour la cérémonie', 'Vaisselle, nappage et mobilier'] },
-      { id: 'fiancailles', title: 'Fiançailles', eventType: 'Fiançailles', galleryCat: 'Mariages', image: '',
-        short: 'Une réception élégante pour officialiser votre union en famille.',
-        text: 'Pour vos fiançailles, nous préparons une réception à votre image : table soignée, douceurs marocaines, dîner ou buffet, et une décoration qui met les futurs mariés à l’honneur.',
-        includes: ['Dîner ou buffet selon le nombre d’invités', 'Thé à la menthe et pâtisseries marocaines', 'Décoration de la table d’honneur', 'Tyafer pour la remise des cadeaux', 'Service à table'] },
-      { id: 'henne', title: 'Henné', eventType: 'Henné', galleryCat: 'Tyafer', image: '',
-        short: 'Des soirées de henné chaleureuses, dans le respect de la tradition.',
-        text: 'Pour la soirée du henné, nous préparons des tyafer décorés avec soin, un coin henné, une ambiance chaleureuse et une table de douceurs marocaines pour vos invitées.',
-        includes: ['Tyafer décorés selon vos couleurs', 'Décoration et coin henné', 'Thé à la menthe et pâtisseries marocaines', 'Buffet salé et sucré'] },
-      { id: 'aqiqa', title: 'Aqiqa / Baptême', eventType: 'Aqiqa / Baptême', galleryCat: 'Cuisine', image: '',
+        text: "Votre mariage ou vos fiançailles méritent une table à la hauteur de l'émotion. Neggafa, décoration, caméra, musique, dîner et douceurs : choisissez votre pack, nous nous occupons de tout pour que vous profitiez de votre fête.",
+        includes: ['Neggafa et tenues', 'Décoration de la salle et de la kousha', 'Caméra et musique (DJ ou orchestre)', 'Dîner : pastilla, viande aux pruneaux, poulet…', 'Dessert, jus, gâteaux, thé à la menthe, dattes et lait'] },
+      { id: 'bapteme', title: 'Baptême', eventType: 'Aqiqa / Baptême', galleryCat: 'Cuisine', image: '',
         short: 'Célébrez l’arrivée de bébé avec un repas généreux pour vos proches.',
-        text: 'Pour l’aqiqa ou le baptême, nous préparons le repas traditionnel, le thé et les douceurs, chez vous ou en salle, pour que vous profitiez pleinement de ce moment en famille.',
-        includes: ['Méchoui, tajines ou couscous', 'Thé, dattes et pâtisseries', 'Service sur place', 'Livraison à domicile possible'] },
-      { id: 'anniversaire', title: 'Anniversaire', eventType: 'Anniversaire', galleryCat: 'Cuisine', image: '',
-        short: 'Un buffet et un gâteau à votre goût, à la maison ou en salle.',
-        text: "Anniversaire, réussite ou retrouvailles : nous livrons et servons chez vous ou dans la salle de votre choix, avec un buffet généreux adapté au nombre d'invités.",
-        includes: ['Buffet salé et sucré', 'Gâteau personnalisé', 'Service sur place', 'Décoration selon le thème'] },
-      { id: 'entreprise', title: "Événement d'entreprise", eventType: "Événement d'entreprise", galleryCat: 'Cuisine', image: '',
+        text: 'Pour le baptême (aqiqa), nous préparons le repas traditionnel, le thé et les douceurs, chez vous ou en salle, pour que vous profitiez pleinement de ce moment en famille.',
+        includes: ['Méchoui, viande aux pruneaux ou poulet rôti', 'Thé, dattes et pâtisseries', 'Service sur place', 'Livraison à domicile possible'] },
+      { id: 'entreprise', title: 'Entreprise', eventType: "Événement d'entreprise", galleryCat: 'Cuisine', image: '',
         short: 'Cocktails, séminaires et fins d’année pour vos équipes et vos clients.',
         text: 'Inauguration, séminaire, fin d’année ou réception de clients : nous proposons des cocktails dînatoires et des buffets élégants, ponctuels et adaptés à votre image.',
         includes: ['Cocktail dînatoire ou buffet', 'Pauses café', 'Service en tenue', 'Devis rapide et facture'] },
-      { id: 'funerailles', title: 'Funérailles', eventType: 'Funérailles', galleryCat: 'Cuisine', image: '',
-        short: 'Les repas de condoléances pris en charge, avec discrétion.',
-        text: 'Dans les moments difficiles, nous nous occupons des repas de condoléances, chez vous ou à la mosquée, pour que vous puissiez rester auprès de vos proches. Un service discret, rapide et respectueux.',
-        includes: ['Couscous et repas traditionnels', 'Thé, dattes et lait', 'Service discret sur place', 'Livraison et mise en place rapides', 'Vaisselle fournie'] },
-      { id: 'autre', title: 'Autre événement', eventType: 'Autre', galleryCat: 'Cuisine', image: '',
-        short: 'Une fête qui ne rentre dans aucune case ? Parlons-en.',
-        text: 'Retour de pèlerinage, réception, soirée privée ou toute autre occasion : dites-nous ce que vous imaginez, nous préparons un menu et un service sur mesure.',
-        includes: ['Menu sur mesure', 'Buffet ou service à table', 'Décoration selon vos envies', 'Devis gratuit'] }
+      { id: 'prive', title: 'Événements privés', eventType: 'Autre', galleryCat: 'Cuisine', image: '',
+        short: 'Anniversaires, henné, réceptions de famille : une fête à votre image.',
+        text: 'Anniversaire, soirée du henné, retour de pèlerinage ou réception de famille : nous préparons un menu et un service sur mesure, chez vous ou dans la salle de votre choix.',
+        includes: ['Menu sur mesure', 'Buffet ou service à table', 'Tyafer et décoration selon vos envies', 'Gâteau et douceurs marocaines'] }
+    ];
+  }
+  function defaultMenuDishes() {
+    return [
+      { id: uid(), name: 'Pastilla au poulet', text: 'Feuilles croustillantes, poulet, amandes, cannelle et sucre glace.', image: '' },
+      { id: uid(), name: 'Pastilla aux fruits de mer', text: 'Crevettes, calamars et vermicelles parfumés sous une pâte dorée.', image: '' },
+      { id: uid(), name: 'Viande aux pruneaux & amandes', text: 'Viande fondante mijotée, pruneaux caramélisés, amandes grillées et sésame.', image: '' },
+      { id: uid(), name: 'Poulet rôti avec daghmira', text: 'Poulet doré, sauce daghmira aux oignons confits et aux épices.', image: '' },
+      { id: uid(), name: 'Demi-méchoui', text: 'Agneau rôti lentement, fondant, servi avec cumin et sel.', image: '' }
     ];
   }
   function defaultSite() {
@@ -162,14 +155,7 @@
         { value: '100 %', label: 'formules sur mesure' }
       ],
       zones: ['Casablanca', 'Mohammedia', 'Bouskoura', 'Dar Bouazza', 'Nouaceur', 'Berrechid'],
-      dishes: [
-        { id: uid(), name: 'Pastilla aux fruits de mer', text: 'Feuilles croustillantes, crevettes, calamars et vermicelles parfumés.', image: '' },
-        { id: uid(), name: 'Méchoui', text: 'Agneau rôti lentement, fondant, servi avec cumin et sel.', image: '' },
-        { id: uid(), name: 'Tajine aux pruneaux', text: 'Veau mijoté, pruneaux caramélisés, amandes et sésame.', image: '' },
-        { id: uid(), name: 'Poulet aux olives', text: 'Poulet beldi au citron confit et aux olives violettes.', image: '' },
-        { id: uid(), name: 'Pâtisseries marocaines', text: 'Cornes de gazelle, briouates au miel, ghriba et fekkas.', image: '' },
-        { id: uid(), name: 'Thé à la menthe', text: 'Servi à l’accueil et au dessert, comme il se doit.', image: '' }
-      ],
+      dishes: defaultMenuDishes(),
       faq: [
         { q: 'Combien de temps à l’avance faut-il réserver ?', a: 'Pour un mariage, idéalement 3 à 4 mois avant, surtout en été. Pour une petite réception, quelques semaines suffisent souvent : contactez-nous pour vérifier la date.' },
         { q: 'Est-ce que vous vous déplacez à domicile ?', a: 'Oui. Nous servons en salle comme à domicile, à Casablanca et dans les environs.' },
@@ -451,6 +437,17 @@
     ['stats', 'zones', 'dishes', 'faq', 'reviews'].forEach(function (k) { if (!d.site[k]) d.site[k] = defaultSite()[k]; });
     if (!d.occasions) d.occasions = defaultOccasions();
     // v2 : 8 services (Mariage, Fiançailles, Henné, Aqiqa, Anniversaire, Entreprise, Funérailles, Autre) — on garde les photos déjà ajoutées
+    // v3 : 4 services (Mariage / Fiançailles, Baptême, Entreprise, Événements privés) — on garde les photos
+    if (!d.occasionsV3) {
+      var keep3 = {};
+      var to3 = { mariage: 'mariage', fiancailles: 'mariage', aqiqa: 'bapteme', entreprise: 'entreprise', anniversaire: 'prive', famille: 'prive', henne: 'prive', autre: 'prive' };
+      (d.occasions || []).forEach(function (o) { var k = to3[o.id]; if (k && o.image && !keep3[k]) keep3[k] = o.image; });
+      d.occasions = defaultOccasions();
+      d.occasions.forEach(function (o) { if (keep3[o.id]) o.image = keep3[o.id]; });
+      d.occasionsV2 = d.occasionsV3 = true;
+    }
+    // menu de la page d'accueil
+    if (!d.site.menuV2) { d.site.dishes = defaultMenuDishes(); d.site.menuV2 = true; }
     if (!d.occasionsV2) {
       var keep = {};
       d.occasions.forEach(function (o) { if (o.image) keep[o.id === 'famille' ? 'anniversaire' : o.id] = o.image; });
