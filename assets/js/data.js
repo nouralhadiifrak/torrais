@@ -103,7 +103,7 @@
     'Pastilla royale': 'Cuisine', 'Plateaux de fruits': 'Cuisine', 'Décoration florale': 'Décoration', 'Pâtisseries marocaines': 'Cuisine'
   };
   /* ---------- packs mariage ---------- */
-  var PACK_INCLUDES = ['Décoration', 'Caméra', 'DJ', 'Dessert', 'Jus', 'Gâteaux', 'Thé à la menthe', 'Dattes'];
+  var PACK_INCLUDES = ['Décoration', 'Caméra', 'DJ', 'Dessert', 'Jus', 'Gâteaux', 'Thé à la menthe', 'Dattes et lait'];
   function defaultPackages() {
     return [
       { id: 'essentiel', name: 'Essentiel', place: 'Chez vous', tables: 2, tenues: 2, featured: false, image: '', price: '',
@@ -470,6 +470,10 @@
         delete d.pricing.packages[k];
       });
       d.packagesV2 = true;
+    }
+    if (!d.packagesV3) {
+      (d.packages || []).forEach(function (p) { p.features = (p.features || []).map(function (x) { return x === 'Dattes' ? 'Dattes et lait' : x; }); });
+      d.packagesV3 = true;
     }
     (d.gallery || []).forEach(function (g) { if (!g.category) g.category = GALLERY_GUESS[g.caption] || 'Mariages'; });
     return d;

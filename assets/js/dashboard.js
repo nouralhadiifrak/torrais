@@ -1952,7 +1952,7 @@
       var pkg = data.packages.filter(function (p) { return p.name === f.package.value; })[0];
       if (!pkg) { toast('Choisissez d\'abord une formule dans l\'onglet Détails.', true); return; }
       if (draft.menuList.length && !window.confirm('Remplacer le menu actuel par le contenu de la formule ' + pkg.name + ' ?')) return;
-      var FOOD = ['Dessert', 'Jus', 'Gâteaux', 'Thé à la menthe', 'Dattes'];
+      var FOOD = ['Dessert', 'Jus', 'Gâteaux', 'Thé à la menthe', 'Dattes', 'Dattes et lait'];
       var chosen = (pkg.menus && pkg.menus[0]) ? pkg.menus[0].label.split('+').map(function (x) { return x.trim(); }).filter(Boolean) : [];
       draft.menuList = chosen.concat(pkg.features.filter(function (x) { return FOOD.indexOf(x) !== -1; }));
       if (!draft.menuList.length) draft.menuList = pkg.features.slice();
