@@ -11,10 +11,23 @@
   <link rel="icon" type="image/png" sizes="32x32" href="assets/img/brand/favicon-32.png">
   <link rel="apple-touch-icon" href="assets/img/brand/apple-touch-icon.png">
   <meta name="theme-color" content="#16130f">
+  <script>
+    // Écran d'ouverture : seulement à l'arrivée sur l'accueil, sans lien vers une section, et si les animations ne sont pas réduites
+    (function () {
+      try {
+        if (location.hash || (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) return;
+        var d = document.documentElement;
+        d.classList.add('is-intro');
+        window.__introSafety = setTimeout(function () { d.classList.remove('is-intro'); }, 9000);
+      } catch (e) {}
+    })();
+  </script>
   <link rel="stylesheet" href="assets/vendor/lenis.css">
   <link rel="stylesheet" href="assets/css/site.css">
 </head>
 <body data-page="home">
+
+  <div class="intro" id="intro" aria-hidden="true"><div class="intro__bg"></div><img class="intro__logo" src="assets/img/brand/logo-mark.webp" alt=""></div>
 
   <div id="siteHeader"></div>
 
@@ -253,5 +266,6 @@
   <script src="assets/js/data.js"></script>
   <script src="assets/js/site.js"></script>
   <script src="assets/js/motion.js"></script>
+  <script src="assets/js/intro.js"></script>
 </body>
 </html>

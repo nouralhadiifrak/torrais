@@ -834,3 +834,15 @@ p { margin: 0 0 1em; }
 @media (min-width: 961px) and (max-width: 1360px) { .header .brand__text { display: none; } }
 @media (min-width: 961px) and (max-width: 1520px) { .header .brand__text { display: none; } }
 @media (min-width: 961px) { .header .brand__text { display: none; } .header .brand__logo { height: 58px; max-width: 76px; } }
+
+/* ---------- Écran d'ouverture (accueil) ---------- */
+.intro { display: none; }
+html.is-intro { overflow: hidden; }
+html.is-intro .intro { display: block; position: fixed; inset: 0; z-index: 9999; cursor: pointer; }
+.intro__bg { position: absolute; inset: 0; background: radial-gradient(ellipse at center, #2a2118 0%, #15110c 55%, #0b0907 100%); }
+.intro__logo { position: absolute; left: 50%; top: 50%; width: clamp(64px, 11vmin, 120px); height: auto; margin: 0; transform: translate(-50%, -50%) scale(.9); opacity: 0; }
+.intro__stage { position: absolute; inset: 0; }
+.intro__card { position: absolute; left: 0; top: 0; background: #2b2622 center / cover no-repeat; border: 1px solid rgba(216, 191, 138, .28); box-shadow: 0 14px 34px rgba(0, 0, 0, .55); transform-origin: center; will-change: transform; overflow: hidden; opacity: 0; }
+.intro__shade { position: absolute; inset: 0; opacity: 0; background: linear-gradient(180deg, rgba(28, 22, 16, .42) 0%, rgba(28, 22, 16, .6) 100%); }
+@media (max-width: 700px) { .intro__shade { background: linear-gradient(180deg, rgba(28, 22, 16, .55) 0%, rgba(28, 22, 16, .68) 100%); } }
+html.is-intro:not(.intro-reveal) .hero__inner > *, html.is-intro:not(.intro-reveal) .hero__scroll { opacity: 0; }
