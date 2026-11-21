@@ -846,3 +846,29 @@ html.is-intro .intro { display: block; position: fixed; inset: 0; z-index: 9999;
 .intro__shade { position: absolute; inset: 0; opacity: 0; background: linear-gradient(180deg, rgba(28, 22, 16, .42) 0%, rgba(28, 22, 16, .6) 100%); }
 @media (max-width: 700px) { .intro__shade { background: linear-gradient(180deg, rgba(28, 22, 16, .55) 0%, rgba(28, 22, 16, .68) 100%); } }
 html.is-intro:not(.intro-reveal) .hero__inner > *, html.is-intro:not(.intro-reveal) .hero__scroll { opacity: 0; }
+
+/* ---------- Services par occasion : une ligne par service, photo d'un côté puis de l'autre ---------- */
+.quick + #occasions { padding-top: 76px; }
+.occasions--zigzag { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.occasions--zigzag .occasion { flex-direction: row; min-height: 220px; }
+.occasions--zigzag .occasion__img { aspect-ratio: auto; width: 44%; flex-shrink: 0; }
+.occasions--zigzag .occasion__img img, .occasions--zigzag .occasion__img .ph { position: absolute; inset: 0; width: 100%; height: 100%; }
+.occasions--zigzag .occasion__body { justify-content: center; padding: 22px 24px; }
+.occasions--zigzag .occasion h3 { font-size: 1.5rem; }
+/* damier sur ordinateur : la 2e ligne inverse les côtés */
+.occasions--zigzag .occasion:nth-child(4n+3), .occasions--zigzag .occasion:nth-child(4n+4) { flex-direction: row-reverse; }
+.occasions--zigzag .ph em { font-style: normal; font-size: .62rem; letter-spacing: .14em; text-transform: uppercase; opacity: .75; }
+@media (max-width: 860px) {
+  .occasions--zigzag { grid-template-columns: 1fr; gap: 14px; }
+  .occasions--zigzag .occasion:nth-child(n) { flex-direction: row; }
+  .occasions--zigzag .occasion:nth-child(even) { flex-direction: row-reverse; }
+}
+@media (max-width: 560px) {
+  .occasions--zigzag .occasion { min-height: 150px; }
+  .occasions--zigzag .occasion__img { width: 42%; aspect-ratio: auto; }
+  .occasions--zigzag .occasion__body { padding: 14px 16px; }
+  .occasions--zigzag .occasion__tag { font-size: .6rem; letter-spacing: .16em; }
+  .occasions--zigzag .occasion h3 { font-size: 1.28rem; margin: .2em 0 .25em; }
+  .occasions--zigzag .occasion p { font-size: .8rem; line-height: 1.45; margin-bottom: .6rem; }
+  .occasions--zigzag .occasion__more { font-size: .74rem; }
+}

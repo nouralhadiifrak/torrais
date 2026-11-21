@@ -43,9 +43,9 @@
       '<header class="header"><div class="container header__inner">' +
         '<a href="' + (HOME || '#top') + '" class="brand" aria-label="TORRAIS EVENT — accueil">' + logo + '<span class="brand__text" aria-hidden="true">TORRAIS <em>EVENT</em></span></a>' +
         '<nav class="nav" id="nav" aria-label="Navigation principale">' +
-          '<div class="nav__drop"><button type="button" class="nav__droptoggle" aria-expanded="false">Nos univers <span aria-hidden="true">▾</span></button>' +
+          '<div class="nav__drop"><button type="button" class="nav__droptoggle" aria-expanded="false">Nos services <span aria-hidden="true">▾</span></button>' +
             '<div class="nav__menu">' + occLinks + '</div></div>' +
-          '<a href="' + HOME + '#services">Services</a>' +
+          '<a href="' + HOME + '#services">Métiers</a>' +
           '<a href="' + HOME + '#formules">Formules</a>' +
           '<a href="' + HOME + '#galerie">Réalisations</a>' +
           reviewsLink +
@@ -72,7 +72,7 @@
             '<a href="#" data-wa-link aria-label="WhatsApp"><span class="icon" data-icon="whatsapp"></span></a>' +
             '<a href="#" data-bind-tel="phone" aria-label="Appeler"><span class="icon" data-icon="phone"></span></a>' +
           '</div></div>' +
-        '<div><h3>Nos univers</h3><ul>' + data.occasions.map(function (o) { return '<li><a href="' + occUrl(o) + '">' + esc(o.title) + '</a></li>'; }).join('') + '</ul></div>' +
+        '<div><h3>Nos services</h3><ul>' + data.occasions.map(function (o) { return '<li><a href="' + occUrl(o) + '">' + esc(o.title) + '</a></li>'; }).join('') + '</ul></div>' +
         '<div><h3>Le site</h3><ul>' +
           '<li><a href="composer.html">Composez votre mariage</a></li><li><a href="' + HOME + '#formules">Formules</a></li><li><a href="' + HOME + '#galerie">Réalisations</a></li>' +
           '<li><a href="' + HOME + '#faq">Questions fréquentes</a></li><li><a href="#devis">Devis gratuit</a></li></ul></div>' +
@@ -145,8 +145,8 @@
     var list = data.occasions.filter(function (o) { return !occasion || o.id !== occasion.id; });
     box.innerHTML = list.map(function (o, i) {
       return '<a class="occasion" href="' + occUrl(o) + '"><div class="occasion__img">' +
-        (o.image ? '<img src="' + esc(o.image) + '" alt="' + esc(o.title) + '" loading="lazy">' : placeholder(i + 1)) + '</div>' +
-        '<div class="occasion__body"><span class="occasion__tag">' + esc(o.eventType) + '</span><h3>' + esc(o.title) + '</h3><p>' + esc(o.short) + '</p>' +
+        (o.image ? '<img src="' + esc(o.image) + '" alt="' + esc(o.title) + '" loading="lazy">' : placeholder(i + 1, 'Photo à venir')) + '</div>' +
+        '<div class="occasion__body"><span class="occasion__tag">' + String(i + 1).padStart(2, '0') + '</span><h3>' + esc(o.title) + '</h3><p>' + esc(o.short) + '</p>' +
         '<span class="occasion__more">Découvrir →</span></div></a>';
     }).join('');
   }
