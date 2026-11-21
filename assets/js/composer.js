@@ -27,7 +27,7 @@
 
   // Formules proposées : celles du site + « sur mesure »
   var PACKS = data.packages.filter(function (p) { return P.packages[p.id]; }).map(function (p) {
-    return { id: p.id, name: p.name, tagline: p.tagline, features: p.features, featured: p.featured };
+    return { id: p.id, name: p.name, tagline: p.tagline || p.place || '', features: p.features, featured: p.featured };
   });
   if (P.packages.surmesure) PACKS.push({ id: 'surmesure', name: 'Sur mesure', tagline: 'Je compose moi-même', features: ['Repas de base : entrée, plat, fruits, thé', 'Ajoutez uniquement ce que vous voulez'] });
 
@@ -37,7 +37,7 @@
     type: TYPES.some(function (t) { return t.id === q.get('type'); }) ? q.get('type') : 'Mariage',
     guests: 200,
     date: '',
-    pkg: P.packages[q.get('formule')] ? q.get('formule') : (P.packages.prestige ? 'prestige' : PACKS[0].id),
+    pkg: P.packages[q.get('formule')] ? q.get('formule') : (P.packages.villa ? 'villa' : PACKS[0].id),
     opts: {},
     tyafer: 0
   };

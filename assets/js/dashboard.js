@@ -1648,14 +1648,18 @@
 
       occasionsEditor() +
 
-      '<section class="card" id="c-formules"><header class="card__head"><h3>Formules</h3><span class="muted">Laissez le prix vide pour afficher « Prix sur devis »</span></header>' +
+      '<section class="card" id="c-formules"><header class="card__head"><h3>Packs mariage</h3><span class="muted">Le prix affiché suit le menu choisi par le client</span></header>' +
         '<div class="editor-grid">' + data.packages.map(function (p, i) {
           return '<div class="editor" data-pkg="' + i + '">' +
             imgSlot('pkg:' + i, p.image, 'Photo (optionnelle)', '', true) +
             field('Nom', '<input data-k="name" value="' + esc(p.name) + '">') +
-            field('Sous-titre', '<input data-k="tagline" value="' + esc(p.tagline) + '">') +
-            field('Prix', '<input data-k="price" value="' + esc(p.price) + '" placeholder="Ex. À partir de 350 DH / personne">') +
-            field('Contenu (une ligne par élément)', '<textarea data-k="features" rows="5">' + esc(p.features.join('\n')) + '</textarea>') +
+            field('Lieu', '<input data-k="place" value="' + esc(p.place || p.tagline || '') + '" placeholder="Ex. Location de villa incluse">') +
+            '<div class="form-grid">' +
+              field('Tables (à partir de)', '<input data-k="tables" type="number" min="0" value="' + esc(p.tables || '') + '">') +
+              field('Neggafa (tenues)', '<input data-k="tenues" type="number" min="0" value="' + esc(p.tenues || '') + '">') +
+            '</div>' +
+            field('Menus au choix (un par ligne : menu | prix en DH)', '<textarea data-k="menus" rows="3" placeholder="Poulet + viande aux pruneaux | 12900">' + esc((p.menus || []).map(function (m) { return m.label + ' | ' + m.price; }).join('\n')) + '</textarea>') +
+            field('Inclus (une ligne par élément)', '<textarea data-k="features" rows="5">' + esc(p.features.join('\n')) + '</textarea>') +
             '<label class="switch"><input type="checkbox" data-k="featured"' + (p.featured ? ' checked' : '') + '><span>Mettre en avant</span></label>' +
             '</div>';
         }).join('') + '</div>' +
@@ -1948,7 +1952,10 @@
       var pkg = data.packages.filter(function (p) { return p.name === f.package.value; })[0];
       if (!pkg) { toast('Choisissez d\'abord une formule dans l\'onglet Détails.', true); return; }
       if (draft.menuList.length && !window.confirm('Remplacer le menu actuel par le contenu de la formule ' + pkg.name + ' ?')) return;
-      draft.menuList = pkg.features.slice();
+      var FOOD = ['Dessert', 'Jus', 'Gâteaux', 'Thé à la menthe', 'Dattes'];
+      var chosen = (pkg.menus && pkg.menus[0]) ? pkg.menus[0].label.split('+').map(function (x) { return x.trim(); }).filter(Boolean) : [];
+      draft.menuList = chosen.concat(pkg.features.filter(function (x) { return FOOD.indexOf(x) !== -1; }));
+      if (!draft.menuList.length) draft.menuList = pkg.features.slice();
       renderMenu();
     },
     'ev-add-dish': function () {
@@ -2140,12 +2147,17 @@
       $$('[data-pkg]').forEach(function (box) {
         var p = data.packages[+box.dataset.pkg];
         p.name = $('[data-k="name"]', box).value.trim();
-        p.tagline = $('[data-k="tagline"]', box).value.trim();
-        p.price = $('[data-k="price"]', box).value.trim();
+        p.place = $('[data-k="place"]', box).value.trim();
+        p.tables = +$('[data-k="tables"]', box).value || 0;
+        p.tenues = +$('[data-k="tenues"]', box).value || 0;
+        p.menus = $('[data-k="menus"]', box).value.split('\n').map(function (x) {
+          var parts = x.split('|');
+          return { label: parts[0].trim(), price: +String(parts[1] || '').replace(/[^\d]/g, '') || 0 };
+        }).filter(function (m) { return m.label; });
         p.features = $('[data-k="features"]', box).value.split('\n').map(function (x) { return x.trim(); }).filter(Boolean);
         p.featured = $('[data-k="featured"]', box).checked;
       });
-      commit('Formules enregistrées.');
+      commit('Packs enregistrés.');
     },
     'save-services': function () {
       $$('[data-svc]').forEach(function (box) {

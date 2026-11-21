@@ -102,6 +102,21 @@
     "Table d'honneur": 'Mariages', 'Buffet marocain': 'Cuisine', 'Tyafer de la henné': 'Tyafer', 'Kousha de la mariée': 'Décoration',
     'Pastilla royale': 'Cuisine', 'Plateaux de fruits': 'Cuisine', 'Décoration florale': 'Décoration', 'Pâtisseries marocaines': 'Cuisine'
   };
+  /* ---------- packs mariage ---------- */
+  var PACK_INCLUDES = ['Décoration', 'Caméra', 'DJ', 'Dessert', 'Jus', 'Gâteaux', 'Thé à la menthe', 'Dattes'];
+  function defaultPackages() {
+    return [
+      { id: 'essentiel', name: 'Essentiel', place: 'Chez vous', tables: 2, tenues: 2, featured: false, image: '', price: '',
+        menus: [{ label: 'Poulet + viande aux pruneaux', price: 12900 }, { label: 'Pastilla au poisson + viande aux pruneaux', price: 12900 }],
+        features: PACK_INCLUDES.slice() },
+      { id: 'villa', name: 'Villa', place: 'Location de villa incluse', tables: 6, tenues: 3, featured: true, image: '', price: '',
+        menus: [{ label: 'Pastilla poulet + viande aux pruneaux', price: 29500 }, { label: 'Pastilla poisson + viande aux pruneaux', price: 32500 }],
+        features: PACK_INCLUDES.slice() },
+      { id: 'salle', name: 'Salle de fête', place: 'Location de salle incluse', tables: 10, tenues: 5, featured: false, image: '', price: '',
+        menus: [{ label: 'Poulet + viande aux pruneaux', price: 39900 }, { label: 'Pastilla poisson + viande aux pruneaux', price: 57000 }],
+        features: PACK_INCLUDES.map(function (x) { return x === 'DJ' ? 'Orchestre' : x; }) }
+    ];
+  }
   function defaultOccasions() {
     return [
       { id: 'mariage', title: 'Mariage', eventType: 'Mariage', galleryCat: 'Mariages', image: '',
@@ -171,9 +186,9 @@
   function defaultPricing() {
     return {
       packages: {
-        essentielle: { min: 180, max: 250, includes: [] },
-        prestige: { min: 280, max: 380, includes: ['mechoui', 'desserts', 'deco_tables'] },
-        royale: { min: 420, max: 600, includes: ['cocktail', 'mechoui', 'desserts', 'gateau', 'deco_tables', 'deco_salle', 'kousha', 'maitre'] },
+        essentiel: { min: 180, max: 250, includes: [] },
+        villa: { min: 280, max: 380, includes: ['mechoui', 'desserts', 'deco_tables'] },
+        salle: { min: 420, max: 600, includes: ['cocktail', 'mechoui', 'desserts', 'gateau', 'deco_tables', 'deco_salle', 'kousha', 'maitre'] },
         surmesure: { min: 120, max: 180, includes: [] }
       },
       options: [
@@ -214,14 +229,7 @@
         { id: 'tyafer', image: '', icon: 'tyafer', title: 'Tyafer', text: 'Tyafer décorés pour la henné, les fiançailles et la dote : une présentation raffinée des cadeaux, dans le respect de la tradition.' },
         { id: 'deco', image: '', icon: 'deco', title: 'Décoration', text: 'Décoration des tables, fleurs, lumières et kousha de la mariée, accordées au thème et aux couleurs de votre fête.' }
       ],
-      packages: [
-        { id: 'essentielle', name: 'Essentielle', tagline: 'Fiançailles et réceptions intimes', price: '', image: '', featured: false,
-          features: ['Dîner traditionnel : pastilla, tajine, fruits', 'Service à table', 'Vaisselle et nappage', 'Thé et pâtisseries marocaines'] },
-        { id: 'prestige', name: 'Prestige', tagline: 'La formule mariage la plus demandée', price: '', image: '', featured: true,
-          features: ['Tout de la formule Essentielle', 'Méchoui ou plat royal', 'Buffet de desserts', 'Décoration des tables', 'Tyafer pour la cérémonie'] },
-        { id: 'royale', name: 'Royale', tagline: 'Votre mariage clé en main', price: '', image: '', featured: false,
-          features: ['Tout de la formule Prestige', 'Décoration complète de la salle et de la kousha', "Cocktail d'accueil", 'Gâteau des mariés', 'Maître d\'hôtel dédié'] }
-      ],
+      packages: defaultPackages(),
       gallery: [
         { id: uid(), src: '', caption: "Table d'honneur", tone: 1 },
         { id: uid(), src: '', caption: 'Buffet marocain', tone: 2 },
@@ -451,6 +459,18 @@
       d.occasionsV2 = true;
     }
     if (!d.pricing) d.pricing = defaultPricing();
+    // v2 : packs Essentiel / Villa / Salle de fête (on garde les photos déjà ajoutées)
+    if (!d.packagesV2) {
+      var imgs = (d.packages || []).map(function (p) { return p.image || ''; });
+      d.packages = defaultPackages();
+      d.packages.forEach(function (p, i) { if (imgs[i]) p.image = imgs[i]; });
+      var map = { essentielle: 'essentiel', prestige: 'villa', royale: 'salle' };
+      Object.keys(map).forEach(function (k) {
+        if (d.pricing.packages[k] && !d.pricing.packages[map[k]]) { d.pricing.packages[map[k]] = d.pricing.packages[k]; }
+        delete d.pricing.packages[k];
+      });
+      d.packagesV2 = true;
+    }
     (d.gallery || []).forEach(function (g) { if (!g.category) g.category = GALLERY_GUESS[g.caption] || 'Mariages'; });
     return d;
   }

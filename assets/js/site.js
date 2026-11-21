@@ -46,7 +46,7 @@
           '<div class="nav__drop"><button type="button" class="nav__droptoggle" aria-expanded="false">Nos services <span aria-hidden="true">▾</span></button>' +
             '<div class="nav__menu">' + occLinks + '</div></div>' +
           '<a href="' + HOME + '#services">Métiers</a>' +
-          '<a href="' + HOME + '#formules">Formules</a>' +
+          '<a href="' + HOME + '#formules">Packs</a>' +
           '<a href="' + HOME + '#galerie">Réalisations</a>' +
           reviewsLink +
           '<a href="composer.html"' + (PAGE === 'composer' ? ' aria-current="page"' : '') + '>Composer</a>' +
@@ -180,24 +180,46 @@
     });
   }
 
+  function packPrice(n) { return Math.round(+n || 0).toLocaleString('fr-FR').replace(/\s/g, ' ') + ' DH'; }
   function renderPackages() {
     var box = $('#packagesGrid');
     if (!box) return;
-    box.innerHTML = data.packages.map(function (p) {
-      var price = p.price ? esc(p.price) : 'Prix sur devis';
-      return '<article class="package' + (p.featured ? ' package--featured' : '') + (p.image ? ' package--photo' : '') + '">' +
-        (p.image ? '<div class="package__img"><img src="' + esc(p.image) + '" alt="' + esc(p.name) + '" loading="lazy"></div>' : '') +
-        (p.featured ? '<span class="package__badge">La plus demandée</span>' : '') +
-        '<h3 class="package__name">' + esc(p.name) + '</h3>' +
-        '<p class="package__tagline">' + esc(p.tagline) + '</p>' +
-        '<div class="package__price">' + price + '</div>' +
-        '<ul class="package__list">' + p.features.map(function (f) {
-          return '<li><span class="icon">' + T.icons.check + '</span><span>' + esc(f) + '</span></li>';
-        }).join('') + '</ul>' +
-        '<a href="#devis" class="btn ' + (p.featured ? 'btn--gold' : 'btn--outline') + ' btn--block" data-package="' + esc(p.name) + '">Demander un devis</a>' +
-        (data.pricing && data.pricing.packages[p.id] ? '<a class="package__compose" href="composer.html?formule=' + encodeURIComponent(p.id) + '">Composer avec cette formule →</a>' : '') +
+    var pin = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>';
+    box.innerHTML = data.packages.map(function (p, i) {
+      var menus = (p.menus || []).filter(function (m) { return m.label; });
+      var same = menus.length > 1 && menus.every(function (m) { return +m.price === +menus[0].price; });
+      var cheapest = menus.reduce(function (min, m, j) { return +m.price && (min < 0 || +m.price < +menus[min].price) ? j : min; }, -1);
+      var start = cheapest >= 0 ? cheapest : 0;
+      var facts = [];
+      if (p.tables) facts.push('Dès <b>' + esc(p.tables) + ' tables</b>');
+      if (p.tenues) facts.push('Neggafa · <b>' + esc(p.tenues) + ' tenues</b>');
+      return '<article class="pack' + (p.featured ? ' pack--featured' : '') + '" data-pack="' + esc(p.name) + '">' +
+        (p.image ? '<div class="pack__img"><img src="' + esc(p.image) + '" alt="' + esc(p.name) + '" loading="lazy"></div>' : '') +
+        (p.featured ? '<span class="pack__badge">Le plus demandé</span>' : '') +
+        '<span class="pack__num">Pack ' + (i + 1) + '</span>' +
+        '<h3 class="pack__name">' + esc(p.name) + '</h3>' +
+        (p.place || p.tagline ? '<p class="pack__place">' + pin + esc(p.place || p.tagline) + '</p>' : '') +
+        (facts.length ? '<div class="pack__facts">' + facts.map(function (f) { return '<span>' + f + '</span>'; }).join('') + '</div>' : '') +
+        (p.features && p.features.length ? '<h4 class="pack__sub">Inclus</h4><ul class="pack__incl">' + p.features.map(function (f) {
+          return '<li' + (/orchestre/i.test(f) ? ' class="is-strong"' : '') + '>' + esc(f) + '</li>';
+        }).join('') + '</ul>' : '') +
+        (menus.length ? '<h4 class="pack__sub">Votre menu</h4><div class="pack__menus" role="radiogroup" aria-label="Menu du pack ' + esc(p.name) + '">' + menus.map(function (m, j) {
+          return '<label class="pack__menu"><input type="radio" name="packmenu' + i + '" value="' + j + '"' + (j === start ? ' checked' : '') + '>' +
+            '<span>' + esc(m.label) + '</span><em>' + (same ? 'même prix' : (+m.price ? packPrice(m.price) : 'sur devis')) + '</em></label>';
+        }).join('') + '</div>' : '') +
+        '<div class="pack__price"><small>À partir de</small><strong data-pack-price>' +
+          (menus.length && +menus[start].price ? packPrice(menus[start].price) : esc(p.price || 'Sur devis')) + '</strong></div>' +
+        '<a href="#devis" class="btn ' + (p.featured ? 'btn--gold' : 'btn--outline') + ' btn--block" data-package="' + esc(p.name) + '">Demander ce pack</a>' +
         '</article>';
     }).join('');
+    // le prix suit le menu choisi
+    box.addEventListener('change', function (e) {
+      var card = e.target.closest('.pack');
+      if (!card || e.target.type !== 'radio') return;
+      var p = data.packages.filter(function (x) { return x.name === card.getAttribute('data-pack'); })[0];
+      var m = p && p.menus[+e.target.value];
+      if (m) $('[data-pack-price]', card).textContent = +m.price ? packPrice(m.price) : 'Sur devis';
+    });
   }
 
   function renderStats() {
@@ -480,7 +502,13 @@
       var a = e.target.closest('[data-package]');
       if (!a) return;
       var msg = form.elements.message;
-      if (!msg.value) msg.value = 'Je suis intéressé(e) par la formule ' + a.getAttribute('data-package') + '.';
+      var card = a.closest('.pack');
+      var chosen = card ? $('.pack__menu input:checked', card) : null;
+      var price = card ? $('[data-pack-price]', card) : null;
+      var line = 'Je suis intéressé(e) par le pack ' + a.getAttribute('data-package') +
+        (chosen ? ' — menu : ' + chosen.parentNode.querySelector('span').textContent : '') +
+        (price ? ' (à partir de ' + price.textContent + ')' : '') + '.';
+      if (!msg.value || /^Je suis intéressé\(e\) par (la formule|le pack)/.test(msg.value)) msg.value = line;
       if (!form.elements.eventType.value) form.elements.eventType.value = 'Mariage';
     });
 
