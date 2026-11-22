@@ -1113,3 +1113,7 @@ h1, h2, h3, h4, .section-title, .page-hero__title, .hero__title--text, .choice__
 .about__caption, .about__sign, .ph em, .review blockquote, .cf-ph em { font-style: normal; }
 .hero__title--text { line-height: 1.12; letter-spacing: .01em; }
 .lux-band__track span { letter-spacing: .24em; }
+
+/* accueil : fin contour arrondi autour des petits titres (Nos services, Notre cuisine, Votre événement…) */
+body[data-page="home"] main .section .eyebrow { display: inline-flex; align-items: center; padding: 8px 18px; border: 1px solid rgba(176, 138, 69, .55); border-radius: 999px; line-height: 1; margin-bottom: 18px; }
+body[data-page="home"] main .lux-choice .eyebrow { border-color: rgba(216, 191, 138, .5); }
