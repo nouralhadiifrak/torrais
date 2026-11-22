@@ -1650,22 +1650,27 @@
 
       occasionsEditor() +
 
-      '<section class="card" id="c-formules"><header class="card__head"><h3>Packs mariage</h3><span class="muted">Le prix affiché suit le menu choisi par le client</span></header>' +
-        '<div class="editor-grid">' + data.packages.map(function (p, i) {
-          return '<div class="editor" data-pkg="' + i + '">' +
-            imgSlot('pkg:' + i, p.image, 'Photo (optionnelle)', '', true) +
-            field('Nom', '<input data-k="name" value="' + esc(p.name) + '">') +
-            field('Lieu', '<input data-k="place" value="' + esc(p.place || p.tagline || '') + '" placeholder="Ex. Location de villa incluse">') +
-            '<div class="form-grid">' +
-              field('Tables (à partir de)', '<input data-k="tables" type="number" min="0" value="' + esc(p.tables || '') + '">') +
-              field('Neggafa (tenues)', '<input data-k="tenues" type="number" min="0" value="' + esc(p.tenues || '') + '">') +
-            '</div>' +
-            field('Menus au choix (un par ligne : menu | prix en DH)', '<textarea data-k="menus" rows="3" placeholder="Poulet + viande aux pruneaux | 12900">' + esc((p.menus || []).map(function (m) { return m.label + ' | ' + m.price; }).join('\n')) + '</textarea>') +
-            field('Inclus (une ligne par élément)', '<textarea data-k="features" rows="5">' + esc(p.features.join('\n')) + '</textarea>') +
-            '<label class="switch"><input type="checkbox" data-k="featured"' + (p.featured ? ' checked' : '') + '><span>Mettre en avant</span></label>' +
-            '</div>';
-        }).join('') + '</div>' +
-        '<div class="form-actions"><button class="btn btn--primary btn--sm" data-action="save-packages">Enregistrer les formules</button></div>' +
+      '<section class="card" id="c-formules"><header class="card__head"><h3>Packs par service</h3><span class="muted">3 packs pour chaque service · le prix affiché suit le menu choisi</span></header>' +
+        '<div class="chips pack-groups">' + T.PACK_GROUPS.map(function (g, gi) { return '<button type="button" class="chip' + (gi === 0 ? ' is-active' : '') + '" data-action="pkg-group" data-group="' + g.id + '">' + esc(g.label) + '</button>'; }).join('') + '</div>' +
+        T.PACK_GROUPS.map(function (g, gi) {
+          var list = g.id === 'mariage' ? data.packages : (data.servicePacks[g.id] || []);
+          return '<div class="editor-grid pkg-group" data-pkg-group="' + g.id + '"' + (gi ? ' hidden' : '') + '>' + list.map(function (p, i) {
+            return '<div class="editor" data-pkg="' + g.id + ':' + i + '">' +
+              (g.id === 'mariage' ? imgSlot('pkg:' + i, p.image, 'Photo (optionnelle)', '', true) : '') +
+              field('Nom', '<input data-k="name" value="' + esc(p.name) + '">') +
+              field('Lieu / sous-titre', '<input data-k="place" value="' + esc(p.place || p.tagline || '') + '" placeholder="Ex. Location de villa incluse">') +
+              '<div class="form-grid">' +
+                field('Tables (à partir de)', '<input data-k="tables" type="number" min="0" value="' + esc(p.tables || '') + '">') +
+                field('Neggafa (tenues)', '<input data-k="tenues" type="number" min="0" value="' + esc(p.tenues || '') + '">') +
+              '</div>' +
+              field('Menus au choix (un par ligne : menu | prix en DH)', '<textarea data-k="menus" rows="3" placeholder="Poulet + viande aux pruneaux | 12900">' + esc((p.menus || []).map(function (m) { return m.label + ' | ' + m.price; }).join('\n')) + '</textarea>') +
+              field('Inclus (une ligne par élément)', '<textarea data-k="features" rows="5">' + esc((p.features || []).join('\n')) + '</textarea>') +
+              field('Prix si pas de menu (facultatif)', '<input data-k="price" value="' + esc(p.price || '') + '" placeholder="Ex. À partir de 9 900 DH">') +
+              '<label class="switch"><input type="checkbox" data-k="featured"' + (p.featured ? ' checked' : '') + '><span>Mettre en avant</span></label>' +
+              '</div>';
+          }).join('') + '</div>';
+        }).join('') +
+        '<div class="form-actions"><button class="btn btn--primary btn--sm" data-action="save-packages">Enregistrer les packs</button></div>' +
       '</section>' +
 
       '<section class="card" id="c-services"><header class="card__head"><h3>Services</h3></header>' +
@@ -2145,19 +2150,28 @@
       });
       commit('Coordonnées enregistrées.');
     },
+    'pkg-group': function (el) {
+      $$('[data-action="pkg-group"]').forEach(function (b) { b.classList.toggle('is-active', b === el); });
+      $$('.pkg-group').forEach(function (g) { g.hidden = g.dataset.pkgGroup !== el.dataset.group; });
+    },
     'save-packages': function () {
       $$('[data-pkg]').forEach(function (box) {
-        var p = data.packages[+box.dataset.pkg];
+        var parts = box.dataset.pkg.split(':');
+        var list = parts[0] === 'mariage' ? data.packages : data.servicePacks[parts[0]];
+        var p = list && list[+parts[1]];
+        if (!p) return;
         p.name = $('[data-k="name"]', box).value.trim();
         p.place = $('[data-k="place"]', box).value.trim();
         p.tables = +$('[data-k="tables"]', box).value || 0;
         p.tenues = +$('[data-k="tenues"]', box).value || 0;
         p.menus = $('[data-k="menus"]', box).value.split('\n').map(function (x) {
-          var parts = x.split('|');
-          return { label: parts[0].trim(), price: +String(parts[1] || '').replace(/[^\d]/g, '') || 0 };
+          var q = x.split('|');
+          return { label: q[0].trim(), price: +String(q[1] || '').replace(/[^\d]/g, '') || 0 };
         }).filter(function (m) { return m.label; });
         p.features = $('[data-k="features"]', box).value.split('\n').map(function (x) { return x.trim(); }).filter(Boolean);
+        p.price = $('[data-k="price"]', box).value.trim();
         p.featured = $('[data-k="featured"]', box).checked;
+        p.soon = !p.menus.length && !p.features.length && !p.price;
       });
       commit('Packs enregistrés.');
     },

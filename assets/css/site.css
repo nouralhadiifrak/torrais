@@ -1157,3 +1157,15 @@ body[data-page="home"] main .lux-choice .eyebrow { border-color: rgba(216, 191, 
 .carte__group:target { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201, 164, 92, .25); }
 .carte__num { position: absolute; top: 22px; right: 24px; font: 400 1.6rem/1 var(--lux); color: rgba(176, 138, 69, .35); }
 #detail .carte { max-width: 1100px; }
+
+/* packs : onglets Mariage / Fiançailles et packs « à venir » */
+.pack-tabs { display: flex; justify-content: center; gap: 6px; margin: -6px auto 30px; padding: 5px; width: max-content; max-width: 100%; border: 1px solid rgba(176, 138, 69, .45); border-radius: 999px; background: var(--white); }
+.pack-tabs[hidden] { display: none; }
+.pack-tab { border: 0; background: transparent; padding: 11px 26px; border-radius: 999px; font: 700 .76rem/1 var(--sans); letter-spacing: .18em; text-transform: uppercase; color: var(--gold-text); cursor: pointer; transition: background .25s, color .25s; }
+.pack-tab.is-active { background: var(--gold); color: #fff; }
+.pack--soon .pack__name { color: var(--ink); }
+.pack__soon { display: grid; gap: 10px; margin: 6px 0 22px; }
+.pack__soon span { font: 700 .66rem/1 var(--sans); letter-spacing: .2em; text-transform: uppercase; color: var(--gold-text); border: 1px solid rgba(176, 138, 69, .45); border-radius: 999px; padding: 7px 12px; width: max-content; }
+.pack__soon i { display: block; height: 10px; border-radius: 6px; background: linear-gradient(90deg, var(--sand) 25%, #f6efe3 50%, var(--sand) 75%); background-size: 200% 100%; animation: phShine 2.4s ease-in-out infinite; }
+.pack__soon i.short { width: 60%; }
+@media (prefers-reduced-motion: reduce) { .pack__soon i { animation: none; } }

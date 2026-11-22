@@ -306,42 +306,78 @@
   }
 
   function packPrice(n) { return Math.round(+n || 0).toLocaleString('fr-FR').replace(/\s/g, ' ') + ' DH'; }
+  function packsOf(group) { return group === 'mariage' ? data.packages : ((data.servicePacks || {})[group] || []); }
+  function packCard(p, i, groupLabel) {
+    var pin = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>';
+    var menus = (p.menus || []).filter(function (m) { return m.label; });
+    var same = menus.length > 1 && menus.every(function (m) { return +m.price === +menus[0].price; });
+    var cheapest = menus.reduce(function (min, m, j) { return +m.price && (min < 0 || +m.price < +menus[min].price) ? j : min; }, -1);
+    var start = cheapest >= 0 ? cheapest : 0;
+    var facts = [];
+    if (p.tables) facts.push('Dès <b>' + esc(p.tables) + ' tables</b>');
+    if (p.tenues) facts.push('Neggafa · <b>' + esc(p.tenues) + ' tenues</b>');
+    var soon = p.soon || (!menus.length && !(p.features || []).length);
+    return '<article class="pack' + (p.featured ? ' pack--featured' : '') + (soon ? ' pack--soon' : '') + '" data-i="' + i + '">' +
+      (p.image ? '<div class="pack__img"><img src="' + esc(p.image) + '" alt="' + esc(p.name) + '" loading="lazy"></div>' : '') +
+      (p.featured && !soon ? '<span class="pack__badge">Le plus demandé</span>' : '') +
+      '<span class="pack__num">Pack ' + (i + 1) + '</span>' +
+      '<h3 class="pack__name">' + esc(p.name) + '</h3>' +
+      (p.place || p.tagline ? '<p class="pack__place">' + pin + esc(p.place || p.tagline) + '</p>' : '') +
+      (facts.length ? '<div class="pack__facts">' + facts.map(function (f) { return '<span>' + f + '</span>'; }).join('') + '</div>' : '') +
+      (soon ? '<div class="pack__soon"><span>Détails à venir</span><i></i><i></i><i class="short"></i></div>' : '') +
+      (p.features && p.features.length ? '<h4 class="pack__sub">Inclus</h4><ul class="pack__incl">' + p.features.map(function (f) {
+        return '<li' + (/orchestre/i.test(f) ? ' class="is-strong"' : '') + '>' + esc(f) + '</li>';
+      }).join('') + '</ul>' : '') +
+      (menus.length ? '<h4 class="pack__sub">Votre menu</h4><div class="pack__menus" role="radiogroup" aria-label="Menu du pack ' + esc(p.name) + '">' + menus.map(function (m, j) {
+        return '<label class="pack__menu"><input type="radio" name="packmenu-' + esc(groupLabel) + '-' + i + '" value="' + j + '"' + (j === start ? ' checked' : '') + '>' +
+          '<span>' + esc(m.label) + '</span><em>' + (same ? 'même prix' : (+m.price ? packPrice(m.price) : 'sur devis')) + '</em></label>';
+      }).join('') + '</div>' : '') +
+      '<div class="pack__price"><small>' + (soon ? 'Prix' : 'À partir de') + '</small><strong data-pack-price>' +
+        (menus.length && +menus[start].price ? packPrice(menus[start].price) : esc(p.price || 'Sur devis')) + '</strong></div>' +
+      '<a href="#devis" class="btn ' + (p.featured ? 'btn--gold' : 'btn--outline') + ' btn--block" data-package="' + esc(p.name + ' (' + groupLabel + ')') + '">Demander ce pack</a>' +
+      '</article>';
+  }
   function renderPackages() {
     var box = $('#packagesGrid');
     if (!box) return;
-    var pin = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>';
-    box.innerHTML = data.packages.map(function (p, i) {
-      var menus = (p.menus || []).filter(function (m) { return m.label; });
-      var same = menus.length > 1 && menus.every(function (m) { return +m.price === +menus[0].price; });
-      var cheapest = menus.reduce(function (min, m, j) { return +m.price && (min < 0 || +m.price < +menus[min].price) ? j : min; }, -1);
-      var start = cheapest >= 0 ? cheapest : 0;
-      var facts = [];
-      if (p.tables) facts.push('Dès <b>' + esc(p.tables) + ' tables</b>');
-      if (p.tenues) facts.push('Neggafa · <b>' + esc(p.tenues) + ' tenues</b>');
-      return '<article class="pack' + (p.featured ? ' pack--featured' : '') + '" data-pack="' + esc(p.name) + '">' +
-        (p.image ? '<div class="pack__img"><img src="' + esc(p.image) + '" alt="' + esc(p.name) + '" loading="lazy"></div>' : '') +
-        (p.featured ? '<span class="pack__badge">Le plus demandé</span>' : '') +
-        '<span class="pack__num">Pack ' + (i + 1) + '</span>' +
-        '<h3 class="pack__name">' + esc(p.name) + '</h3>' +
-        (p.place || p.tagline ? '<p class="pack__place">' + pin + esc(p.place || p.tagline) + '</p>' : '') +
-        (facts.length ? '<div class="pack__facts">' + facts.map(function (f) { return '<span>' + f + '</span>'; }).join('') + '</div>' : '') +
-        (p.features && p.features.length ? '<h4 class="pack__sub">Inclus</h4><ul class="pack__incl">' + p.features.map(function (f) {
-          return '<li' + (/orchestre/i.test(f) ? ' class="is-strong"' : '') + '>' + esc(f) + '</li>';
-        }).join('') + '</ul>' : '') +
-        (menus.length ? '<h4 class="pack__sub">Votre menu</h4><div class="pack__menus" role="radiogroup" aria-label="Menu du pack ' + esc(p.name) + '">' + menus.map(function (m, j) {
-          return '<label class="pack__menu"><input type="radio" name="packmenu' + i + '" value="' + j + '"' + (j === start ? ' checked' : '') + '>' +
-            '<span>' + esc(m.label) + '</span><em>' + (same ? 'même prix' : (+m.price ? packPrice(m.price) : 'sur devis')) + '</em></label>';
-        }).join('') + '</div>' : '') +
-        '<div class="pack__price"><small>À partir de</small><strong data-pack-price>' +
-          (menus.length && +menus[start].price ? packPrice(menus[start].price) : esc(p.price || 'Sur devis')) + '</strong></div>' +
-        '<a href="#devis" class="btn ' + (p.featured ? 'btn--gold' : 'btn--outline') + ' btn--block" data-package="' + esc(p.name) + '">Demander ce pack</a>' +
-        '</article>';
-    }).join('');
+    var section = $('#formules');
+    var groups = !occasion ? ['mariage'] : occasion.id === 'mariage' ? ['mariage', 'fiancailles'] : [occasion.id];
+    var labels = {}; (T.PACK_GROUPS || []).forEach(function (g) { labels[g.id] = g.label; });
+    var tabs = $('#packTabs');
+    var current = groups[0];
+    function draw() {
+      var list = packsOf(current);
+      box.setAttribute('data-group', current);
+      box.innerHTML = list.map(function (p, i) { return packCard(p, i, labels[current] || current); }).join('');
+      var head = section && $('.section-head', section);
+      if (head) {
+        $('.eyebrow', head).textContent = 'Packs ' + (labels[current] || '').toLowerCase();
+        var allSoon = list.every(function (p) { return p.soon; });
+        $('.section-sub', head).textContent = current === 'mariage'
+          ? "Trois packs tout compris : neggafa, décoration, caméra, musique, dîner et douceurs. Choisissez votre menu, le prix s'affiche."
+          : allSoon ? 'Nos trois packs ' + (labels[current] || '').toLowerCase() + ' arrivent très bientôt. En attendant, demandez votre devis gratuit.'
+          : 'Trois packs pour votre événement. Choisissez celui qui vous convient.';
+      }
+    }
+    if (tabs) {
+      if (groups.length > 1) {
+        tabs.hidden = false;
+        tabs.innerHTML = groups.map(function (g, i) { return '<button type="button" role="tab" aria-selected="' + (i === 0) + '" class="pack-tab' + (i === 0 ? ' is-active' : '') + '" data-group="' + g + '">' + esc(labels[g] || g) + '</button>'; }).join('');
+        tabs.addEventListener('click', function (e) {
+          var t = e.target.closest('[data-group]');
+          if (!t) return;
+          current = t.getAttribute('data-group');
+          $$('.pack-tab', tabs).forEach(function (x) { x.classList.toggle('is-active', x === t); x.setAttribute('aria-selected', String(x === t)); });
+          draw();
+        });
+      } else tabs.hidden = true;
+    }
+    draw();
     // le prix suit le menu choisi
     box.addEventListener('change', function (e) {
       var card = e.target.closest('.pack');
       if (!card || e.target.type !== 'radio') return;
-      var p = data.packages.filter(function (x) { return x.name === card.getAttribute('data-pack'); })[0];
+      var p = packsOf(current)[+card.getAttribute('data-i')];
       var m = p && p.menus[+e.target.value];
       if (m) $('[data-pack-price]', card).textContent = +m.price ? packPrice(m.price) : 'Sur devis';
     });
@@ -569,8 +605,6 @@
     $('#occIncludes').innerHTML = (occasion.includes || []).map(function (x) {
       return '<li><span class="icon">' + T.icons.check + '</span><span>' + esc(x) + '</span></li>';
     }).join('');
-    var packs = $('#formules');
-    if (packs) packs.hidden = occasion.id !== 'mariage';
     $('#occWa').setAttribute('data-wa-text', 'Bonjour TORRAIS EVENT, je souhaite des informations pour : ' + occasion.title.toLowerCase() + '.');
     var bg = occasion.image || (data.media.hero[0] && data.media.hero[0].src) || (data.media.heroVideo ? 'assets/img/salle.jpg' : '');
     if (bg) {
@@ -746,7 +780,7 @@
       var price = card ? $('[data-pack-price]', card) : null;
       var line = 'Je suis intéressé(e) par le pack ' + a.getAttribute('data-package') +
         (chosen ? ' — menu : ' + chosen.parentNode.querySelector('span').textContent : '') +
-        (price ? ' (à partir de ' + price.textContent + ')' : '') + '.';
+        (price && /^\d/.test(price.textContent) ? ' (à partir de ' + price.textContent + ')' : price && /\d/.test(price.textContent) ? ' (' + price.textContent.charAt(0).toLowerCase() + price.textContent.slice(1) + ')' : '') + '.';
       if (!msg.value || /^Je suis intéressé\(e\) par (la formule|le pack)/.test(msg.value)) msg.value = line;
       if (!form.elements.eventType.value) form.elements.eventType.value = 'Mariage';
     });

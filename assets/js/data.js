@@ -117,6 +117,22 @@
         features: PACK_INCLUDES.map(function (x) { return x === 'DJ' ? 'Orchestre' : x; }) }
     ];
   }
+  // Packs des autres services (le mariage garde data.packages) : contenu à venir, remplacé quand le gérant l'envoie
+  var PACK_GROUPS = [
+    { id: 'mariage', label: 'Mariage' },
+    { id: 'fiancailles', label: 'Fiançailles' },
+    { id: 'bapteme', label: 'Baptême' },
+    { id: 'entreprise', label: 'Entreprise' },
+    { id: 'prive', label: 'Événements privés' }
+  ];
+  function placeholderPacks() {
+    return ['Essentiel', 'Prestige', 'Royal'].map(function (n, i) {
+      return { id: n.toLowerCase(), name: n, place: '', tables: 0, tenues: 0, featured: i === 1, image: '', price: '', menus: [], features: [], soon: true };
+    });
+  }
+  function defaultServicePacks() {
+    return { fiancailles: placeholderPacks(), bapteme: placeholderPacks(), entreprise: placeholderPacks(), prive: placeholderPacks() };
+  }
   function defaultOccasions() {
     return [
       { id: 'mariage', title: 'Mariage / Fiançailles', eventType: 'Mariage', galleryCat: 'Mariages', image: '',
@@ -469,6 +485,7 @@
     // menu de la page d'accueil
     if (!d.site.menuV2) { d.site.dishes = defaultMenuDishes(); d.site.menuV2 = true; }
     if (!d.site.menuCats) d.site.menuCats = defaultMenuCats();
+    if (!d.servicePacks) d.servicePacks = defaultServicePacks();
     if (!d.occasionsV2) {
       var keep = {};
       d.occasions.forEach(function (o) { if (o.image) keep[o.id === 'famille' ? 'anniversaire' : o.id] = o.image; });
@@ -523,6 +540,7 @@
     },
     icons: ICONS,
     EVENT_TYPES: EVENT_TYPES,
+    PACK_GROUPS: PACK_GROUPS,
     SERVICE_NAMES: SERVICE_NAMES,
     SOURCES: SOURCES,
     ROLES: ROLES,
