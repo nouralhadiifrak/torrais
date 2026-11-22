@@ -472,8 +472,18 @@
     var box = $('#reviewsGrid');
     if (!box) return;
     var list = (data.site.reviews || []).filter(function (r) { return r.text; });
-    if (!list.length) return;
     $('#avis').hidden = false;
+    // Pas encore de vrais avis : cartes d'attente clairement marquées (aucun faux nom ni faux texte)
+    if (!list.length) {
+      if (box.closest('main') && document.body.getAttribute('data-page') !== 'home') { $('#avis').hidden = true; return; }
+      box.innerHTML = [1, 2, 3].map(function () {
+        return '<figure class="review review--ph" aria-hidden="true"><div class="review__top"><span class="review__g">G</span><div class="review__stars">★★★★★</div></div>' +
+          '<div class="review__lines"><i></i><i></i><i></i><i class="short"></i></div>' +
+          '<figcaption><span class="review__avatar"></span><span class="review__tag">Avis à venir</span></figcaption></figure>';
+      }).join('');
+      box.insertAdjacentHTML('afterend', '<p class="reviews__soon">Les avis de nos clients arrivent bientôt ici.</p>');
+      return;
+    }
     if (data.settings.googleReviews) {
       $('#reviewsLink').href = data.settings.googleReviews;
       $('#reviewsMore').hidden = false;

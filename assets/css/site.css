@@ -1133,3 +1133,19 @@ body[data-page="home"] main .lux-choice .eyebrow { border-color: rgba(216, 191, 
 
 /* les cartes de côté reçoivent bien le clic (pas de couche 3D devant elles) */
 .coverflow__stage { transform-style: flat; }
+
+/* avis : cartes d'attente (en attendant les vrais avis Google) */
+.review--ph { position: relative; overflow: hidden; }
+.review__top { display: flex; align-items: center; justify-content: space-between; }
+.review__g { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font: 700 .95rem/1 var(--sans); color: #fff; background: conic-gradient(#ea4335 0 25%, #fbbc05 0 50%, #34a853 0 75%, #4285f4 0); opacity: .55; }
+.review--ph .review__stars { color: rgba(176, 138, 69, .45); }
+.review__lines { display: grid; gap: 10px; flex: 1; padding: 6px 0; }
+.review__lines i { display: block; height: 10px; border-radius: 6px; background: linear-gradient(90deg, var(--sand) 25%, #f6efe3 50%, var(--sand) 75%); background-size: 200% 100%; animation: phShine 2.4s ease-in-out infinite; }
+.review__lines i.short { width: 55%; }
+.review--ph figcaption { flex-direction: row; align-items: center; gap: 10px; }
+.review__avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--sand); }
+.review__tag { font: 700 .66rem/1 var(--sans); letter-spacing: .2em; text-transform: uppercase; color: var(--gold-text); border: 1px solid rgba(176, 138, 69, .45); border-radius: 999px; padding: 6px 12px; }
+.reviews__soon { text-align: center; margin: 22px 0 0; color: var(--muted); font-size: .92rem; }
+@keyframes phShine { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
+@media (prefers-reduced-motion: reduce) { .review__lines i { animation: none; } }
+@media (max-width: 860px) { .reviews { grid-template-columns: 1fr; } .review--ph:nth-child(n+2) { display: none; } }
