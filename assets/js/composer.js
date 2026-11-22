@@ -1,4 +1,4 @@
-/* TORRAIS EVENT — « Composez votre mariage » : simulateur en 5 étapes avec estimation */
+/* TORRAIS EVENT — « Composez votre événement » : simulateur en 6 étapes, relié aux vrais packs et aux 5 familles du menu */
 (function () {
   'use strict';
 
@@ -15,36 +15,63 @@
   function $(sel, r) { return (r || document).querySelector(sel); }
   function $$(sel, r) { return Array.prototype.slice.call((r || document).querySelectorAll(sel)); }
 
+  /* ---------- données ---------- */
   var TYPES = [
-    { id: 'Mariage', label: 'Mariage', icon: 'traiteur' },
-    { id: 'Fiançailles', label: 'Fiançailles', icon: 'deco' },
-    { id: 'Henné', label: 'Henné', icon: 'tyafer' },
-    { id: 'Anniversaire', label: 'Anniversaire / aqiqa', icon: 'buffet' },
-    { id: "Événement d'entreprise", label: 'Entreprise', icon: 'buffet' }
+    { id: 'mariage', label: 'Mariage', eventType: 'Mariage', icon: 'deco' },
+    { id: 'fiancailles', label: 'Fiançailles', eventType: 'Fiançailles', icon: 'tyafer' },
+    { id: 'bapteme', label: 'Baptême', eventType: 'Aqiqa / Baptême', icon: 'buffet' },
+    { id: 'entreprise', label: 'Entreprise', eventType: "Événement d'entreprise", icon: 'traiteur' },
+    { id: 'prive', label: 'Autre', eventType: 'Autre', icon: 'buffet' }
   ];
-  var STEPS = ['Votre fête', 'Formule', 'Menu', 'Décoration', 'Récapitulatif'];
+  var PLACES = [
+    { id: 'salle', label: 'Salle de fête', text: 'Nous réservons et préparons la salle.', icon: 'deco' },
+    { id: 'villa', label: 'Villa', text: 'Une villa pour une fête plus intime.', icon: 'tyafer' },
+    { id: 'domicile', label: 'À domicile', text: 'Nous venons chez vous, tout compris.', icon: 'traiteur' }
+  ];
+  var STEPS = ['Votre fête', 'Lieu', 'Pack', 'Menu', 'Options', 'Récapitulatif'];
   var UNIT_LABEL = { pers: '/ invité', table: '/ table de 10', forfait: 'forfait', unite: "l'unité" };
+  var CAT_ICONS = { plats: 'traiteur', desserts: 'buffet', 'sucres-sales': 'tyafer', salades: 'buffet', jus: 'deco' };
+  // Ce que les packs comprennent déjà, par famille du menu (« Inclus » dans le menu)
+  var FEATURE_CAT = { dessert: 'desserts', jus: 'jus', 'gâteaux': 'sucres-sales' };
+  var DECO_IDS = ['deco_tables', 'deco_salle', 'kousha'];
 
-  // Formules proposées : celles du site + « sur mesure »
-  var PACKS = data.packages.filter(function (p) { return P.packages[p.id]; }).map(function (p) {
-    return { id: p.id, name: p.name, tagline: p.tagline || p.place || '', features: p.features, featured: p.featured };
-  });
-  if (P.packages.surmesure) PACKS.push({ id: 'surmesure', name: 'Sur mesure', tagline: 'Je compose moi-même', features: ['Repas de base : entrée, plat, fruits, thé', 'Ajoutez uniquement ce que vous voulez'] });
+  function typeOf(id) { return TYPES.filter(function (t) { return t.id === id; })[0] || TYPES[0]; }
+  function packsOf(group) { return group === 'mariage' ? data.packages : ((data.servicePacks || {})[group] || []); }
+  function isSoon(p) { return p.soon || (!(p.menus || []).filter(function (m) { return m.label; }).length && !(p.features || []).length && !p.price); }
+  function placeOfPack(p) {
+    var s = (p.place || '').toLowerCase();
+    return /villa/.test(s) ? 'villa' : /salle/.test(s) ? 'salle' : /chez vous|domicile/.test(s) ? 'domicile' : '';
+  }
 
   var q = new URLSearchParams(window.location.search);
+  var startType = TYPES.some(function (t) { return t.id === q.get('type'); }) ? q.get('type') : 'mariage';
   var state = {
     step: 0,
-    type: TYPES.some(function (t) { return t.id === q.get('type'); }) ? q.get('type') : 'Mariage',
+    type: startType,
     guests: 200,
     date: '',
-    pkg: P.packages[q.get('formule')] ? q.get('formule') : (P.packages.villa ? 'villa' : PACKS[0].id),
+    place: '',
+    pkg: '',            // id du pack, ou 'surmesure'
+    pkgMenu: 0,         // index du menu choisi dans le pack
+    cat: '',            // famille du menu ouverte
+    dishes: {},         // plats ajoutés : { 'plats:Pastilla au poulet': true }
     opts: {},
     tyafer: 0
   };
+  if (q.get('formule')) state.pkg = q.get('formule');
 
-  /* ---------- calcul de l'estimation ---------- */
+  function currentPacks() { return packsOf(state.type); }
+  function currentPack() { return currentPacks().filter(function (p) { return p.id === state.pkg; })[0] || null; }
+  function packMenus(p) { return ((p && p.menus) || []).filter(function (m) { return m.label; }); }
+  function hasFeature(p, name) { return !!p && (p.features || []).some(function (f) { return f.toLowerCase() === name; }); }
+
+  /* ---------- prix ---------- */
   function round500(n) { return Math.round(n / 500) * 500; }
-  function included(id) { var pk = P.packages[state.pkg]; return !!(pk && pk.includes.indexOf(id) !== -1); }
+  function included(id) {
+    var p = currentPack();
+    if (p && DECO_IDS.indexOf(id) !== -1 && hasFeature(p, 'décoration')) return true;
+    return false;
+  }
   function qtyOf(o) {
     if (o.unit === 'pers') return state.guests;
     if (o.unit === 'table') return Math.ceil(state.guests / 10);
@@ -52,12 +79,25 @@
     return 1;
   }
   function selected(o) { return o.id === 'tyafer' ? state.tyafer > 0 : !!state.opts[o.id]; }
+  function extraOptions() { return P.options.filter(function (o) { return o.group !== 'Menu' && o.active !== false; }); }
+  function basePrice() {
+    var p = currentPack();
+    if (!p) return null;
+    var m = packMenus(p)[state.pkgMenu];
+    if (m && +m.price) return +m.price;
+    var digits = String(p.price || '').replace(/[^\d]/g, '');
+    return digits ? +digits : null;
+  }
   function lines() {
-    var pk = P.packages[state.pkg];
-    var pack = PACKS.filter(function (p) { return p.id === state.pkg; })[0];
-    var out = [{ label: 'Formule ' + (pack ? pack.name : ''), detail: state.guests + ' invités', min: pk.min * state.guests, max: pk.max * state.guests }];
-    P.options.forEach(function (o) {
-      if (included(o.id)) { out.push({ label: o.name, detail: 'inclus', min: 0, max: 0, included: true }); return; }
+    var out = [];
+    var p = currentPack();
+    if (state.pkg === 'surmesure') out.push({ label: 'Événement sur mesure', detail: state.guests + ' invités', price: null });
+    else if (p) {
+      var m = packMenus(p)[state.pkgMenu];
+      out.push({ label: 'Pack ' + p.name, detail: m ? m.label : (p.place || ''), price: basePrice() });
+    }
+    extraOptions().forEach(function (o) {
+      if (included(o.id)) { out.push({ label: o.name, detail: 'inclus dans le pack', included: true }); return; }
       if (!selected(o)) return;
       var n = qtyOf(o);
       var detail = o.unit === 'table' ? n + ' tables' : o.unit === 'unite' ? n + ' tyafer' : o.unit === 'pers' ? state.guests + ' invités' : '';
@@ -67,24 +107,31 @@
   }
   function estimate() {
     var l = lines();
-    var min = l.reduce(function (s, x) { return s + x.min; }, 0);
-    var max = l.reduce(function (s, x) { return s + x.max; }, 0);
-    return { min: round500(min), max: round500(max), perMin: Math.round(min / state.guests), perMax: Math.round(max / state.guests) };
+    var base = basePrice();
+    var min = l.reduce(function (s, x) { return s + (x.min || 0); }, 0);
+    var max = l.reduce(function (s, x) { return s + (x.max || 0); }, 0);
+    return { base: base, optMin: round500(min), optMax: round500(max), min: (base || 0) + round500(min), max: (base || 0) + round500(max) };
   }
-  function rangeText(e) { return U.formatDH(e.min) + ' – ' + U.formatDH(e.max); }
+  function totalText(e) {
+    if (e.base == null) return e.optMax ? 'Sur devis + options' : 'Sur devis';
+    if (!e.optMax) return 'Dès ' + U.formatDH(e.base);
+    return U.formatDH(e.min) + ' – ' + U.formatDH(e.max);
+  }
   function optPrice(o) {
     if (o.unit === 'pers') return '+ ' + o.min + '–' + o.max + ' DH ' + UNIT_LABEL.pers;
-    return '+ ' + U.formatDH(o.min).replace(' DH', '') + '–' + U.formatDH(o.max) + ' ' + UNIT_LABEL[o.unit];
+    return '+ ' + U.formatDH(o.min).replace(' DH', '') + '–' + U.formatDH(o.max) + ' ' + UNIT_LABEL[o.unit];
   }
+  function thumb(icon, tone) { return '<span class="cz-thumb tone-' + ((tone % 8) + 1) + '" aria-hidden="true">' + (T.icons[icon] || '') + '</span>'; }
 
   /* ---------- rendu ---------- */
   function render() {
     root.innerHTML =
       '<div class="composer__main">' +
-        '<ol class="steps-bar">' + STEPS.map(function (s, i) {
+        '<ol class="steps-bar steps-bar--6">' + STEPS.map(function (s, i) {
           return '<li class="' + (i === state.step ? 'is-current' : i < state.step ? 'is-done' : '') + '"><button type="button" data-goto="' + i + '"' + (i > state.step ? ' disabled' : '') + '><span>' + (i + 1) + '</span>' + s + '</button></li>';
         }).join('') + '</ol>' +
         '<div class="composer__panel" id="composerPanel">' + stepHtml() + '</div>' +
+        '<p class="form__error" id="stepError" hidden></p>' +
         '<div class="composer__nav">' +
           (state.step > 0 ? '<button type="button" class="btn btn--ghost" data-prev>← Retour</button>' : '<span></span>') +
           (state.step < STEPS.length - 1 ? '<button type="button" class="btn btn--gold" data-next>Continuer →</button>' : '') +
@@ -92,15 +139,15 @@
       '</div>' +
       '<aside class="composer__summary" id="composerSummary">' + summaryHtml() + '</aside>' +
       '<div class="composer__bar" id="composerBar">' + barHtml() + '</div>';
-    paint();
   }
 
   function stepHtml() {
+    var t = typeOf(state.type);
     if (state.step === 0) {
       return '<h2 class="composer__title">Quel événement préparez-vous ?</h2>' +
-        '<div class="choice-grid choice-grid--types">' + TYPES.map(function (t) {
-          return '<label class="choice"><input type="radio" name="type" value="' + esc(t.id) + '"' + (state.type === t.id ? ' checked' : '') + '>' +
-            '<span class="choice__box"><span class="choice__icon">' + T.icons[t.icon] + '</span><strong>' + esc(t.label) + '</strong></span></label>';
+        '<div class="cz-types">' + TYPES.map(function (x, i) {
+          return '<label class="cz-type"><input type="radio" name="type" value="' + x.id + '"' + (state.type === x.id ? ' checked' : '') + '>' +
+            '<span class="cz-type__box">' + thumb(x.icon, i) + '<strong>' + esc(x.label) + '</strong></span></label>';
         }).join('') + '</div>' +
         '<div class="composer__row">' +
           '<label class="field field--guests"><span>Nombre d\'invités : <b id="guestsOut">' + state.guests + '</b></span>' +
@@ -109,41 +156,111 @@
         '</div>';
     }
     if (state.step === 1) {
-      return '<h2 class="composer__title">Choisissez une formule de départ</h2><p class="composer__hint">Vous pourrez ajouter des options à l\'étape suivante.</p>' +
-        '<div class="choice-grid choice-grid--packs">' + PACKS.map(function (p) {
-          var pr = P.packages[p.id];
-          return '<label class="choice choice--pack"><input type="radio" name="pkg" value="' + esc(p.id) + '"' + (state.pkg === p.id ? ' checked' : '') + '>' +
-            '<span class="choice__box">' + (p.featured ? '<em class="choice__badge">La plus demandée</em>' : '') +
-            '<strong class="choice__name">' + esc(p.name) + '</strong><span class="choice__tag">' + esc(p.tagline || '') + '</span>' +
-            '<span class="choice__price">≈ ' + pr.min + ' – ' + pr.max + ' DH <small>/ invité</small></span>' +
-            '<ul>' + (p.features || []).slice(0, 5).map(function (f) { return '<li>' + esc(f) + '</li>'; }).join('') + '</ul></span></label>';
+      return '<h2 class="composer__title">Où aura lieu votre ' + esc(t.label.toLowerCase()) + ' ?</h2><p class="composer__hint">Nous nous adaptons à votre lieu.</p>' +
+        '<div class="cz-places">' + PLACES.map(function (x, i) {
+          return '<label class="cz-place"><input type="radio" name="place" value="' + x.id + '"' + (state.place === x.id ? ' checked' : '') + '>' +
+            '<span class="cz-place__box"><span class="cz-place__ph ph cf-ph tone-' + (i + 2) + '">' + T.icons[x.icon] + '<em>Photo à venir</em></span>' +
+            '<span class="cz-place__text"><strong>' + esc(x.label) + '</strong><span>' + esc(x.text) + '</span></span><span class="cz-radio" aria-hidden="true"></span></span></label>';
         }).join('') + '</div>';
     }
-    if (state.step === 2 || state.step === 3) {
-      var groups = state.step === 2 ? ['Menu'] : ['Décoration', 'Service'];
-      return '<h2 class="composer__title">' + (state.step === 2 ? 'Votre menu' : 'Décoration, tyafer et service') + '</h2>' +
-        '<p class="composer__hint">Ce qui est déjà compris dans votre formule est coché d\'office.</p>' +
+    if (state.step === 2) {
+      var list = currentPacks();
+      return '<h2 class="composer__title">Choisissez votre pack</h2><p class="composer__hint">Les packs ' + esc(t.label.toLowerCase()) + ' : vous choisirez le menu à l\'étape suivante.</p>' +
+        '<div class="cz-packs">' + list.map(function (p, i) {
+          var soon = isSoon(p);
+          var menus = packMenus(p);
+          var prices = menus.map(function (m) { return +m.price; }).filter(Boolean);
+          var from = prices.length ? Math.min.apply(null, prices) : 0;
+          var match = state.place && placeOfPack(p) === state.place;
+          return '<label class="cz-pack' + (p.featured && !soon ? ' cz-pack--featured' : '') + '"><input type="radio" name="pkg" value="' + esc(p.id) + '"' + (state.pkg === p.id ? ' checked' : '') + '>' +
+            '<span class="cz-pack__box">' +
+              (match ? '<em class="cz-pack__badge">Pour votre lieu</em>' : p.featured && !soon ? '<em class="cz-pack__badge">Le plus demandé</em>' : '') +
+              '<span class="cz-pack__num">Pack ' + (i + 1) + '</span>' +
+              '<strong class="cz-pack__name">' + esc(p.name) + '</strong>' +
+              '<span class="cz-pack__place">' + esc(p.place || (soon ? 'Détails à venir' : '')) + '</span>' +
+              '<span class="cz-pack__price">' + (from ? '<small>dès</small> ' + U.formatDH(from) : '<small>Prix</small> sur devis') + '</span>' +
+              '<span class="cz-pack__facts">' +
+                (p.tables ? '<span>' + p.tables + '+ tables</span>' : '') + (p.tenues ? '<span>' + p.tenues + ' tenues</span>' : '') +
+              '</span>' +
+              (soon ? '<span class="cz-pack__soon"><i></i><i></i><i class="short"></i></span>' :
+                '<ul class="cz-pack__list">' + (p.features || []).slice(0, 6).map(function (f) { return '<li>' + esc(f) + '</li>'; }).join('') + '</ul>') +
+              '<span class="cz-pack__pick">' + (state.pkg === p.id ? 'Sélectionné' : 'Choisir') + '</span>' +
+            '</span></label>';
+        }).join('') + '</div>' +
+        '<label class="cz-custom"><input type="radio" name="pkg" value="surmesure"' + (state.pkg === 'surmesure' ? ' checked' : '') + '>' +
+          '<span class="cz-custom__box">' + thumb('deco', 5) + '<span><strong>Sur mesure</strong><span>Aucun pack ne vous convient ? Composez librement, nous vous faisons un devis.</span></span><span class="cz-radio" aria-hidden="true"></span></span></label>';
+    }
+    if (state.step === 3) {
+      var p = currentPack();
+      var menus = packMenus(p);
+      var cats = data.site.menuCats || [];
+      var head = '<h2 class="composer__title">Votre menu</h2>';
+      var packMenu = menus.length ? '<h3 class="composer__group">Le menu de votre pack</h3><div class="cz-menus">' + menus.map(function (m, i) {
+        return '<label class="cz-menu"><input type="radio" name="pkgMenu" value="' + i + '"' + (state.pkgMenu === i ? ' checked' : '') + '>' +
+          '<span class="cz-menu__box">' + thumb('traiteur', i + 2) + '<span class="cz-menu__text"><strong>' + esc(m.label) + '</strong><span>' + (+m.price ? 'Pack dès ' + U.formatDH(m.price) : 'Sur devis') + '</span></span><span class="cz-radio" aria-hidden="true"></span></span></label>';
+      }).join('') + '</div>' : '';
+      var open = cats.filter(function (c) { return c.id === state.cat; })[0];
+      var catBlock;
+      if (!open) {
+        catBlock = '<h3 class="composer__group">' + (menus.length ? 'Ajoutez des plats' : 'Choisissez vos plats') + '</h3>' +
+          '<p class="composer__hint">Choisissez une famille pour voir ses plats.</p>' +
+          '<div class="cz-cats">' + cats.map(function (c, i) {
+            var n = Object.keys(state.dishes).filter(function (k) { return state.dishes[k] && k.indexOf(c.id + ':') === 0; }).length;
+            var inc = catIncluded(c.id);
+            return '<button type="button" class="cz-cat" data-cat="' + esc(c.id) + '">' +
+              (c.image ? '<span class="cz-cat__img"><img src="' + esc(c.image) + '" alt=""></span>' : '<span class="cz-cat__img ph cf-ph tone-' + (i % 8 + 1) + '">' + T.icons[CAT_ICONS[c.id] || 'traiteur'] + '</span>') +
+              '<span class="cz-cat__text"><span class="cz-cat__num">' + String(i + 1).padStart(2, '0') + '</span><strong>' + esc(c.title) + '</strong>' +
+              '<span>' + (inc ? 'Inclus dans votre pack' : (c.items || []).length + ' plats') + (n ? ' · <b>' + n + ' choisi' + (n > 1 ? 's' : '') + '</b>' : '') + '</span></span>' +
+              '<span class="cz-cat__go" aria-hidden="true">→</span></button>';
+          }).join('') + '</div>';
+      } else {
+        var inc = catIncluded(open.id);
+        catBlock = '<div class="cz-cathead"><button type="button" class="cz-back" data-cat="">← Toutes les familles</button>' +
+          '<h3>' + esc(open.title) + '</h3>' + (inc ? '<span class="cz-inc">Inclus dans votre pack</span>' : '') + '</div>' +
+          '<div class="cz-dishes">' + (open.items || []).map(function (d, i) {
+            var key = open.id + ':' + d;
+            var inMenu = menus.length && packMenus(p)[state.pkgMenu] && dishInMenu(d, packMenus(p)[state.pkgMenu].label);
+            var on = inMenu || !!state.dishes[key];
+            return '<label class="cz-dish' + (on ? ' is-on' : '') + (inMenu ? ' is-included' : '') + '"><input type="checkbox" data-dish="' + esc(key) + '"' + (on ? ' checked' : '') + (inMenu ? ' disabled' : '') + '>' +
+              thumb(CAT_ICONS[open.id] || 'traiteur', i) +
+              '<span class="cz-dish__name">' + esc(d) + '</span>' +
+              '<span class="cz-dish__tag">' + (inMenu ? 'Dans votre menu' : on ? 'Ajouté' : 'Ajouter') + '</span>' +
+              '<span class="opt__check" aria-hidden="true">' + T.icons.check + '</span></label>';
+          }).join('') + '</div>' +
+          '<p class="composer__hint cz-note">Les plats ajoutés sont précisés dans votre devis (prix selon la quantité).</p>';
+      }
+      return head + packMenu + catBlock;
+    }
+    if (state.step === 4) {
+      var groups = ['Décoration', 'Service'];
+      return '<h2 class="composer__title">Décoration, tyafer et service</h2>' +
+        '<p class="composer__hint">Ce qui est déjà compris dans votre pack est coché d\'office.</p>' +
         groups.map(function (g) {
           var list = P.options.filter(function (o) { return o.group === g && o.active !== false; });
           if (!list.length) return '';
-          return (groups.length > 1 ? '<h3 class="composer__group">' + esc(g) + '</h3>' : '') + '<div class="opt-list">' + list.map(optHtml).join('') + '</div>';
+          return '<h3 class="composer__group">' + esc(g) + '</h3><div class="opt-list">' + list.map(optHtml).join('') + '</div>';
         }).join('');
     }
     // Récapitulatif
     var e = estimate();
+    var dishList = chosenDishes();
     return '<h2 class="composer__title">Votre composition</h2>' +
-      '<div class="recap">' + lines().map(function (l) {
-        return '<div class="recap__line' + (l.included ? ' is-included' : '') + '"><span>' + esc(l.label) + (l.detail ? ' <small>' + esc(l.detail) + '</small>' : '') + '</span>' +
-          '<b>' + (l.included ? 'Inclus' : rangeText({ min: round500(l.min), max: round500(l.max) })) + '</b></div>';
-      }).join('') +
-      '<div class="recap__total"><span>Estimation totale</span><b>' + rangeText(e) + '</b><small>soit environ ' + e.perMin + ' – ' + e.perMax + ' DH par invité</small></div></div>' +
-      '<p class="composer__note">Estimation indicative. TORRAIS EVENT vous envoie un devis précis après avoir échangé avec vous (lieu, date, menu exact).</p>' +
+      '<div class="recap">' +
+        '<div class="recap__line"><span>Événement <small>' + esc(t.label) + ' · ' + state.guests + ' invités' + (state.date ? ' · ' + U.formatDate(state.date, { day: 'numeric', month: 'short', year: 'numeric' }) : '') + '</small></span><b></b></div>' +
+        (state.place ? '<div class="recap__line"><span>Lieu <small>' + esc(placeLabel()) + '</small></span><b></b></div>' : '') +
+        lines().map(function (l) {
+          return '<div class="recap__line' + (l.included ? ' is-included' : '') + '"><span>' + esc(l.label) + (l.detail ? ' <small>' + esc(l.detail) + '</small>' : '') + '</span>' +
+            '<b>' + (l.included ? 'Inclus' : l.price !== undefined ? (l.price ? 'Dès ' + U.formatDH(l.price) : 'Sur devis') : U.formatDH(round500(l.min)) + ' – ' + U.formatDH(round500(l.max))) + '</b></div>';
+        }).join('') +
+        (dishList.length ? '<div class="recap__line"><span>Plats ajoutés <small>' + esc(dishList.join(', ')) + '</small></span><b>Selon devis</b></div>' : '') +
+        '<div class="recap__total"><span>Estimation</span><b>' + totalText(e) + '</b><small>Prix « à partir de » : le devis final dépend du nombre d\'invités et de vos choix.</small></div>' +
+      '</div>' +
       '<form class="composer__form" id="composerForm" novalidate>' +
         '<div class="form__row">' +
           '<label class="field"><span>Votre nom *</span><input name="name" autocomplete="name" placeholder="Ex. Salma Bennani"></label>' +
           '<label class="field"><span>Téléphone / WhatsApp *</span><input name="phone" type="tel" autocomplete="tel" placeholder="06 XX XX XX XX"></label>' +
         '</div>' +
-        '<label class="field"><span>Un mot à ajouter ?</span><textarea name="message" rows="3" placeholder="Lieu, thème, demandes particulières…"></textarea></label>' +
+        '<label class="field"><span>Un mot à ajouter ?</span><textarea name="message" rows="3" placeholder="Thème, demandes particulières…"></textarea></label>' +
         '<p class="form__error" id="composerError" hidden></p>' +
         '<div class="composer__send">' +
           '<button type="submit" class="btn btn--gold">Recevoir mon devis</button>' +
@@ -155,47 +272,81 @@
         '<a href="#" class="btn btn--wa" id="composerDoneWa"><span class="icon">' + T.icons.whatsapp + '</span> L\'envoyer aussi sur WhatsApp</a></div>';
   }
 
-  function optHtml(o) {
+  function catIncluded(catId) {
+    var p = currentPack();
+    if (!p) return false;
+    return Object.keys(FEATURE_CAT).some(function (f) { return FEATURE_CAT[f] === catId && hasFeature(p, f); });
+  }
+  function norm(s) { return String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/&/g, ' ').replace(/\s+/g, ' ').trim(); }
+  // Un plat fait-il partie du menu choisi ? (« Pastilla poulet + viande aux pruneaux » ↔ « Pastilla au poulet », « Viande aux pruneaux & amandes »)
+  function dishInMenu(dish, menuLabel) {
+    var parts = norm(menuLabel).split('+').map(function (x) { return x.trim(); });
+    var d = norm(dish);
+    return parts.some(function (part) {
+      var words = part.split(' ').filter(function (w) { return w.length > 3; });
+      return words.length && words.every(function (w) { return d.indexOf(w.replace(/s$/, '')) !== -1 || (w === 'poisson' && d.indexOf('fruits de mer') !== -1); });
+    });
+  }
+  function chosenDishes() {
+    return Object.keys(state.dishes).filter(function (k) { return state.dishes[k]; }).map(function (k) { return k.split(':').slice(1).join(':'); });
+  }
+  function placeLabel() { var x = PLACES.filter(function (p) { return p.id === state.place; })[0]; return x ? x.label : ''; }
+
+  function optHtml(o, i) {
     var inc = included(o.id);
+    var icon = o.group === 'Décoration' ? 'deco' : o.id === 'tyafer' ? 'tyafer' : 'traiteur';
     if (o.id === 'tyafer') {
-      return '<div class="opt' + (state.tyafer ? ' is-on' : '') + '"><div class="opt__text"><strong>' + esc(o.name) + '</strong><span>' + esc(o.text || '') + '</span><em>' + optPrice(o) + '</em></div>' +
+      return '<div class="opt' + (state.tyafer ? ' is-on' : '') + '">' + thumb(icon, i) + '<div class="opt__text"><strong>' + esc(o.name) + '</strong><span>' + esc(o.text || '') + '</span><em>' + optPrice(o) + '</em></div>' +
         '<div class="stepper" role="group" aria-label="Nombre de tyafer"><button type="button" data-tyafer="-1" aria-label="Moins">−</button><output id="tyaferOut">' + state.tyafer + '</output><button type="button" data-tyafer="1" aria-label="Plus">+</button></div></div>';
     }
     return '<label class="opt' + (inc ? ' is-included' : state.opts[o.id] ? ' is-on' : '') + '"><input type="checkbox" data-opt="' + esc(o.id) + '"' + (inc || state.opts[o.id] ? ' checked' : '') + (inc ? ' disabled' : '') + '>' +
-      '<span class="opt__check" aria-hidden="true">' + T.icons.check + '</span>' +
-      '<span class="opt__text"><strong>' + esc(o.name) + '</strong><span>' + esc(o.text || '') + '</span><em>' + (inc ? 'Inclus dans votre formule' : optPrice(o)) + '</em></span></label>';
+      thumb(icon, i) +
+      '<span class="opt__text"><strong>' + esc(o.name) + '</strong><span>' + esc(o.text || '') + '</span><em>' + (inc ? 'Inclus dans votre pack' : optPrice(o)) + '</em></span>' +
+      '<span class="opt__check" aria-hidden="true">' + T.icons.check + '</span></label>';
   }
 
   function summaryHtml() {
     var e = estimate();
-    var pack = PACKS.filter(function (p) { return p.id === state.pkg; })[0];
-    var extras = P.options.filter(function (o) { return !included(o.id) && selected(o); });
+    var p = currentPack();
+    var t = typeOf(state.type);
+    var extras = extraOptions().filter(function (o) { return !included(o.id) && selected(o); });
+    var nd = chosenDishes().length;
     return '<p class="eyebrow">Votre estimation</p>' +
-      '<div class="sum__total" aria-live="polite">' + rangeText(e) + '</div>' +
-      '<p class="sum__per">≈ ' + e.perMin + ' – ' + e.perMax + ' DH par invité</p>' +
+      '<div class="sum__total" aria-live="polite">' + totalText(e) + '</div>' +
+      '<p class="sum__per">Prix indicatif · devis final gratuit</p>' +
       '<ul class="sum__list">' +
-        '<li><span>Événement</span><b>' + esc(state.type) + '</b></li>' +
+        '<li><span>Événement</span><b>' + esc(t.label) + '</b></li>' +
         '<li><span>Invités</span><b>' + state.guests + '</b></li>' +
         (state.date ? '<li><span>Date</span><b>' + U.formatDate(state.date, { day: 'numeric', month: 'short', year: 'numeric' }) + '</b></li>' : '') +
-        '<li><span>Formule</span><b>' + esc(pack ? pack.name : '') + '</b></li>' +
+        (state.place ? '<li><span>Lieu</span><b>' + esc(placeLabel()) + '</b></li>' : '') +
+        '<li><span>Pack</span><b>' + (state.pkg === 'surmesure' ? 'Sur mesure' : p ? esc(p.name) : '—') + '</b></li>' +
+        (p && packMenus(p)[state.pkgMenu] ? '<li><span>Menu</span><b>' + esc(packMenus(p)[state.pkgMenu].label) + '</b></li>' : '') +
+        (nd ? '<li><span>Plats ajoutés</span><b>' + nd + '</b></li>' : '') +
         (extras.length ? '<li class="sum__extras"><span>Options</span><b>' + extras.map(function (o) { return esc(o.id === 'tyafer' ? state.tyafer + ' tyafer' : o.name); }).join(', ') + '</b></li>' : '') +
-      '</ul><p class="sum__note">Estimation indicative · devis final gratuit</p>';
+      '</ul>';
   }
   function barHtml() {
-    var e = estimate();
-    return '<div><small>Estimation</small><b>' + rangeText(e) + '</b></div>' +
+    return '<div><small>Estimation</small><b>' + totalText(estimate()) + '</b></div>' +
       (state.step < STEPS.length - 1 ? '<button type="button" class="btn btn--gold btn--sm" data-next>Continuer</button>' : '');
   }
   function refreshLive() {
     $('#composerSummary').innerHTML = summaryHtml();
     $('#composerBar').innerHTML = barHtml();
   }
-  function paint() {
-    $$('[data-icon]', root).forEach(function (el) { if (!el.firstChild && T.icons[el.getAttribute('data-icon')]) el.innerHTML = T.icons[el.getAttribute('data-icon')]; });
-  }
+  function redrawPanel() { $('#composerPanel').innerHTML = stepHtml(); refreshLive(); }
 
+  function canLeave(step) {
+    var msg = '';
+    if (step === 1 && !state.place) msg = 'Choisissez le lieu de votre événement.';
+    if (step === 2 && !state.pkg) msg = 'Choisissez un pack (ou « Sur mesure »).';
+    var err = $('#stepError');
+    if (err) { err.textContent = msg; err.hidden = !msg; }
+    return !msg;
+  }
   function go(step) {
+    if (step > state.step && !canLeave(state.step)) return;
     state.step = Math.max(0, Math.min(STEPS.length - 1, step));
+    if (state.step !== 3) state.cat = '';
     render();
     var top = $('#composerSection').getBoundingClientRect().top + window.scrollY - 90;
     if (window.TorraisMotion && window.TorraisMotion.lenis) window.TorraisMotion.lenis.scrollTo(top);
@@ -205,22 +356,19 @@
   /* ---------- envoi ---------- */
   function compositionText() {
     var e = estimate();
-    return lines().map(function (l) { return '• ' + l.label + (l.detail ? ' (' + l.detail + ')' : ''); }).join('\n') +
-      '\nEstimation : ' + rangeText(e).replace(/ /g, ' ');
+    var d = chosenDishes();
+    return (state.place ? '• Lieu : ' + placeLabel() + '\n' : '') +
+      lines().map(function (l) { return '• ' + l.label + (l.detail ? ' (' + l.detail + ')' : ''); }).join('\n') +
+      (d.length ? '\n• Plats ajoutés : ' + d.join(', ') : '') +
+      '\nEstimation : ' + totalText(e).replace(/ /g, ' ');
   }
   function waText(name) {
+    var t = typeOf(state.type);
     return 'Bonjour TORRAIS EVENT, j\'ai composé mon événement sur votre site.\n' +
       (name ? '• Nom : ' + name + '\n' : '') +
-      '• Événement : ' + state.type + '\n' +
+      '• Événement : ' + t.label + ' (' + state.guests + ' invités)\n' +
       (state.date ? '• Date : ' + U.formatDate(state.date) + '\n' : '') +
       compositionText();
-  }
-  function servicesFrom() {
-    var sv = ['Traiteur'];
-    if (['deco_tables', 'kousha', 'deco_salle'].some(function (id) { return included(id) || state.opts[id]; })) sv.push('Décoration');
-    if (state.tyafer > 0) sv.push('Tyafer');
-    if (['cocktail', 'desserts'].some(function (id) { return included(id) || state.opts[id]; })) sv.push('Buffet');
-    return sv;
   }
   function submit(form) {
     var f = form.elements;
@@ -236,16 +384,21 @@
     err.hidden = true;
     var e = estimate();
     var now = new Date();
-    var pack = PACKS.filter(function (p) { return p.id === state.pkg; })[0];
+    var p = currentPack();
+    var t = typeOf(state.type);
     var extra = f.message.value.trim();
+    var services = ['Traiteur'];
+    if (DECO_IDS.some(function (id) { return included(id) || state.opts[id]; })) services.push('Décoration');
+    if (state.tyafer > 0) services.push('Tyafer');
     var req = {
       id: U.uid(), source: 'Site web',
       createdAt: U.iso(now) + 'T' + String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0'),
-      name: name, phone: phone, eventType: state.type, date: state.date, guests: state.guests,
-      budget: 'Estimation ' + rangeText(e).replace(/ /g, ' '),
-      services: servicesFrom(),
-      message: 'Composé avec le simulateur (formule ' + (pack ? pack.name : '') + ').' + (extra ? ' ' + extra : ''),
-      composition: lines().map(function (l) { return { label: l.label, detail: l.detail, included: !!l.included, min: round500(l.min), max: round500(l.max) }; }),
+      name: name, phone: phone, eventType: t.eventType, date: state.date, guests: state.guests,
+      budget: 'Estimation ' + totalText(e).replace(/ /g, ' '),
+      services: services,
+      message: 'Composé avec le simulateur : ' + (state.pkg === 'surmesure' ? 'sur mesure' : 'pack ' + (p ? p.name : '')) + (state.place ? ', ' + placeLabel().toLowerCase() : '') + '.' +
+        (chosenDishes().length ? ' Plats ajoutés : ' + chosenDishes().join(', ') + '.' : '') + (extra ? ' ' + extra : ''),
+      composition: lines().map(function (l) { return { label: l.label, detail: l.detail, included: !!l.included, min: l.price || round500(l.min || 0), max: l.price || round500(l.max || 0) }; }),
       estimate: { min: e.min, max: e.max },
       status: 'nouveau', notes: '', eventId: null
     };
@@ -268,6 +421,8 @@
     if (t.closest('[data-prev]')) { go(state.step - 1); return; }
     var g = t.closest('[data-goto]');
     if (g && !g.disabled) { go(+g.getAttribute('data-goto')); return; }
+    var c = t.closest('[data-cat]');
+    if (c) { state.cat = c.getAttribute('data-cat'); redrawPanel(); return; }
     var ty = t.closest('[data-tyafer]');
     if (ty) {
       state.tyafer = Math.max(0, Math.min(30, state.tyafer + (+ty.getAttribute('data-tyafer'))));
@@ -284,13 +439,27 @@
   });
   root.addEventListener('change', function (e) {
     var t = e.target;
-    if (t.name === 'type') state.type = t.value;
-    if (t.name === 'pkg') state.pkg = t.value;
+    if (t.name === 'type') { state.type = t.value; state.pkg = ''; state.pkgMenu = 0; }
+    if (t.name === 'place') {
+      state.place = t.value;
+      // présélectionne le pack qui correspond au lieu (s'il existe)
+      var match = currentPacks().filter(function (p) { return placeOfPack(p) === state.place; })[0];
+      if (match && !state.pkg) state.pkg = match.id;
+    }
+    if (t.name === 'pkg') { state.pkg = t.value; state.pkgMenu = 0; $$('.cz-pack__pick', root).forEach(function (el) { var inp = el.closest('label').querySelector('input'); el.textContent = inp.checked ? 'Sélectionné' : 'Choisir'; }); }
+    if (t.name === 'pkgMenu') state.pkgMenu = +t.value;
     if (t.id === 'dateInput') state.date = t.value;
+    if (t.dataset && t.dataset.dish) {
+      state.dishes[t.dataset.dish] = t.checked;
+      var row = t.closest('.cz-dish');
+      row.classList.toggle('is-on', t.checked);
+      row.querySelector('.cz-dish__tag').textContent = t.checked ? 'Ajouté' : 'Ajouter';
+    }
     if (t.dataset && t.dataset.opt) {
       state.opts[t.dataset.opt] = t.checked;
       t.closest('.opt').classList.toggle('is-on', t.checked);
     }
+    var err = $('#stepError'); if (err) err.hidden = true;
     refreshLive();
   });
   root.addEventListener('input', function (e) {
