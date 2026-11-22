@@ -1709,7 +1709,7 @@
           field('Accroche', '<input data-k="short" value="' + esc(o.short) + '">') +
           field('Présentation', '<textarea data-k="text" rows="4">' + esc(o.text) + '</textarea>') +
           field('Ce que nous proposons (une ligne par élément)', '<textarea data-k="includes" rows="4">' + esc((o.includes || []).join('\n')) + '</textarea>') +
-          '<a class="link small" href="../evenement.html?type=' + esc(o.id) + '" target="_blank" rel="noopener">Voir la page ↗</a></div>';
+          '<a class="link small" href="../' + ({ mariage: 'mariage.html', bapteme: 'bapteme.html', entreprise: 'entreprise.html', prive: 'evenements-prives.html' }[o.id] || ('evenement.html?type=' + esc(o.id))) + '" target="_blank" rel="noopener">Voir la page ↗</a></div>';
       }).join('') + '</div>' +
       '<div class="form-actions"><button class="btn btn--primary btn--sm" data-action="save-occasions">Enregistrer les pages</button></div></section>';
   }

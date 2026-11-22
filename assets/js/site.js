@@ -12,12 +12,13 @@
 
   function $(sel, root) { return (root || document).querySelector(sel); }
   function $$(sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
-  function occUrl(o) { return 'evenement.html?type=' + encodeURIComponent(o.id); }
+  var OCC_PAGES = { mariage: 'mariage.html', bapteme: 'bapteme.html', entreprise: 'entreprise.html', prive: 'evenements-prives.html' };
+  function occUrl(o) { return OCC_PAGES[o.id] || ('evenement.html?type=' + encodeURIComponent(o.id)); }
 
   // Page « univers » : quelle occasion afficher ?
   var occasion = null;
   if (PAGE === 'occasion') {
-    var wanted = (new URLSearchParams(window.location.search)).get('type');
+    var wanted = document.body.getAttribute('data-occasion') || (new URLSearchParams(window.location.search)).get('type');
     occasion = data.occasions.filter(function (o) { return o.id === wanted; })[0] || data.occasions[0];
   }
 
@@ -29,7 +30,7 @@
       return '<a href="' + occUrl(o) + '"' + (occasion && occasion.id === o.id ? ' aria-current="page"' : '') + '>' + esc(o.title) + '</a>';
     }).join('');
     var mariage = data.occasions.filter(function (o) { return o.id === 'mariage'; })[0];
-    var PACKS_URL = (mariage ? occUrl(mariage) : 'evenement.html?type=mariage') + '#formules';
+    var PACKS_URL = (mariage ? occUrl(mariage) : 'mariage.html') + '#formules';
 
     $('#siteHeader').innerHTML =
       '<a class="skip-link" href="#contenu">Aller au contenu</a>' +

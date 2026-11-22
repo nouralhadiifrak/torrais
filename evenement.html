@@ -2,105 +2,16 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>TORRAIS EVENT — Traiteur à Casablanca</title>
-  <meta name="description" content="TORRAIS EVENT, traiteur à Casablanca : mariages, henné, fêtes de famille et événements d'entreprise.">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Mulish:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="icon" type="image/png" sizes="32x32" href="assets/img/brand/favicon-32.png">
-  <link rel="apple-touch-icon" href="assets/img/brand/apple-touch-icon.png">
-  <meta name="theme-color" content="#16130f">
-  <link rel="stylesheet" href="assets/vendor/lenis.css">
-  <link rel="stylesheet" href="assets/css/site.css">
+  <title>TORRAIS EVENT</title>
+  <meta name="robots" content="noindex">
+  <script>
+    (function () {
+      var map = { mariage: 'mariage.html', fiancailles: 'mariage.html', bapteme: 'bapteme.html', aqiqa: 'bapteme.html', entreprise: 'entreprise.html', prive: 'evenements-prives.html', anniversaire: 'evenements-prives.html', henne: 'evenements-prives.html', autre: 'evenements-prives.html', famille: 'evenements-prives.html' };
+      var t = new URLSearchParams(location.search).get('type');
+      location.replace((map[t] || 'mariage.html') + location.hash);
+    })();
+  </script>
+  <meta http-equiv="refresh" content="0; url=mariage.html">
 </head>
-<body data-page="occasion">
-
-  <div id="siteHeader"></div>
-
-  <main id="contenu">
-    <section class="page-hero" id="pageHero">
-      <div class="page-hero__bg" id="pageHeroBg" aria-hidden="true"></div>
-      <div class="container page-hero__inner">
-        <nav class="crumbs" aria-label="Fil d'Ariane"><a href="index.html">Accueil</a> <span>›</span> <a href="index.html#occasions">Nos services</a></nav>
-        <h1 class="page-hero__title" id="occTitle"></h1>
-        <p class="page-hero__lead" id="occShort"></p>
-        <div class="hero__actions">
-          <a href="#devis" class="btn btn--gold">Demander un devis</a>
-          <a href="#" class="btn btn--outline" data-wa-link id="occWa"><span class="icon" data-icon="whatsapp"></span> WhatsApp</a>
-        </div>
-      </div>
-    </section>
-
-    <section class="section">
-      <div class="container occ-intro">
-        <div>
-          <p class="eyebrow">Notre proposition</p>
-          <h2 class="section-title" id="occHeading"></h2>
-          <p id="occText"></p>
-        </div>
-        <div class="occ-includes">
-          <h3>Ce que nous proposons</h3>
-          <ul id="occIncludes"></ul>
-        </div>
-      </div>
-    </section>
-
-    <section class="section section--cream" id="formules">
-      <div class="container">
-        <div class="section-head">
-          <p class="eyebrow">Packs mariage</p>
-          <h2 class="section-title">Choisissez votre pack</h2>
-          <p class="section-sub">Trois packs tout compris : neggafa, décoration, caméra, musique, dîner et douceurs. Choisissez votre menu, le prix s'affiche.</p>
-        </div>
-        <div class="packs" id="packagesGrid"></div>
-        <p class="packages__note">Prix « à partir de » : le prix final dépend du nombre de tables et des options. Devis gratuit.</p>
-      </div>
-    </section>
-
-    <section class="section" id="galerie">
-      <div class="container">
-        <div class="section-head">
-          <p class="eyebrow">Réalisations</p>
-          <h2 class="section-title">En images</h2>
-        </div>
-        <div class="gallery" id="galleryGrid"></div>
-      </div>
-    </section>
-
-    <section class="section section--cream">
-      <div class="container">
-        <div class="section-head">
-          <p class="eyebrow">Nos autres univers</p>
-          <h2 class="section-title">Pour chaque occasion</h2>
-        </div>
-        <div class="occasions occasions--3" id="occasionsGrid"></div>
-      </div>
-    </section>
-
-    <section class="section section--gold" id="devis">
-      <div class="container devis">
-        <div class="devis__intro">
-          <p class="eyebrow eyebrow--light">Devis gratuit</p>
-          <h2 class="section-title">Parlez-nous de votre événement</h2>
-          <p>Nous vous répondons rapidement, par téléphone ou sur WhatsApp.</p>
-          <ul class="devis__contact">
-            <li><span class="icon" data-icon="phone"></span> <a href="#" data-bind-tel="phone" data-bind="phoneDisplay">06 63 35 15 07</a></li>
-            <li><span class="icon" data-icon="whatsapp"></span> <a href="#" data-wa-link>Écrire sur WhatsApp</a></li>
-          </ul>
-        </div>
-        <div id="quoteMount"></div>
-      </div>
-    </section>
-  </main>
-
-  <div id="siteFooter"></div>
-
-  <script src="assets/vendor/gsap.min.js"></script>
-  <script src="assets/vendor/ScrollTrigger.min.js"></script>
-  <script src="assets/vendor/lenis.min.js"></script>
-  <script src="assets/js/data.js"></script>
-  <script src="assets/js/site.js"></script>
-  <script src="assets/js/motion.js"></script>
-</body>
+<body><p><a href="mariage.html">Continuer</a></p></body>
 </html>
