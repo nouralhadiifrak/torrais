@@ -939,3 +939,51 @@ html.is-intro:not(.intro-reveal) .hero__inner > *, html.is-intro:not(.intro-reve
 .reviews__more { text-align: center; margin: 28px 0 0; }
 /* le héros enchaîne directement sur les services */
 .hero + #occasions { padding-top: 80px; }
+
+/* ---------- Nos menus : carrousel 3D (coverflow) ---------- */
+.coverflow { position: relative; }
+.coverflow__stage { position: relative; height: clamp(320px, 42vw, 460px); perspective: 1300px; transform-style: preserve-3d; }
+.cf-card { position: absolute; left: 50%; top: 50%; width: clamp(210px, 28vw, 330px); aspect-ratio: 4 / 5; padding: 0; border: 0; border-radius: 22px; overflow: hidden; cursor: pointer; background: var(--sand);
+  box-shadow: 0 24px 50px rgba(43, 34, 24, .28); transition: transform .8s cubic-bezier(.65, 0, .35, 1), opacity .8s cubic-bezier(.65, 0, .35, 1); will-change: transform; }
+.cf-card img { width: 100%; height: 100%; object-fit: cover; }
+.cf-card .ph em { font-size: .95rem; opacity: .85; }
+.cf-card.is-active { cursor: default; box-shadow: 0 30px 60px rgba(43, 34, 24, .34); }
+.cf-card:focus-visible { outline: 3px solid var(--gold); outline-offset: 4px; }
+.coverflow__caption { text-align: center; max-width: 520px; margin: 26px auto 0; min-height: 88px; }
+.coverflow__caption h3 { font-size: 1.9rem; margin: 0 0 .25em; }
+.coverflow__caption p { margin: 0; color: var(--muted); font-size: .95rem; }
+.coverflow__caption.is-in { animation: cfCap .6s ease both; }
+@keyframes cfCap { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.coverflow__dots { display: flex; justify-content: center; gap: 8px; margin-top: 14px; }
+.coverflow__dots button { width: 8px; height: 8px; padding: 0; border-radius: 999px; border: 0; background: var(--line); cursor: pointer; transition: width .3s, background .3s; }
+.coverflow__dots button.is-active { width: 26px; background: var(--gold); }
+@media (max-width: 640px) { .coverflow__stage { height: 330px; } .cf-card { width: 205px; } .coverflow__caption h3 { font-size: 1.55rem; } }
+@media (prefers-reduced-motion: reduce) { .cf-card { transition: none; } .coverflow__caption.is-in { animation: none; } }
+#carte .section-head--row { align-items: flex-end; }
+@media (max-width: 480px) { #carte .carousel-nav { display: none; } }
+
+/* ---------- Galerie : mur de photos qui dérive ---------- */
+.drift { position: relative; height: 640px; overflow: hidden; border-radius: 26px; background: #16130f;
+  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 10%, #000 90%, transparent 100%); mask-image: linear-gradient(180deg, transparent 0, #000 10%, #000 90%, transparent 100%); }
+.drift__wall { position: absolute; left: 50%; top: 50%; width: 150%; height: 190%; display: flex; gap: 14px; transform: translate(-50%, -50%) rotate(-12deg); }
+.drift__col { flex: 1; min-width: 0; }
+.drift__track { display: flex; flex-direction: column; gap: 14px; animation: driftUp var(--dur, 40s) linear infinite; }
+.drift__col--down .drift__track { animation-name: driftDown; }
+@keyframes driftUp { from { transform: translateY(0); } to { transform: translateY(calc(-50% - 7px)); } }
+@keyframes driftDown { from { transform: translateY(calc(-50% - 7px)); } to { transform: translateY(0); } }
+.drift:hover .drift__track { animation-play-state: paused; }
+.drift__tile { position: relative; display: block; width: 100%; padding: 0; border: 0; border-radius: 16px; overflow: hidden; cursor: zoom-in; background: var(--sand); flex-shrink: 0; }
+.drift__tile img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform .6s; }
+.drift__tile .ph svg { width: 34px; height: 34px; }
+.drift__tile:hover img, .drift__tile:hover .ph { transform: scale(1.05); }
+.drift__tile .ph { transition: transform .6s; }
+.drift__cap { position: absolute; left: 0; right: 0; bottom: 0; padding: 22px 12px 10px; text-align: left; font: 500 .95rem/1.2 var(--serif); color: #fff; background: linear-gradient(transparent, rgba(22, 19, 15, .6)); opacity: 0; transition: opacity .3s; }
+.drift__tile:hover .drift__cap, .drift__tile:focus-visible .drift__cap { opacity: 1; }
+.drift__tile:focus-visible { outline: 3px solid var(--gold-light); outline-offset: 2px; }
+@media (max-width: 700px) { .drift { height: 480px; border-radius: 20px; } .drift__wall { width: 170%; gap: 10px; } .drift__track { gap: 10px; } .drift__tile { border-radius: 12px; }
+  @keyframes driftUp { from { transform: translateY(0); } to { transform: translateY(calc(-50% - 5px)); } }
+  @keyframes driftDown { from { transform: translateY(calc(-50% - 5px)); } to { transform: translateY(0); } } }
+@media (prefers-reduced-motion: reduce) { .drift__track { animation: none; } }
+
+.cf-card::after { content: ''; position: absolute; inset: 0; background: #16130f; opacity: 0; transition: opacity .8s cubic-bezier(.65, 0, .35, 1); pointer-events: none; }
+.cf-card.is-side::after { opacity: .35; }
