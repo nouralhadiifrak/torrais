@@ -1666,6 +1666,7 @@
               field('Menus au choix (un par ligne : menu | prix en DH)', '<textarea data-k="menus" rows="3" placeholder="Poulet + viande aux pruneaux | 12900">' + esc((p.menus || []).map(function (m) { return m.label + ' | ' + m.price; }).join('\n')) + '</textarea>') +
               field('Inclus (une ligne par élément)', '<textarea data-k="features" rows="5">' + esc((p.features || []).join('\n')) + '</textarea>') +
               field('Prix si pas de menu (facultatif)', '<input data-k="price" value="' + esc(p.price || '') + '" placeholder="Ex. À partir de 9 900 DH">') +
+              field('Présentation (page « Voir plus de détails »)', '<textarea data-k="description" rows="4" placeholder="Quelques phrases pour présenter ce pack…">' + esc(p.description || '') + '</textarea>') +
               '<label class="switch"><input type="checkbox" data-k="featured"' + (p.featured ? ' checked' : '') + '><span>Mettre en avant</span></label>' +
               '</div>';
           }).join('') + '</div>';
@@ -2170,6 +2171,7 @@
         }).filter(function (m) { return m.label; });
         p.features = $('[data-k="features"]', box).value.split('\n').map(function (x) { return x.trim(); }).filter(Boolean);
         p.price = $('[data-k="price"]', box).value.trim();
+        p.description = $('[data-k="description"]', box).value.trim();
         p.featured = $('[data-k="featured"]', box).checked;
         p.soon = !p.menus.length && !p.features.length && !p.price;
       });

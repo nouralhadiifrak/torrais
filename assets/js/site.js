@@ -15,6 +15,13 @@
   var OCC_PAGES = { mariage: 'mariage.html', bapteme: 'bapteme.html', entreprise: 'entreprise.html', prive: 'evenements-prives.html' };
   function occUrl(o) { return OCC_PAGES[o.id] || ('evenement.html?type=' + encodeURIComponent(o.id)); }
 
+  // Page « pack » : quel service, quel pack ?
+  var PACK_GROUP = PAGE === 'pack' ? document.body.getAttribute('data-group') : null;
+  var PACK_ID = PAGE === 'pack' ? document.body.getAttribute('data-pack') : null;
+  var GROUP_OCC = { mariage: 'mariage', fiancailles: 'mariage', bapteme: 'bapteme', entreprise: 'entreprise', prive: 'prive' };
+  var GROUP_EVENT = { mariage: 'Mariage', fiancailles: 'Fiançailles', bapteme: 'Aqiqa / Baptême', entreprise: "Événement d'entreprise", prive: 'Autre' };
+  function packUrl(group, p) { return 'pack-' + group + '-' + p.id + '.html'; }
+
   // Page « univers » : quelle occasion afficher ?
   var occasion = null;
   if (PAGE === 'occasion') {
@@ -175,6 +182,90 @@
     }).join('');
   }
 
+  /* ---------- page de détail d'un pack ---------- */
+  var INCL_TEXT = {
+    'décoration': 'Décoration de la salle, des tables et de la kousha, à vos couleurs.',
+    'caméra': 'Votre mariage filmé du début à la fin.',
+    'dj': 'Un DJ pour faire danser vos invités toute la soirée.',
+    'orchestre': 'Un orchestre pour une ambiance live et chaleureuse.',
+    'dessert': 'Une sélection de desserts pour finir le dîner en douceur.',
+    'jus': 'Jus frais servis tout au long de la soirée.',
+    'gâteaux': 'Gâteaux marocains et gâteaux de soirée.',
+    'thé à la menthe': 'Atay servi dans les règles de l’art.',
+    'dattes et lait': 'L’accueil traditionnel de vos invités.'
+  };
+  function renderPackPage() {
+    if (PAGE !== 'pack') return;
+    var labels = {}; (T.PACK_GROUPS || []).forEach(function (g) { labels[g.id] = g.label; });
+    var list = packsOf(PACK_GROUP);
+    var idx = list.map(function (p) { return p.id; }).indexOf(PACK_ID);
+    var p = list[idx < 0 ? 0 : idx];
+    if (!p) return;
+    var gLabel = labels[PACK_GROUP] || '';
+    var occ = data.occasions.filter(function (o) { return o.id === GROUP_OCC[PACK_GROUP]; })[0];
+    var soon = p.soon || (!(p.menus || []).length && !(p.features || []).length);
+    var menus = (p.menus || []).filter(function (m) { return m.label; });
+    var prices = menus.map(function (m) { return +m.price; }).filter(Boolean);
+    var from = prices.length ? Math.min.apply(null, prices) : 0;
+    document.title = 'Pack ' + p.name + ' — ' + gLabel + ' — TORRAIS EVENT';
+    $('#packCrumbs').innerHTML = '<a href="index.html">Accueil</a> <span>›</span> ' + (occ ? '<a href="' + occUrl(occ) + '">' + esc(gLabel) + '</a>' : esc(gLabel)) + ' <span>›</span> <span>Pack ' + esc(p.name) + '</span>';
+    $('#packTitle').textContent = 'Pack ' + p.name;
+    $('#packLead').textContent = gLabel + (p.place ? ' · ' + p.place : '') + (from ? ' · à partir de ' + packPrice(from) : soon ? ' · détails à venir' : '');
+    var bg = p.image || (occ && occ.image) || 'assets/img/salle.jpg';
+    $('#pageHeroBg').style.backgroundImage = 'url("' + bg + '")';
+    $('#packWa').setAttribute('data-wa-text', 'Bonjour TORRAIS EVENT, je suis intéressé(e) par le pack ' + p.name + ' (' + gLabel + ').');
+    $('#packHeading').textContent = 'Pack ' + p.name + ', ' + gLabel.toLowerCase();
+    // présentation : texte du gérant, sinon un résumé tiré du contenu du pack
+    var intro = p.description ? p.description.split(/\n+/) : soon ? ['Le contenu détaillé de ce pack arrive très bientôt. En attendant, contactez-nous : nous vous présentons le pack et préparons votre devis gratuit.'] :
+      ['Le pack ' + p.name + ' réunit l’essentiel pour votre ' + gLabel.toLowerCase() + (p.place ? ' : ' + p.place.charAt(0).toLowerCase() + p.place.slice(1) : '') + (p.tables ? ', à partir de ' + p.tables + ' tables' : '') + (p.tenues ? ', avec une neggafa et ' + p.tenues + ' tenues' : '') + '.',
+       'Décoration, musique, dîner et douceurs : vous choisissez votre menu, nous nous occupons de tout le reste pour que vous profitiez pleinement de votre fête.'];
+    $('#packIntro').innerHTML = intro.map(function (t) { return '<p>' + esc(t) + '</p>'; }).join('');
+    var facts = [];
+    if (p.place) facts.push(esc(p.place));
+    if (p.tables) facts.push('Dès <b>' + esc(p.tables) + ' tables</b>');
+    if (p.tenues) facts.push('Neggafa · <b>' + esc(p.tenues) + ' tenues</b>');
+    $('#packFacts').innerHTML = facts.map(function (f) { return '<span>' + f + '</span>'; }).join('');
+    // encadré prix + menu (réutilise la carte pack, sans le lien « détails »)
+    var card = packCard(p, idx < 0 ? 0 : idx, gLabel, null);
+    $('#packBox').outerHTML = card.replace('<article class="pack', '<aside id="packBox" class="pack pack--detail').replace(/<\/article>$/, '</aside>');
+    var box = $('#packBox');
+    box.addEventListener('change', function (e) {
+      if (e.target.type !== 'radio') return;
+      var m = p.menus[+e.target.value];
+      if (m) $('[data-pack-price]', box).textContent = +m.price ? packPrice(m.price) : 'Sur devis';
+    });
+    // photos : celles du pack, sinon des emplacements
+    var photos = (p.photos || []).filter(Boolean);
+    var slots = photos.length ? photos.map(function (src) { return { src: src }; }) :
+      ['Le lieu', 'La décoration', 'La neggafa', 'Le dîner', 'Les douceurs'].map(function (t) { return { label: t }; });
+    $('#packGallery').innerHTML = slots.map(function (x, i) {
+      return '<figure class="pack-gallery__item' + (i === 0 ? ' pack-gallery__item--big' : '') + '">' +
+        (x.src ? '<img src="' + esc(x.src) + '" alt="Pack ' + esc(p.name) + '" loading="lazy">' : '<span class="ph cf-ph tone-' + (i % 8 + 1) + '">' + T.icons[DISH_ICONS[i % 2]] + '<strong>' + esc(x.label) + '</strong><em>Photo à venir</em></span>') + '</figure>';
+    }).join('');
+    // inclus
+    var incl = p.features || [];
+    $('#packIncl').innerHTML = incl.length ? incl.map(function (f, i) {
+      return '<div class="pack-incl__item"><span class="pack-incl__num">' + String(i + 1).padStart(2, '0') + '</span><h3>' + esc(f) + '</h3><p>' + esc(INCL_TEXT[f.toLowerCase()] || '') + '</p></div>';
+    }).join('') : '<p class="pack-empty">Le détail de ce qui est inclus arrive bientôt.</p>';
+    // menus
+    $('#packMenus').innerHTML = menus.length ? menus.map(function (m, i) {
+      return '<div class="pack-menus__item"><span class="pack-menus__label">Menu ' + (i + 1) + '</span><h3>' + esc(m.label) + '</h3><strong>' + (+m.price ? 'À partir de ' + packPrice(m.price) : 'Sur devis') + '</strong></div>';
+    }).join('') : '<p class="pack-empty">Le menu de ce pack arrive bientôt. Découvrez déjà nos plats.</p>';
+    // FAQ du pack (réponses générales, sans chiffres inventés)
+    var faq = [
+      { q: 'Puis-je personnaliser ce pack ?', a: 'Oui. Chaque pack est une base : nous l’adaptons à vos envies (menu, décoration, animations). Parlons-en lors de votre demande de devis.' },
+      { q: 'Le prix affiché est-il le prix final ?', a: 'Le prix « à partir de » dépend du menu choisi. Le prix final dépend du nombre d’invités et des options ajoutées : demandez un devis gratuit pour une estimation précise.' },
+      { q: 'Comment réserver ce pack ?', a: 'Remplissez le formulaire en bas de page ou écrivez-nous sur WhatsApp avec votre date et le nombre d’invités. Nous vous rappelons rapidement.' }
+    ];
+    $('#packFaq').innerHTML = faq.map(function (f) {
+      return '<details class="faq__item"><summary>' + esc(f.q) + '</summary><p>' + esc(f.a) + '</p></details>';
+    }).join('');
+    // les autres packs du même service
+    var others = list.filter(function (x) { return x !== p; });
+    $('#otherTitle').textContent = 'Nos autres packs ' + gLabel.toLowerCase();
+    $('#otherPacks').innerHTML = others.map(function (x) { return packCard(x, list.indexOf(x), gLabel, PACK_GROUP); }).join('');
+  }
+
   /* ---------- page Mariage : les étapes en zigzag ---------- */
   function renderWeddingSteps() {
     var box = $('#weddingSteps');
@@ -324,7 +415,7 @@
 
   function packPrice(n) { return Math.round(+n || 0).toLocaleString('fr-FR').replace(/\s/g, ' ') + ' DH'; }
   function packsOf(group) { return group === 'mariage' ? data.packages : ((data.servicePacks || {})[group] || []); }
-  function packCard(p, i, groupLabel) {
+  function packCard(p, i, groupLabel, group) {
     var pin = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>';
     var menus = (p.menus || []).filter(function (m) { return m.label; });
     var same = menus.length > 1 && menus.every(function (m) { return +m.price === +menus[0].price; });
@@ -351,7 +442,8 @@
       }).join('') + '</div>' : '') +
       '<div class="pack__price"><small>' + (soon ? 'Prix' : 'À partir de') + '</small><strong data-pack-price>' +
         (menus.length && +menus[start].price ? packPrice(menus[start].price) : esc(p.price || 'Sur devis')) + '</strong></div>' +
-      '<a href="#devis" class="btn ' + (p.featured ? 'btn--gold' : 'btn--outline') + ' btn--block" data-package="' + esc(p.name + ' (' + groupLabel + ')') + '">Demander ce pack</a>' +
+      '<a href="' + (PAGE === 'pack' ? '#devis' : '#devis') + '" class="btn ' + (p.featured ? 'btn--gold' : 'btn--outline') + ' btn--block" data-package="' + esc(p.name + ' (' + groupLabel + ')') + '">Demander ce pack</a>' +
+      (group ? '<a href="' + packUrl(group, p) + '" class="pack__more">Voir plus de détails <span aria-hidden="true">→</span></a>' : '') +
       '</article>';
   }
   function renderPackages() {
@@ -365,7 +457,7 @@
     function draw() {
       var list = packsOf(current);
       box.setAttribute('data-group', current);
-      box.innerHTML = list.map(function (p, i) { return packCard(p, i, labels[current] || current); }).join('');
+      box.innerHTML = list.map(function (p, i) { return packCard(p, i, labels[current] || current, current); }).join('');
       var head = section && $('.section-head', section);
       if (head) {
         $('.eyebrow', head).textContent = 'Packs ' + (labels[current] || '').toLowerCase();
@@ -756,7 +848,7 @@
         '</div>' +
         '<div class="form__row">' +
           '<label class="field"><span>Type d\'événement *</span><select name="eventType" required><option value="">Choisir…</option>' +
-            T.EVENT_TYPES.map(function (t) { return '<option' + (occasion && occasion.eventType === t ? ' selected' : '') + '>' + esc(t) + '</option>'; }).join('') + '</select></label>' +
+            T.EVENT_TYPES.map(function (t) { return '<option' + ((PACK_GROUP ? GROUP_EVENT[PACK_GROUP] === t : occasion && occasion.eventType === t) ? ' selected' : '') + '>' + esc(t) + '</option>'; }).join('') + '</select></label>' +
           '<label class="field"><span>Date de l\'événement *</span><input type="date" name="date" required min="' + U.iso(new Date()) + '"></label>' +
         '</div>' +
         '<div class="form__row">' +
@@ -882,6 +974,7 @@
   renderReviews();
   renderMenusPage();
   renderWeddingSteps();
+  renderPackPage();
   initDevisChoice();
   renderFaq();
   renderZones();
