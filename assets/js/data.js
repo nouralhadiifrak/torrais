@@ -172,6 +172,19 @@
         items: ['Jus d’orange frais', 'Jus d’avocat', 'Panaché de fruits', 'Jus de fraise', 'Citronnade à la menthe'] }
     ];
   }
+  // Les étapes du mariage (page Mariage / Fiançailles)
+  function defaultWeddingSteps() {
+    return [
+      { title: 'Le lieu', text: 'Votre fête où vous le souhaitez : nous nous occupons de la salle ou nous venons chez vous.', choose: true, options: ['Salle de fête', 'Villa', 'À domicile'] },
+      { title: 'L’ambiance traditionnelle', text: 'Une entrée inoubliable, portée par les rythmes de la tradition marocaine.', choose: true, options: ['Issawa', 'Dakka marrakchia'] },
+      { title: 'La musique', text: 'Pour faire danser vos invités toute la soirée.', choose: true, options: ['DJ', 'Orchestre'] },
+      { title: 'L’entrée', text: 'L’accueil des invités, comme le veut la tradition.', choose: false, options: ['Dattes et lait'] },
+      { title: 'Le thé', text: 'Atay servi dans les règles de l’art, accompagné des douceurs de votre choix.', choose: true, options: ['Mets sucrés-salés', 'Gâteaux'] },
+      { title: 'La neggafa', text: 'Pour sublimer la mariée tout au long de la soirée, de 2 à 5 tenues.', choose: true, options: ['2 tenues', '3 tenues', '4 tenues', '5 tenues'] },
+      { title: 'Photographe et vidéaste', text: 'Chaque instant capturé, en photo et en vidéo, pour revivre votre mariage.', choose: false, options: ['Photographe', 'Vidéaste'] },
+      { title: 'Votre menu', text: 'Composez votre dîner parmi nos plats signature.', choose: true, options: ['Pastilla au poulet', 'Pastilla aux fruits de mer', 'Poulet rôti avec daghmira', 'Viande aux pruneaux & amandes', 'Demi-méchoui'] }
+    ];
+  }
   function defaultMenuDishes() {
     return [
       { id: uid(), name: 'Pastilla au poulet', text: 'Feuilles croustillantes, poulet, amandes, cannelle et sucre glace.', image: '' },
@@ -486,6 +499,7 @@
     if (!d.site.menuV2) { d.site.dishes = defaultMenuDishes(); d.site.menuV2 = true; }
     if (!d.site.menuCats) d.site.menuCats = defaultMenuCats();
     if (!d.servicePacks) d.servicePacks = defaultServicePacks();
+    if (!d.site.weddingSteps) d.site.weddingSteps = defaultWeddingSteps();
     if (!d.occasionsV2) {
       var keep = {};
       d.occasions.forEach(function (o) { if (o.image) keep[o.id === 'famille' ? 'anniversaire' : o.id] = o.image; });

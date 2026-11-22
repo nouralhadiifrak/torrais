@@ -1169,3 +1169,13 @@ body[data-page="home"] main .lux-choice .eyebrow { border-color: rgba(216, 191, 
 .pack__soon i { display: block; height: 10px; border-radius: 6px; background: linear-gradient(90deg, var(--sand) 25%, #f6efe3 50%, var(--sand) 75%); background-size: 200% 100%; animation: phShine 2.4s ease-in-out infinite; }
 .pack__soon i.short { width: 60%; }
 @media (prefers-reduced-motion: reduce) { .pack__soon i { animation: none; } }
+
+/* page Mariage : les étapes */
+.wstep { cursor: default; }
+.wstep:hover { transform: none; }
+.wstep__opts { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 4px; }
+.wstep__label { font: 700 .62rem/1 var(--sans); letter-spacing: .18em; text-transform: uppercase; color: var(--muted); margin-right: 4px; }
+.wstep__opt { font-size: .8rem; font-weight: 600; color: var(--gold-text); background: #fdf8ee; border: 1px solid rgba(176, 138, 69, .4); border-radius: 999px; padding: 6px 12px; }
+.wsteps .occasion { min-height: 230px; }
+.wsteps .cf-ph strong { font-size: 1.45rem; }
+@media (max-width: 560px) { .wsteps .occasion { min-height: 170px; } .wsteps .cf-ph strong { font-size: 1.05rem; } .wsteps .cf-ph em { display: none; } .wsteps .cf-ph svg { width: 28px; height: 28px; } .wstep__opt { font-size: .72rem; padding: 5px 9px; } }
