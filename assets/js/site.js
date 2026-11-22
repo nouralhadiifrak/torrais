@@ -856,9 +856,6 @@
           '<label class="field"><span>Budget approximatif</span><select name="budget"><option value="">Je ne sais pas encore</option>' +
             '<option>Moins de 20 000 DH</option><option>20 000 – 50 000 DH</option><option>50 000 – 80 000 DH</option><option>80 000 – 120 000 DH</option><option>Plus de 120 000 DH</option></select></label>' +
         '</div>' +
-        '<fieldset class="field field--checks"><legend>Services souhaités</legend><div class="checks">' +
-          T.SERVICE_NAMES.map(function (n) { return '<label class="check"><input type="checkbox" name="services" value="' + esc(n) + '"><span>' + esc(n) + '</span></label>'; }).join('') +
-        '</div></fieldset>' +
         '<label class="field"><span>Votre message</span><textarea name="message" rows="4" placeholder="Lieu, formule qui vous intéresse, demandes particulières…"></textarea></label>' +
         '<p class="form__error" id="formError" role="alert" hidden></p>' +
         '<button type="submit" class="btn btn--dark btn--block">Envoyer ma demande</button>' +
