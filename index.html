@@ -7,7 +7,7 @@
   <meta name="description" content="TORRAIS EVENT, traiteur à Casablanca : mariages, fiançailles, henné, tyafer, buffets et décoration. Formules sur mesure, devis gratuit.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Italiana&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="icon" type="image/png" sizes="32x32" href="assets/img/brand/favicon-32.png">
   <link rel="apple-touch-icon" href="assets/img/brand/apple-touch-icon.png">
   <meta name="theme-color" content="#16130f">
@@ -38,22 +38,23 @@
       <div class="hero__slides" id="heroSlides" aria-hidden="true"></div>
       <div class="hero__dots" id="heroDots"></div>
       <div class="container hero__inner">
-        <p class="eyebrow">Traiteur · Tyafer · Buffet · Décoration</p>
-        <h1 class="hero__title hero__title--logo"><img src="assets/img/brand/logo.webp" width="900" height="614" alt="TORRAIS EVENT"></h1>
-        <p class="hero__lead">Traiteur de mariages et d'événements à <strong data-bind="city">Casablanca</strong>.
-          <span data-bind="tagline">Réservez la formule mariage à votre service, selon votre choix.</span></p>
+        <h1 class="hero__title hero__title--text">Traiteur de mariages et d'événements à <span data-bind="city">Casablanca</span></h1>
+        <p class="hero__lead"><span data-bind="tagline">Réservez la formule mariage à votre service, selon votre choix.</span></p>
         <div class="hero__actions">
           <a href="#devis" class="btn btn--gold">Demander un devis gratuit</a>
           <a href="composer.html" class="btn btn--outline">Composer mon mariage</a>
         </div>
-        <ul class="hero__badges">
-          <li><span class="icon" data-icon="check"></span> Formules sur mesure</li>
-          <li><span class="icon" data-icon="check"></span> Cuisine marocaine &amp; internationale</li>
-          <li><span class="icon" data-icon="check"></span> Service et décoration inclus</li>
-        </ul>
       </div>
-      <a href="#maison" class="hero__scroll" aria-label="Défiler vers la suite"><span></span></a>
+      <a href="#occasions" class="hero__scroll" aria-label="Défiler vers la suite"><span></span></a>
     </section>
+
+    <!-- BANDE DE SÉPARATION -->
+    <div class="lux-band" aria-hidden="true">
+      <div class="lux-band__track">
+        <span>Mariage</span><i>✦</i><span>Fiançailles</span><i>✦</i><span>Baptême</span><i>✦</i><span>Entreprise</span><i>✦</i><span>Événements privés</span><i>✦</i><span>Traiteur</span><i>✦</i><span>Neggafa</span><i>✦</i><span>Décoration</span><i>✦</i>
+        <span>Mariage</span><i>✦</i><span>Fiançailles</span><i>✦</i><span>Baptême</span><i>✦</i><span>Entreprise</span><i>✦</i><span>Événements privés</span><i>✦</i><span>Traiteur</span><i>✦</i><span>Neggafa</span><i>✦</i><span>Décoration</span><i>✦</i>
+      </div>
+    </div>
 
     <!-- 1. NOS SERVICES -->
     <section class="section section--cream" id="occasions">
@@ -61,7 +62,7 @@
         <div class="section-head">
           <p class="eyebrow">Nos services</p>
           <h2 class="section-title">Pour chaque occasion</h2>
-          <p class="section-sub">Mariage, baptême, entreprise ou fête privée : une équipe et une cuisine adaptées à votre événement.</p>
+          <p class="section-sub">Chaque occasion a son émotion. Nous imaginons pour la vôtre une table, un décor et un service à sa hauteur.</p>
         </div>
         <div class="occasions occasions--zigzag" id="occasionsGrid"></div>
       </div>
@@ -70,37 +71,38 @@
     <!-- 2. NOS MENUS -->
     <section class="section" id="carte">
       <div class="container">
-        <div class="section-head section-head--row">
-          <div>
-            <p class="eyebrow">Notre cuisine</p>
-            <h2 class="section-title">Nos menus</h2>
-          </div>
-          <div class="carousel-nav">
-            <button type="button" class="carousel-btn" data-carousel="prev" aria-label="Plats précédents">‹</button>
-            <button type="button" class="carousel-btn" data-carousel="next" aria-label="Plats suivants">›</button>
-          </div>
+        <div class="section-head">
+          <p class="eyebrow">Notre cuisine</p>
+          <h2 class="section-title">Nos menus</h2>
+          <p class="section-sub">Une cuisine marocaine généreuse, préparée maison et servie avec soin, du premier thé au dessert.</p>
         </div>
         <div class="coverflow" id="dishesTrack" aria-roledescription="carrousel" aria-label="Nos plats"></div>
+        <p class="carte-cta"><a href="menus.html" class="btn btn--gold">Découvrir nos menus</a></p>
       </div>
     </section>
 
     <!-- 3. DEUX OPTIONS : composer / devis -->
-    <section class="section section--cream" id="devis">
+    <section class="section lux-choice" id="devis">
       <div class="container">
         <div class="section-head">
-          <p class="eyebrow">Votre événement</p>
+          <p class="eyebrow eyebrow--light">Votre événement</p>
           <h2 class="section-title">Comment voulez-vous commencer&nbsp;?</h2>
+          <p class="section-sub">Deux façons de préparer votre fête avec nous. Choisissez celle qui vous ressemble.</p>
         </div>
         <div class="choice">
-          <a class="choice__card choice__card--dark" href="composer.html">
+          <a class="choice__card" href="composer.html">
+            <span class="choice__num" aria-hidden="true">I</span>
             <span class="choice__icon" data-icon="deco"></span>
-            <span class="choice__text"><strong>Composer votre événement</strong><span>Choisissez votre pack, votre menu et vos options : vous voyez tout de suite une estimation.</span></span>
-            <span class="choice__go" aria-hidden="true">→</span>
+            <strong class="choice__title">Composer votre événement</strong>
+            <span class="choice__desc">Choisissez votre pack, votre menu et vos options. L'estimation s'affiche aussitôt.</span>
+            <span class="choice__cta">Commencer <span aria-hidden="true">→</span></span>
           </a>
           <button type="button" class="choice__card" id="openDevis" aria-expanded="false" aria-controls="devisPanel">
+            <span class="choice__num" aria-hidden="true">II</span>
             <span class="choice__icon" data-icon="traiteur"></span>
-            <span class="choice__text"><strong>Demander un devis</strong><span>Décrivez votre événement en 1 minute : Saïd vous rappelle avec un devis gratuit.</span></span>
-            <span class="choice__go" aria-hidden="true">↓</span>
+            <strong class="choice__title">Demander un devis</strong>
+            <span class="choice__desc">Décrivez votre événement en une minute. Saïd vous rappelle avec un devis gratuit.</span>
+            <span class="choice__cta">Remplir le formulaire <span aria-hidden="true">↓</span></span>
           </button>
         </div>
         <div class="devis-panel section--gold" id="devisPanel" hidden>
@@ -131,7 +133,7 @@
         <div class="section-head">
           <p class="eyebrow">Galerie</p>
           <h2 class="section-title">Nos événements</h2>
-          <p class="section-sub">Plus de photos sur notre <a href="#" data-bind-href="instagram" target="_blank" rel="noopener">page Instagram</a>.</p>
+          <p class="section-sub">Quelques moments que nous avons eu la joie d'accompagner. Plus de photos sur notre <a href="#" data-bind-href="instagram" target="_blank" rel="noopener">page Instagram</a>.</p>
         </div>
         <div class="drift" id="galleryGrid"></div>
       </div>

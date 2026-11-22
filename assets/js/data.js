@@ -201,6 +201,7 @@
         businessName: 'TORRAIS EVENT',
         owner: 'Saïd',
         phone: '0663351507',
+        phone2: '0633318936',
         whatsapp: '0663351507',
         email: '',
         instagram: 'https://www.instagram.com/torrais.event/',
@@ -456,6 +457,7 @@
       d.occasionsV2 = true;
     }
     if (!d.pricing) d.pricing = defaultPricing();
+    if (d.settings && d.settings.phone2 == null) d.settings.phone2 = '0633318936';
     // v2 : packs Essentiel / Villa / Salle de fête (on garde les photos déjà ajoutées)
     if (!d.packagesV2) {
       var imgs = (d.packages || []).map(function (p) { return p.image || ''; });

@@ -1631,6 +1631,7 @@
         '<form class="form-grid" id="settingsForm">' +
           field('Nom du gérant', '<input name="owner" value="' + esc(s.owner) + '">') +
           field('Téléphone', '<input name="phone" type="tel" value="' + esc(s.phone) + '">') +
+          field('Deuxième téléphone', '<input name="phone2" type="tel" value="' + esc(s.phone2 || '') + '" placeholder="Optionnel">') +
           field('WhatsApp', '<input name="whatsapp" type="tel" value="' + esc(s.whatsapp) + '">') +
           field('E-mail', '<input name="email" type="email" value="' + esc(s.email) + '" placeholder="Optionnel">') +
           field('Instagram (lien)', '<input name="instagram" value="' + esc(s.instagram) + '">') +
@@ -2139,7 +2140,7 @@
 
     'save-settings': function () {
       var f = $('#settingsForm').elements;
-      ['owner', 'phone', 'whatsapp', 'email', 'instagram', 'city', 'address', 'hours', 'tagline', 'ice', 'rc', 'idf', 'patente', 'googleReviews'].forEach(function (k) {
+      ['owner', 'phone', 'phone2', 'whatsapp', 'email', 'instagram', 'city', 'address', 'hours', 'tagline', 'ice', 'rc', 'idf', 'patente', 'googleReviews'].forEach(function (k) {
         data.settings[k] = f[k].value.trim();
       });
       commit('Coordonnées enregistrées.');

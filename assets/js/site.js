@@ -30,7 +30,6 @@
     }).join('');
     var mariage = data.occasions.filter(function (o) { return o.id === 'mariage'; })[0];
     var PACKS_URL = (mariage ? occUrl(mariage) : 'evenement.html?type=mariage') + '#formules';
-    var reviewsLink = (data.site.reviews || []).length ? '<a href="' + HOME + '#avis">Avis</a>' : '';
 
     $('#siteHeader').innerHTML =
       '<a class="skip-link" href="#contenu">Aller au contenu</a>' +
@@ -38,22 +37,20 @@
         '<span class="topbar__item"><span class="icon" data-icon="clock"></span><span data-bind="hours"></span></span>' +
         '<span class="topbar__item topbar__item--city"><span class="icon" data-icon="pin"></span>Traiteur à <span data-bind="city"></span></span>' +
         '<span class="topbar__right">' +
-          '<a href="#" data-bind-tel="phone"><span class="icon" data-icon="phone"></span><span data-bind="phoneDisplay"></span></a>' +
-          '<a href="#" data-bind-href="instagram" target="_blank" rel="noopener" aria-label="Instagram"><span class="icon" data-icon="instagram"></span></a>' +
+          '<a href="#" data-bind-tel="phone" class="topbar__tel"><span class="icon" data-icon="phone"></span><span data-bind="phoneDisplay"></span></a>' +
+          (s.phone2 ? '<a href="#" data-bind-tel="phone2" class="topbar__tel"><span class="icon" data-icon="phone"></span><span data-bind="phone2Display"></span></a>' : '') +
+          '<a href="#" data-bind-href="instagram" target="_blank" rel="noopener" aria-label="Instagram" class="topbar__insta"><span class="icon" data-icon="instagram"></span></a>' +
         '</span>' +
       '</div></div>' +
       '<header class="header"><div class="container header__inner">' +
         '<a href="' + (HOME || '#top') + '" class="brand" aria-label="TORRAIS EVENT — accueil">' + logo + '<span class="brand__text" aria-hidden="true">TORRAIS <em>EVENT</em></span></a>' +
         '<nav class="nav" id="nav" aria-label="Navigation principale">' +
+          '<a href="' + (HOME || '#top') + '"' + (PAGE === 'home' ? ' aria-current="page"' : '') + '>Accueil</a>' +
           '<div class="nav__drop"><button type="button" class="nav__droptoggle" aria-expanded="false">Nos services <span aria-hidden="true">▾</span></button>' +
             '<div class="nav__menu">' + occLinks + '</div></div>' +
-          '<a href="' + HOME + '#carte">Nos menus</a>' +
-          '<a href="' + PACKS_URL + '">Packs mariage</a>' +
-          '<a href="' + HOME + '#galerie">Galerie</a>' +
-          reviewsLink +
-          '<a href="composer.html"' + (PAGE === 'composer' ? ' aria-current="page"' : '') + '>Composer</a>' +
-          '<a href="' + HOME + '#contact">Contact</a>' +
-          '<a href="#devis" class="btn btn--gold btn--sm">Devis gratuit</a>' +
+          '<a href="menus.html"' + (PAGE === 'menus' ? ' aria-current="page"' : '') + '>Nos menus</a>' +
+          '<a href="apropos.html"' + (PAGE === 'about' ? ' aria-current="page"' : '') + '>À propos</a>' +
+          '<a href="' + (PAGE === 'home' || PAGE === 'occasion' ? '#devis' : HOME + '#devis') + '" class="btn btn--gold btn--sm">Devis gratuit</a>' +
         '</nav>' +
         '<button class="nav-toggle" id="navToggle" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="nav"><span></span><span></span><span></span></button>' +
       '</div></header>';
@@ -76,7 +73,7 @@
           '</div></div>' +
         '<div><h3>Nos services</h3><ul>' + data.occasions.map(function (o) { return '<li><a href="' + occUrl(o) + '">' + esc(o.title) + '</a></li>'; }).join('') + '</ul></div>' +
         '<div><h3>Le site</h3><ul>' +
-          '<li><a href="' + HOME + '#carte">Nos menus</a></li><li><a href="' + PACKS_URL + '">Packs mariage</a></li><li><a href="composer.html">Composer votre événement</a></li>' +
+          '<li><a href="menus.html">Nos menus</a></li><li><a href="apropos.html">À propos</a></li><li><a href="' + PACKS_URL + '">Packs mariage</a></li><li><a href="composer.html">Composer votre événement</a></li>' +
           '<li><a href="' + HOME + '#galerie">Galerie</a></li><li><a href="' + HOME + '#faq">Questions fréquentes</a></li><li><a href="' + (PAGE === 'home' || PAGE === 'occasion' ? '#devis' : HOME + '#devis') + '">Devis gratuit</a></li></ul></div>' +
         '<div><h3>Contact</h3><ul class="footer__contact">' +
           '<li><a href="#" data-bind-tel="phone" data-bind="phoneDisplay"></a></li>' +
@@ -111,7 +108,7 @@
   function bindSettings() {
     var values = {
       city: s.city, tagline: s.tagline, owner: s.owner, address: s.address, hours: s.hours, email: s.email,
-      phoneDisplay: U.formatPhone(s.phone), whatsappDisplay: U.formatPhone(s.whatsapp || s.phone)
+      phoneDisplay: U.formatPhone(s.phone), phone2Display: U.formatPhone(s.phone2), whatsappDisplay: U.formatPhone(s.whatsapp || s.phone)
     };
     $$('[data-bind]').forEach(function (el) {
       var key = el.getAttribute('data-bind');
@@ -134,6 +131,7 @@
   }
 
   /* ---------- sections ---------- */
+  var DISH_ICONS = ['traiteur', 'buffet']; // cloche et couverts pour les plats
   var PH_ICONS = ['traiteur', 'buffet', 'tyafer', 'deco'];
   function placeholder(i, label) {
     return '<span class="ph tone-' + (i % 8 + 1) + '">' + T.icons[PH_ICONS[i % 4]] + (label ? '<em>' + esc(label) + '</em>' : '') + '</span>';
@@ -176,13 +174,38 @@
     }).join('');
   }
 
+  /* ---------- page « Nos menus » ---------- */
+  function renderMenusPage() {
+    var grid = $('#signatureGrid');
+    if (grid) {
+      grid.innerHTML = (data.site.dishes || []).map(function (d, i) {
+        return '<article class="sig" id="plat-' + i + '"><div class="sig__img">' +
+          (d.image ? '<img src="' + esc(d.image) + '" alt="' + esc(d.name) + '" loading="lazy">' : '<span class="ph cf-ph tone-' + (i % 8 + 1) + '">' + T.icons[DISH_ICONS[i % 2]] + '<strong>' + esc(d.name) + '</strong><em>Photo à venir</em></span>') +
+          '</div><div class="sig__body"><span class="sig__num">' + String(i + 1).padStart(2, '0') + '</span><h3>' + esc(d.name) + '</h3><p>' + esc(d.text || '') + '</p></div></article>';
+      }).join('');
+    }
+    var carte = $('#carteList');
+    if (carte) {
+      carte.innerHTML = T.DISH_CATEGORIES.map(function (cat) {
+        var list = (data.dishes || []).filter(function (d) { return d.category === cat; });
+        if (!list.length) return '';
+        return '<div class="carte__group"><h3 class="carte__title">' + esc(cat) + '</h3><ul>' + list.map(function (d) { return '<li>' + esc(d.name) + '</li>'; }).join('') + '</ul></div>';
+      }).join('');
+    }
+    // arrivée depuis le carrousel : met le plat en valeur
+    var h = window.location.hash;
+    if (/^#plat-\d+$/.test(h)) { var el = $(h); if (el) { el.classList.add('is-target'); setTimeout(function () { el.scrollIntoView({ block: 'center' }); }, 300); } }
+  }
+
   /* ---------- « Nos menus » : carrousel 3D (coverflow) ---------- */
   function coverflow(box, dishes) {
     var n = dishes.length;
     var cur = 0;
-    box.innerHTML = '<div class="coverflow__stage">' + dishes.map(function (d, i) {
+    box.innerHTML = '<div class="coverflow__stage">' +
+      '<button type="button" class="cf-arrow cf-arrow--prev" data-cf="prev" aria-label="Plat précédent">‹</button>' +
+      '<button type="button" class="cf-arrow cf-arrow--next" data-cf="next" aria-label="Plat suivant">›</button>' + dishes.map(function (d, i) {
       return '<button type="button" class="cf-card" data-i="' + i + '" aria-label="' + esc(d.name) + '">' +
-        (d.image ? '<img src="' + esc(d.image) + '" alt="" loading="lazy">' : '<span class="ph cf-ph tone-' + (i % 8 + 1) + '">' + T.icons[PH_ICONS[i % 4]] + '<strong>' + esc(d.name) + '</strong><em>Photo à venir</em></span>') + '</button>';
+        (d.image ? '<img src="' + esc(d.image) + '" alt="" loading="lazy">' : '<span class="ph cf-ph tone-' + (i % 8 + 1) + '">' + T.icons[DISH_ICONS[i % 2]] + '<strong>' + esc(d.name) + '</strong><em>Photo à venir</em></span>') + '</button>';
     }).join('') + '</div>' +
       '<div class="coverflow__caption" aria-live="polite"><h3></h3><p></p></div>' +
       '<div class="coverflow__dots">' + dishes.map(function (d, i) { return '<button type="button" data-i="' + i + '" aria-label="' + esc(d.name) + '"></button>'; }).join('') + '</div>';
@@ -225,10 +248,15 @@
       box.addEventListener('mouseleave', function () { paused = false; });
     }
     box.addEventListener('click', function (e) {
+      if (box.dataset.dragged) return;
+      var arrow = e.target.closest('[data-cf]');
+      if (arrow) { hold(); go(cur + (arrow.getAttribute('data-cf') === 'next' ? 1 : -1)); return; }
       var c = e.target.closest('[data-i]');
-      if (!c || box.dataset.dragged) return;
+      if (!c) return;
       hold();
-      go(+c.getAttribute('data-i'));
+      var i = +c.getAttribute('data-i');
+      if (i === cur && c.classList.contains('cf-card')) { window.location.href = 'menus.html#plat-' + i; return; }
+      go(i);
     });
     $$('[data-carousel]').forEach(function (b) {
       b.addEventListener('click', function () { hold(); go(cur + (b.getAttribute('data-carousel') === 'next' ? 1 : -1)); });
@@ -241,6 +269,7 @@
     var drag = null;
     var stage = $('.coverflow__stage', box);
     stage.addEventListener('pointerdown', function (e) {
+      if (e.target.closest('[data-cf]')) return;
       drag = { x: e.clientX, moved: false };
       hold();
     });
@@ -779,6 +808,7 @@
   renderFilters();
   renderGallery();
   renderReviews();
+  renderMenusPage();
   initDevisChoice();
   renderFaq();
   renderZones();

@@ -999,3 +999,99 @@ html.is-intro:not(.intro-reveal) .hero__inner > *, html.is-intro:not(.intro-reve
 
 /* les cartes de côté du menu 3D ne doivent pas élargir la page sur mobile */
 #carte { overflow: hidden; }
+
+/* =========================================================
+   Finitions luxe — police des titres, bande, choix, nouvelles pages
+   ========================================================= */
+:root { --lux: 'Italiana', 'Cormorant Garamond', Georgia, serif; }
+.section-title, .page-hero__title, .hero__title--text, .choice__title, .coverflow__caption h3, .sig h3, .value h3, .carte__title, .occasion h3 { font-family: var(--lux); font-weight: 400; letter-spacing: .01em; }
+.section-sub { max-width: 560px; }
+
+/* en-tête : deux numéros */
+.topbar__tel { font-weight: 500; letter-spacing: .04em; }
+@media (max-width: 560px) {
+  .topbar { display: block; }
+  .topbar__inner { height: 34px; gap: 0; }
+  .topbar__item, .topbar__insta { display: none !important; }
+  .topbar__right { margin: 0 auto; gap: 22px; }
+}
+
+/* héros : seulement l'accroche */
+.hero__title--text { max-width: 900px; margin: 0 auto .4em; font-size: clamp(2.3rem, 6vw, 4.6rem); line-height: 1.08; letter-spacing: .02em; text-transform: none; color: #fff; }
+.hero__title--text span { color: var(--gold-light); }
+
+/* bande de séparation */
+.lux-band { position: relative; overflow: hidden; background: #0f0d0a; padding: 22px 0; border-top: 1px solid rgba(216, 191, 138, .35); border-bottom: 1px solid rgba(216, 191, 138, .35); }
+.lux-band::before, .lux-band::after { content: ''; position: absolute; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(216, 191, 138, .55), transparent); }
+.lux-band::before { top: 5px; } .lux-band::after { bottom: 5px; }
+.lux-band__track { display: flex; align-items: center; gap: 34px; width: max-content; animation: luxBand 48s linear infinite; }
+.lux-band__track span { font: 400 1.35rem/1 var(--lux); letter-spacing: .28em; text-transform: uppercase; white-space: nowrap; background: linear-gradient(180deg, #f3dfae, #c9a45c 60%, #a07c3a); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.lux-band__track i { font-style: normal; color: var(--gold); font-size: .8rem; }
+@keyframes luxBand { to { transform: translateX(-50%); } }
+@media (max-width: 640px) { .lux-band { padding: 16px 0; } .lux-band__track { gap: 22px; } .lux-band__track span { font-size: 1.05rem; } }
+@media (prefers-reduced-motion: reduce) { .lux-band__track { animation: none; } }
+.lux-band + #occasions { padding-top: 84px; }
+
+/* menus : flèches sur le carrousel, bouton */
+.cf-arrow { position: absolute; top: 50%; z-index: 30; width: 48px; height: 48px; margin-top: -24px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, .6); background: rgba(22, 19, 15, .45); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); color: #fff; font-size: 1.6rem; line-height: 1; cursor: pointer; display: grid; place-items: center; transition: background .2s, transform .2s; }
+.cf-arrow:hover { background: var(--gold); border-color: var(--gold); }
+.cf-arrow:active { transform: scale(.94); }
+.cf-arrow--prev { left: max(8px, calc(50% - 330px)); } .cf-arrow--next { right: max(8px, calc(50% - 330px)); }
+@media (max-width: 640px) { .cf-arrow { width: 42px; height: 42px; margin-top: -21px; } .cf-arrow--prev { left: 6px; } .cf-arrow--next { right: 6px; } }
+.cf-card.is-active { cursor: pointer; }
+.carte-cta { text-align: center; margin: 26px 0 0; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+/* votre événement : version luxe */
+.lux-choice { position: relative; background: radial-gradient(ellipse at 50% 0%, rgba(201, 164, 92, .16), transparent 60%), #120f0b; color: rgba(255, 255, 255, .78); overflow: hidden; }
+.lux-choice::before { content: ''; position: absolute; inset: 18px; border: 1px solid rgba(216, 191, 138, .18); border-radius: 28px; pointer-events: none; }
+.lux-choice .section-title { color: #fff; }
+.lux-choice .section-sub { color: rgba(255, 255, 255, .62); }
+.lux-choice .choice { gap: 24px; max-width: 980px; }
+.lux-choice .choice__card { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 0; min-height: 300px; padding: 40px 34px 32px; border-radius: 22px; background: linear-gradient(160deg, rgba(255, 255, 255, .06), rgba(255, 255, 255, .015)); border: 1px solid rgba(216, 191, 138, .32); color: #fff; box-shadow: none; text-align: left; overflow: hidden; }
+.lux-choice .choice__card::after { content: ''; position: absolute; inset: 8px; border: 1px solid rgba(216, 191, 138, .12); border-radius: 16px; pointer-events: none; transition: border-color .35s; }
+.lux-choice .choice__card:hover { transform: translateY(-4px); border-color: var(--gold); background: linear-gradient(160deg, rgba(201, 164, 92, .16), rgba(255, 255, 255, .02)); box-shadow: 0 24px 60px rgba(0, 0, 0, .35); }
+.lux-choice .choice__card:hover::after { border-color: rgba(216, 191, 138, .35); }
+.choice__num { position: absolute; top: 18px; right: 28px; font: 400 4.2rem/1 var(--lux); color: rgba(216, 191, 138, .22); }
+.lux-choice .choice__icon { width: 52px; height: 52px; background: transparent; border: 1px solid rgba(216, 191, 138, .55); color: var(--gold-light); margin-bottom: 26px; }
+.choice__title { display: block; font-size: 2rem; line-height: 1.1; color: #fff; margin-bottom: 12px; }
+.choice__desc { display: block; font-size: .92rem; line-height: 1.6; color: rgba(255, 255, 255, .66); max-width: 34ch; }
+.choice__cta { margin-top: auto; padding-top: 26px; font: 600 .74rem/1 var(--sans); letter-spacing: .2em; text-transform: uppercase; color: var(--gold-light); display: inline-flex; gap: 10px; align-items: center; }
+.choice__cta span { transition: transform .3s; }
+.choice__card:hover .choice__cta span { transform: translateX(5px); }
+#openDevis:hover .choice__cta span, #openDevis.is-open .choice__cta span { transform: translateY(4px); }
+.lux-choice #openDevis.is-open { border-color: var(--gold); }
+@media (max-width: 760px) { .lux-choice::before { inset: 10px; border-radius: 20px; } .lux-choice .choice__card { min-height: 0; padding: 30px 24px 26px; } .choice__title { font-size: 1.7rem; } .choice__num { font-size: 3.2rem; } }
+
+/* page Nos menus */
+.sig-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 22px; }
+.sig { background: var(--white); border: 1px solid var(--line); border-radius: 20px; overflow: hidden; transition: box-shadow .3s, transform .3s; scroll-margin-top: 120px; }
+.sig:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+.sig.is-target { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201, 164, 92, .3), var(--shadow-lg); }
+.sig__img { position: relative; aspect-ratio: 4 / 5; background: var(--sand); }
+.sig__img img { width: 100%; height: 100%; object-fit: cover; }
+.sig__body { padding: 18px 20px 22px; }
+.sig__num { font: 600 .68rem/1 var(--sans); letter-spacing: .2em; color: var(--gold-text); }
+.sig h3 { font-size: 1.6rem; margin: .3em 0 .25em; }
+.sig p { margin: 0; color: var(--muted); font-size: .9rem; }
+.carte { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 22px; max-width: 1000px; margin: 0 auto; }
+.carte__group { background: var(--white); border: 1px solid var(--line); border-radius: 18px; padding: 26px 26px 20px; }
+.carte__title { font-size: 1.7rem; margin: 0 0 12px; padding-bottom: 10px; border-bottom: 1px solid var(--line); color: var(--gold-dark); }
+.carte__group ul { list-style: none; margin: 0; padding: 0; }
+.carte__group li { padding: 7px 0; font-size: .95rem; border-bottom: 1px dotted var(--line); }
+.carte__group li:last-child { border-bottom: 0; }
+
+/* page À propos */
+.about-page { display: grid; grid-template-columns: 1fr 1.1fr; gap: 56px; align-items: center; }
+.about-page__img { position: relative; aspect-ratio: 4 / 5; border-radius: 24px; overflow: hidden; }
+.values { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+.value { background: var(--white); border: 1px solid var(--line); border-radius: 20px; padding: 32px 28px; }
+.value__num { font: 400 2.6rem/1 var(--lux); color: var(--gold); }
+.value h3 { font-size: 1.6rem; margin: .5em 0 .3em; }
+.value p { margin: 0; color: var(--muted); font-size: .92rem; }
+@media (max-width: 860px) { .about-page { grid-template-columns: 1fr; gap: 28px; } .values { grid-template-columns: 1fr; } }
+
+/* menu mobile fermé : complètement caché (il ne dépasse plus au-dessus de l en-tête) */
+@media (max-width: 960px) {
+  .nav { visibility: hidden; transition: transform .35s ease, visibility 0s linear .35s; }
+  .nav.is-open { visibility: visible; transition: transform .35s ease, visibility 0s; }
+}
