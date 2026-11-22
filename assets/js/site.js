@@ -89,7 +89,7 @@
           '<li><span data-bind="address"></span></li><li><span data-bind="hours"></span></li></ul></div>' +
       '</div>' +
       '<div class="container footer__bottom"><span>© <span id="year"></span> TORRAIS EVENT. Tous droits réservés.</span>' +
-        '<a href="dashboard/" class="footer__admin">Espace gérant</a></div></footer>' +
+        '</div></footer>' +
       // Barre d'actions sur téléphone : devis et simulateur (WhatsApp reste en bouton flottant)
       (PAGE === 'composer' ? '' :
         '<nav class="mbar" aria-label="Actions rapides">' +
@@ -858,14 +858,14 @@
         '</div>' +
         '<label class="field"><span>Votre message</span><textarea name="message" rows="4" placeholder="Lieu, formule qui vous intéresse, demandes particulières…"></textarea></label>' +
         '<p class="form__error" id="formError" role="alert" hidden></p>' +
-        '<button type="submit" class="btn btn--dark btn--block">Envoyer ma demande</button>' +
-        '<p class="form__hint">Réponse rapide · Sans engagement</p>' +
+        '<button type="submit" class="btn btn--wa btn--block"><span class="icon">' + T.icons.whatsapp + '</span> Envoyer ma demande sur WhatsApp</button>' +
+        '<p class="form__hint">Votre demande s\'ouvre dans WhatsApp, prête à envoyer · Réponse rapide · Sans engagement</p>' +
       '</form>' +
       '<div class="form form--success" id="formSuccess" hidden>' +
         '<div class="success__icon"><span class="icon">' + T.icons.check + '</span></div>' +
-        '<h3>Merci, votre demande est bien envoyée !</h3>' +
-        '<p>Nous vous recontactons très vite. Pour une réponse encore plus rapide, envoyez-la aussi sur WhatsApp :</p>' +
-        '<a href="#" class="btn btn--wa btn--block" id="successWa"><span class="icon">' + T.icons.whatsapp + '</span> Envoyer sur WhatsApp</a>' +
+        '<h3>Votre demande est prête !</h3>' +
+        '<p>WhatsApp s\'est ouvert avec votre message : il ne vous reste qu\'à appuyer sur « Envoyer ». Si WhatsApp ne s\'est pas ouvert, utilisez ce bouton :</p>' +
+        '<a href="#" class="btn btn--wa btn--block" id="successWa"><span class="icon">' + T.icons.whatsapp + '</span> Ouvrir WhatsApp</a>' +
         '<button type="button" class="btn btn--ghost btn--block" id="newRequest">Faire une autre demande</button>' +
       '</div>';
   }
@@ -909,39 +909,22 @@
       }
       errorBox.hidden = true;
 
-      var services = $$('input[name="services"]:checked', form).map(function (c) { return c.value; });
-      var now = new Date();
       var req = {
-        id: U.uid(),
-        source: 'Site web',
-        createdAt: U.iso(now) + 'T' + String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0'),
-        name: f.name.value.trim(),
-        phone: f.phone.value.trim(),
-        eventType: f.eventType.value,
-        date: f.date.value,
-        guests: +f.guests.value,
-        budget: f.budget.value,
-        services: services,
-        message: f.message.value.trim(),
-        status: 'nouveau',
-        notes: '',
-        eventId: null
+        name: f.name.value.trim(), phone: f.phone.value.trim(), eventType: f.eventType.value,
+        date: f.date.value, guests: +f.guests.value, budget: f.budget.value, message: f.message.value.trim()
       };
-      // Démo : la demande est enregistrée dans le navigateur et apparaît dans l'espace gérant.
-      data = T.store.fresh();
-      data.requests.unshift(req);
-      T.store.save(data);
-
       var text = 'Bonjour TORRAIS EVENT, je souhaite un devis.\n' +
         '• Nom : ' + req.name + '\n' +
+        '• Téléphone : ' + req.phone + '\n' +
         '• Événement : ' + req.eventType + '\n' +
         '• Date : ' + U.formatDate(req.date) + '\n' +
         '• Invités : ' + req.guests + '\n' +
         (req.budget ? '• Budget : ' + req.budget + '\n' : '') +
-        (services.length ? '• Services : ' + services.join(', ') + '\n' : '') +
         (req.message ? '• Message : ' + req.message : '');
+      var url = U.waLink(s.whatsapp || s.phone, text);
+      window.open(url, '_blank', 'noopener');
       var wa = $('#successWa');
-      wa.href = U.waLink(s.whatsapp || s.phone, text);
+      wa.href = url;
       wa.target = '_blank';
       wa.rel = 'noopener';
 

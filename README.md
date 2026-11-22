@@ -14,7 +14,7 @@ Démo du site de **TORRAIS EVENT**, traiteur de mariages et d'événements à Ca
 | Site public | `index.html` | Barre d'infos, héros (diaporama), notre maison, nos univers, métiers, plats signature, formules (« Prix sur devis »), chiffres clés, réalisations avec filtres, étapes, avis clients (masqués tant qu'il n'y en a pas), FAQ, devis + zones desservies, contact + carte, bandeau WhatsApp / appel |
 | Composez votre mariage | `composer.html` | Simulateur en 5 étapes (événement et invités, formule, menu, décoration et tyafer, récapitulatif) avec estimation en direct ; la composition arrive dans l'espace gérant et peut être envoyée sur WhatsApp. Prix modifiables dans « Contenu du site → Simulateur » (prix de démonstration) |
 | Pages univers | `evenement.html?type=…` | Une page par occasion (mariage, henné, fêtes de famille, entreprise) avec présentation, formules, photos et devis pré-rempli |
-| Espace gérant | `dashboard/` | Connexion (mot de passe démo : `demo`) |
+| Espace gérant | `dashboard/` | Mis de côté pour l'instant : non relié au site et redirigé vers l'accueil sur Vercel (`vercel.json`). Les demandes de devis et le simulateur passent par WhatsApp. |
 
 ### Espace gérant
 - **Tableau de bord** : nouvelles demandes, événements du mois, chiffre du mois, reste à encaisser, graphique de l'année

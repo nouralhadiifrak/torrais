@@ -263,13 +263,13 @@
         '<label class="field"><span>Un mot à ajouter ?</span><textarea name="message" rows="3" placeholder="Thème, demandes particulières…"></textarea></label>' +
         '<p class="form__error" id="composerError" hidden></p>' +
         '<div class="composer__send">' +
-          '<button type="submit" class="btn btn--gold">Recevoir mon devis</button>' +
-          '<button type="button" class="btn btn--wa" data-send-wa><span class="icon">' + T.icons.whatsapp + '</span> Envoyer sur WhatsApp</button>' +
+          '<button type="submit" class="btn btn--wa"><span class="icon">' + T.icons.whatsapp + '</span> Envoyer ma composition sur WhatsApp</button>' +
         '</div>' +
+        '<p class="composer__note">Votre composition s\'ouvre dans WhatsApp, prête à envoyer à ' + esc(S.owner || 'TORRAIS EVENT') + '.</p>' +
       '</form>' +
       '<div class="composer__done" id="composerDone" hidden><div class="success__icon"><span class="icon">' + T.icons.check + '</span></div>' +
-        '<h3>Merci, votre composition est envoyée !</h3><p>' + esc(S.owner || 'Nous') + ' vous recontacte très vite pour affiner votre devis.</p>' +
-        '<a href="#" class="btn btn--wa" id="composerDoneWa"><span class="icon">' + T.icons.whatsapp + '</span> L\'envoyer aussi sur WhatsApp</a></div>';
+        '<h3>Votre composition est prête !</h3><p>WhatsApp s\'est ouvert avec votre message : appuyez sur « Envoyer ». ' + esc(S.owner || 'Nous') + ' vous répond très vite avec votre devis.</p>' +
+        '<a href="#" class="btn btn--wa" id="composerDoneWa"><span class="icon">' + T.icons.whatsapp + '</span> Ouvrir WhatsApp</a></div>';
   }
 
   function catIncluded(catId) {
@@ -382,34 +382,14 @@
       return;
     }
     err.hidden = true;
-    var e = estimate();
-    var now = new Date();
-    var p = currentPack();
-    var t = typeOf(state.type);
     var extra = f.message.value.trim();
-    var services = ['Traiteur'];
-    if (DECO_IDS.some(function (id) { return included(id) || state.opts[id]; })) services.push('Décoration');
-    if (state.tyafer > 0) services.push('Tyafer');
-    var req = {
-      id: U.uid(), source: 'Site web',
-      createdAt: U.iso(now) + 'T' + String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0'),
-      name: name, phone: phone, eventType: t.eventType, date: state.date, guests: state.guests,
-      budget: 'Estimation ' + totalText(e).replace(/ /g, ' '),
-      services: services,
-      message: 'Composé avec le simulateur : ' + (state.pkg === 'surmesure' ? 'sur mesure' : 'pack ' + (p ? p.name : '')) + (state.place ? ', ' + placeLabel().toLowerCase() : '') + '.' +
-        (chosenDishes().length ? ' Plats ajoutés : ' + chosenDishes().join(', ') + '.' : '') + (extra ? ' ' + extra : ''),
-      composition: lines().map(function (l) { return { label: l.label, detail: l.detail, included: !!l.included, min: l.price || round500(l.min || 0), max: l.price || round500(l.max || 0) }; }),
-      estimate: { min: e.min, max: e.max },
-      status: 'nouveau', notes: '', eventId: null
-    };
-    data = T.store.fresh();
-    data.requests.unshift(req);
-    T.store.save(data);
+    var url = U.waLink(S.whatsapp || S.phone, waText(name) + '\n• Téléphone : ' + phone + (extra ? '\n• Message : ' + extra : ''));
+    window.open(url, '_blank', 'noopener');
     form.hidden = true;
     var done = $('#composerDone');
     done.hidden = false;
     var wa = $('#composerDoneWa');
-    wa.href = U.waLink(S.whatsapp || S.phone, waText(name) + (extra ? '\n• Message : ' + extra : ''));
+    wa.href = url;
     wa.target = '_blank'; wa.rel = 'noopener';
     done.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
@@ -430,11 +410,6 @@
       ty.closest('.opt').classList.toggle('is-on', state.tyafer > 0);
       refreshLive();
       return;
-    }
-    if (t.closest('[data-send-wa]')) {
-      var f = $('#composerForm').elements;
-      var url = U.waLink(S.whatsapp || S.phone, waText(f.name.value.trim()) + (f.message.value.trim() ? '\n• Message : ' + f.message.value.trim() : ''));
-      window.open(url, '_blank', 'noopener');
     }
   });
   root.addEventListener('change', function (e) {
