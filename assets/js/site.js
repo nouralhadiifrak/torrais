@@ -218,15 +218,15 @@
     var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     var timer = null, paused = false, visible = false;
     function tick() { if (!paused && visible && !document.hidden) go(cur + 1); }
-    function start() { if (!reduce && !timer) timer = setInterval(tick, 3200); }
-    function hold() { paused = true; clearTimeout(hold.t); hold.t = setTimeout(function () { paused = false; }, 6000); }
+    function start() { if (!reduce && !timer) timer = setInterval(tick, 2600); }
+    function hold() { paused = true; clearTimeout(hold.t); hold.t = setTimeout(function () { paused = false; }, 4000); }
     if (window.matchMedia && window.matchMedia('(hover: hover)').matches) {
       box.addEventListener('mouseenter', function () { paused = true; });
       box.addEventListener('mouseleave', function () { paused = false; });
     }
     box.addEventListener('click', function (e) {
       var c = e.target.closest('[data-i]');
-      if (!c) return;
+      if (!c || box.dataset.dragged) return;
       hold();
       go(+c.getAttribute('data-i'));
     });
@@ -237,15 +237,26 @@
       if (e.key === 'ArrowRight') { hold(); go(cur + 1); }
       if (e.key === 'ArrowLeft') { hold(); go(cur - 1); }
     });
-    // balayage au doigt
-    var x0 = null;
-    box.addEventListener('touchstart', function (e) { x0 = e.touches[0].clientX; hold(); }, { passive: true });
-    box.addEventListener('touchend', function (e) {
-      if (x0 == null) return;
-      var dx = e.changedTouches[0].clientX - x0;
-      if (Math.abs(dx) > 40) go(cur + (dx < 0 ? 1 : -1));
-      x0 = null;
+    // glisser au doigt ou à la souris : un pas toutes les 60 px, réaction immédiate
+    var drag = null;
+    var stage = $('.coverflow__stage', box);
+    stage.addEventListener('pointerdown', function (e) {
+      drag = { x: e.clientX, moved: false };
+      hold();
     });
+    window.addEventListener('pointermove', function (e) {
+      if (!drag) return;
+      var dx = e.clientX - drag.x;
+      if (Math.abs(dx) >= 60) { go(cur + (dx < 0 ? 1 : -1)); drag.x = e.clientX; drag.moved = true; }
+    });
+    window.addEventListener('pointerup', function (e) {
+      if (!drag) return;
+      var dx = e.clientX - drag.x;
+      if (Math.abs(dx) > 25) { go(cur + (dx < 0 ? 1 : -1)); drag.moved = true; }
+      if (drag.moved) { box.dataset.dragged = '1'; setTimeout(function () { delete box.dataset.dragged; }, 50); }
+      drag = null;
+    });
+    window.addEventListener('pointercancel', function () { drag = null; });
     if ('IntersectionObserver' in window) {
       new IntersectionObserver(function (en) { visible = en[0].isIntersecting; }, { threshold: 0.3 }).observe(box);
     } else visible = true;
@@ -333,26 +344,68 @@
     if (g.src) return '<img src="' + esc(g.src) + '" alt="' + esc(g.caption) + '" loading="lazy">';
     return placeholder(g.tone != null ? g.tone : i);
   }
-  /* ---------- galerie de l'accueil : mur de photos qui dérive (colonnes en sens alternés) ---------- */
+  /* ---------- galerie de l'accueil : « Drift Wall » ----------
+     Colonnes de largeurs différentes, tuiles de hauteurs variées (tile 180 × 124, écart 6, arrondi 16, variance 0,4),
+     mur légèrement incliné, chaque colonne dérive à sa propre vitesse, en sens alternés. */
   function renderDrift(box) {
     galleryList = data.gallery.slice();
     var n = galleryList.length;
     if (!n) { box.innerHTML = '<p class="gallery__empty">Bientôt nos photos.</p>'; return; }
-    var cols = window.innerWidth < 700 ? 6 : 9;
-    var ratios = ['3 / 4', '1 / 1', '4 / 5', '4 / 3', '3 / 4', '5 / 4'];
+    var mobile = window.innerWidth < 700;
+    var TW = mobile ? 128 : 180, TH = mobile ? 90 : 124, GAP = 6, VAR = 0.4;
+    // petit générateur pseudo-aléatoire stable (même mur à chaque visite)
+    var seed = 7;
+    function rnd() { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; }
+    var wallW = box.clientWidth * 1.25;
     var html = '<div class="drift__wall">';
-    for (var c = 0; c < cols; c++) {
-      var tiles = '';
-      for (var k = 0; k < 6; k++) {
-        var idx = (c * 3 + k * 2 + (c % 2)) % n;
+    var x = 0, c = 0, pick = 0;
+    while (x < wallW) {
+      var w = Math.round(TW * (1 + (rnd() * 2 - 1) * VAR * 0.5));
+      var tiles = '', total = 0;
+      while (total < box.clientHeight * 1.35 || tiles.split('<button').length < 6) {
+        var h = Math.round(TH * (1 + (rnd() * 2 - 1) * VAR));
+        var idx = pick++ % n;
         var g = galleryList[idx];
-        tiles += '<button type="button" class="drift__tile" data-index="' + idx + '" style="aspect-ratio:' + ratios[(c + k * 5) % ratios.length] + '" aria-label="' + esc(g.caption || 'Photo') + '">' +
+        tiles += '<button type="button" class="drift__tile" data-index="' + idx + '" style="height:' + h + 'px" aria-label="' + esc(g.caption || 'Photo') + '">' +
           photoInner(g, idx) + (g.caption ? '<span class="drift__cap">' + esc(g.caption) + '</span>' : '') + '</button>';
+        total += h + GAP;
       }
-      html += '<div class="drift__col' + (c % 2 ? ' drift__col--down' : '') + '" style="--dur:' + (34 + (c * 7) % 16) + 's"><div class="drift__track">' +
+      var speed = (mobile ? 14 : 18) + Math.round(rnd() * (mobile ? 22 : 30)); // px / seconde
+      html += '<div class="drift__col" style="width:' + w + 'px" data-speed="' + speed + '" data-dir="' + (c % 2 ? 1 : -1) + '"><div class="drift__track">' +
         tiles + tiles.replace(/<button /g, '<button tabindex="-1" aria-hidden="true" ') + '</div></div>';
+      x += w + GAP; c++;
     }
-    box.innerHTML = html + '</div>';
+    box.innerHTML = html + '</div><div class="drift__vignette" aria-hidden="true"></div>';
+    driftMotion(box);
+  }
+  function driftMotion(box) {
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var cols = $$('.drift__col', box).map(function (col) {
+      var track = col.firstChild;
+      return { track: track, v: +col.getAttribute('data-speed'), dir: +col.getAttribute('data-dir'), off: Math.random() * 400, half: track.scrollHeight / 2 };
+    });
+    var factor = 1, target = 1, visible = true, last = 0;
+    if (window.matchMedia('(hover: hover)').matches) {
+      box.addEventListener('mouseenter', function () { target = 0.15; });
+      box.addEventListener('mouseleave', function () { target = 1; });
+    }
+    if ('IntersectionObserver' in window) new IntersectionObserver(function (en) { visible = en[0].isIntersecting; }).observe(box);
+    window.addEventListener('resize', function () { cols.forEach(function (c) { c.half = c.track.scrollHeight / 2; }); });
+    function frame(t) {
+      var dt = last ? Math.min(0.05, (t - last) / 1000) : 0;
+      last = t;
+      if (visible && !document.hidden) {
+        factor += (target - factor) * Math.min(1, dt * 4); // ralentit / repart en douceur
+        cols.forEach(function (c) {
+          if (!c.half) c.half = c.track.scrollHeight / 2;
+          c.off = (c.off + c.v * factor * dt) % c.half;
+          var y = c.dir < 0 ? -c.off : c.off - c.half;
+          c.track.style.transform = 'translate3d(0,' + y.toFixed(2) + 'px,0)';
+        });
+      }
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
   }
   function renderGallery(filter) {
     var box = $('#galleryGrid');
