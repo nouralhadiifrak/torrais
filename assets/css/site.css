@@ -1095,3 +1095,21 @@ html.is-intro:not(.intro-reveal) .hero__inner > *, html.is-intro:not(.intro-reve
   .nav { visibility: hidden; transition: transform .35s ease, visibility 0s linear .35s; }
   .nav.is-open { visibility: visible; transition: transform .35s ease, visibility 0s; }
 }
+
+/* =========================================================
+   Polices (comme traiteursadak.com) : Marcellus pour les titres, Mulish pour le texte
+   ========================================================= */
+:root {
+  --serif: 'Marcellus', 'Cormorant Garamond', Georgia, serif;
+  --lux: 'Marcellus', Georgia, serif;
+  --sans: 'Mulish', 'Helvetica Neue', Arial, sans-serif;
+}
+body { font-family: var(--sans); }
+h1, h2, h3, h4, .section-title, .page-hero__title, .hero__title--text, .choice__title, .coverflow__caption h3, .sig h3, .value h3, .carte__title, .occasion h3, .pack__name { font-family: var(--lux); font-weight: 400; letter-spacing: .01em; }
+.eyebrow { font-family: var(--sans); font-weight: 700; letter-spacing: .26em; }
+.btn { font-family: var(--sans); font-weight: 700; letter-spacing: .08em; }
+/* Marcellus n'a pas d'italique : les accroches passent en Mulish droit */
+.hero__lead span, .page-hero__lead { font-family: var(--sans); font-style: normal; font-size: 1.12rem; letter-spacing: .01em; }
+.about__caption, .about__sign, .ph em, .review blockquote, .cf-ph em { font-style: normal; }
+.hero__title--text { line-height: 1.12; letter-spacing: .01em; }
+.lux-band__track span { letter-spacing: .24em; }
