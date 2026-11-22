@@ -182,7 +182,7 @@
     var cur = 0;
     box.innerHTML = '<div class="coverflow__stage">' + dishes.map(function (d, i) {
       return '<button type="button" class="cf-card" data-i="' + i + '" aria-label="' + esc(d.name) + '">' +
-        (d.image ? '<img src="' + esc(d.image) + '" alt="" loading="lazy">' : placeholder(i, 'Photo à venir')) + '</button>';
+        (d.image ? '<img src="' + esc(d.image) + '" alt="" loading="lazy">' : '<span class="ph cf-ph tone-' + (i % 8 + 1) + '">' + T.icons[PH_ICONS[i % 4]] + '<strong>' + esc(d.name) + '</strong><em>Photo à venir</em></span>') + '</button>';
     }).join('') + '</div>' +
       '<div class="coverflow__caption" aria-live="polite"><h3></h3><p></p></div>' +
       '<div class="coverflow__dots">' + dishes.map(function (d, i) { return '<button type="button" data-i="' + i + '" aria-label="' + esc(d.name) + '"></button>'; }).join('') + '</div>';

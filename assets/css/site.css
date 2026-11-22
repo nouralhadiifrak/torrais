@@ -986,3 +986,16 @@ html.is-intro:not(.intro-reveal) .hero__inner > *, html.is-intro:not(.intro-reve
 .coverflow__stage { touch-action: pan-y; user-select: none; -webkit-user-select: none; }
 .cf-card img { pointer-events: none; -webkit-user-drag: none; }
 .coverflow__caption.is-in { animation-duration: .35s; }
+
+/* menu : nom du plat sur la photo en attendant les vraies photos */
+.cf-ph { padding: 0 22px; text-align: center; }
+.cf-ph strong { display: block; font: 500 1.7rem/1.15 var(--serif); color: #fff; text-shadow: 0 2px 14px rgba(74, 58, 35, .35); }
+.cf-ph em { font-size: .8rem !important; letter-spacing: .14em; text-transform: uppercase; font-style: normal !important; font-family: var(--sans) !important; opacity: .8; }
+@media (max-width: 640px) { .cf-ph strong { font-size: 1.4rem; } }
+/* galerie : le mur prend toute la largeur de l'écran */
+#galerie { overflow: hidden; padding-bottom: 0; }
+#galerie .drift { width: 100vw; margin-left: calc(50% - 50vw); border-radius: 0; }
+@media (max-width: 700px) { #galerie .drift { border-radius: 0; } }
+
+/* les cartes de côté du menu 3D ne doivent pas élargir la page sur mobile */
+#carte { overflow: hidden; }
