@@ -187,6 +187,7 @@
         '<div class="occasion__body"><span class="occasion__tag">' + String(i + 1).padStart(2, '0') + '</span><h3>' + esc(st.title) + '</h3><p>' + esc(st.text) + '</p>' +
         (st.options && st.options.length ? '<div class="wstep__opts">' + (st.choose ? '<span class="wstep__label">Au choix</span>' : '') +
           st.options.map(function (o) { return '<span class="wstep__opt">' + esc(o) + '</span>'; }).join('') + '</div>' : '') +
+        (st.link ? '<a class="wstep__link" href="' + esc(st.link.href) + '">' + esc(st.link.label) + ' <span aria-hidden="true">→</span></a>' : '') +
         '</div></article>';
     }).join('');
   }

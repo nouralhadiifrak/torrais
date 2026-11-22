@@ -180,9 +180,9 @@
       { title: 'La musique', text: 'Pour faire danser vos invités toute la soirée.', choose: true, options: ['DJ', 'Orchestre'] },
       { title: 'L’entrée', text: 'L’accueil des invités, comme le veut la tradition.', choose: false, options: ['Dattes et lait'] },
       { title: 'Le thé', text: 'Atay servi dans les règles de l’art, accompagné des douceurs de votre choix.', choose: true, options: ['Mets sucrés-salés', 'Gâteaux'] },
-      { title: 'La neggafa', text: 'Pour sublimer la mariée tout au long de la soirée, de 2 à 5 tenues.', choose: true, options: ['2 tenues', '3 tenues', '4 tenues', '5 tenues'] },
+      { title: 'La neggafa', text: 'Pour sublimer la mariée tout au long de la soirée.', choose: false, options: ['De 2 à 5 tenues'] },
       { title: 'Photographe et vidéaste', text: 'Chaque instant capturé, en photo et en vidéo, pour revivre votre mariage.', choose: false, options: ['Photographe', 'Vidéaste'] },
-      { title: 'Votre menu', text: 'Composez votre dîner parmi nos plats signature.', choose: true, options: ['Pastilla au poulet', 'Pastilla aux fruits de mer', 'Poulet rôti avec daghmira', 'Viande aux pruneaux & amandes', 'Demi-méchoui'] }
+      { title: 'Votre menu', text: 'Composez votre dîner parmi nos plats\u00a0: pastillas, viandes, poulet, méchoui, desserts…', choose: false, options: [], link: { href: 'menus.html', label: 'Voir nos menus' } }
     ];
   }
   function defaultMenuDishes() {
@@ -499,7 +499,7 @@
     if (!d.site.menuV2) { d.site.dishes = defaultMenuDishes(); d.site.menuV2 = true; }
     if (!d.site.menuCats) d.site.menuCats = defaultMenuCats();
     if (!d.servicePacks) d.servicePacks = defaultServicePacks();
-    if (!d.site.weddingSteps) d.site.weddingSteps = defaultWeddingSteps();
+    if (!d.site.weddingSteps || !d.site.weddingStepsV2) { d.site.weddingSteps = defaultWeddingSteps(); d.site.weddingStepsV2 = true; }
     if (!d.occasionsV2) {
       var keep = {};
       d.occasions.forEach(function (o) { if (o.image) keep[o.id === 'famille' ? 'anniversaire' : o.id] = o.image; });
