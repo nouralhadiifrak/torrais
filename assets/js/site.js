@@ -184,12 +184,22 @@
           '</div><div class="sig__body"><span class="sig__num">' + String(i + 1).padStart(2, '0') + '</span><h3>' + esc(d.name) + '</h3><p>' + esc(d.text || '') + '</p></div></article>';
       }).join('');
     }
+    var cats = data.site.menuCats || [];
+    var famBox = $('#menuCats');
+    if (famBox) {
+      famBox.innerHTML = cats.map(function (c, i) {
+        return '<a class="occasion" href="#cat-' + esc(c.id) + '"><div class="occasion__img">' +
+          (c.image ? '<img src="' + esc(c.image) + '" alt="' + esc(c.title) + '" loading="lazy">' :
+            '<span class="ph cf-ph tone-' + (i % 8 + 1) + '">' + T.icons[DISH_ICONS[i % 2]] + '<strong>' + esc(c.title) + '</strong><em>Photo à venir</em></span>') + '</div>' +
+          '<div class="occasion__body"><span class="occasion__tag">' + String(i + 1).padStart(2, '0') + '</span><h3>' + esc(c.title) + '</h3><p>' + esc(c.short) + '</p>' +
+          '<span class="occasion__more">Voir les plats →</span></div></a>';
+      }).join('');
+    }
     var carte = $('#carteList');
     if (carte) {
-      carte.innerHTML = T.DISH_CATEGORIES.map(function (cat) {
-        var list = (data.dishes || []).filter(function (d) { return d.category === cat; });
-        if (!list.length) return '';
-        return '<div class="carte__group"><h3 class="carte__title">' + esc(cat) + '</h3><ul>' + list.map(function (d) { return '<li>' + esc(d.name) + '</li>'; }).join('') + '</ul></div>';
+      carte.innerHTML = cats.map(function (c, i) {
+        return '<div class="carte__group" id="cat-' + esc(c.id) + '"><span class="carte__num">' + String(i + 1).padStart(2, '0') + '</span><h3 class="carte__title">' + esc(c.title) + '</h3><ul>' +
+          (c.items || []).map(function (n) { return '<li>' + esc(n) + '</li>'; }).join('') + '</ul></div>';
       }).join('');
     }
     // arrivée depuis le carrousel : met le plat en valeur

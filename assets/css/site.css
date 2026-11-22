@@ -1149,3 +1149,11 @@ body[data-page="home"] main .lux-choice .eyebrow { border-color: rgba(216, 191, 
 @keyframes phShine { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
 @media (prefers-reduced-motion: reduce) { .review__lines i { animation: none; } }
 @media (max-width: 860px) { .reviews { grid-template-columns: 1fr; } .review--ph:nth-child(n+2) { display: none; } }
+
+/* page Nos menus : 5 familles */
+#menuCats .occasion__img .cf-ph strong { font-size: 1.5rem; }
+@media (max-width: 560px) { #menuCats .occasion__img .cf-ph strong { font-size: 1.05rem; } #menuCats .occasion__img .cf-ph em { display: none; } #menuCats .cf-ph svg { width: 30px; height: 30px; } }
+.carte__group { position: relative; scroll-margin-top: 110px; transition: box-shadow .3s, border-color .3s; }
+.carte__group:target { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201, 164, 92, .25); }
+.carte__num { position: absolute; top: 22px; right: 24px; font: 400 1.6rem/1 var(--lux); color: rgba(176, 138, 69, .35); }
+#detail .carte { max-width: 1100px; }

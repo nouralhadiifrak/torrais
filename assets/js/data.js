@@ -137,6 +137,25 @@
         includes: ['Menu sur mesure', 'Buffet ou service à table', 'Tyafer et décoration selon vos envies', 'Gâteau et douceurs marocaines'] }
     ];
   }
+  function defaultMenuCats() {
+    return [
+      { id: 'plats', title: 'Plats principaux', image: '',
+        short: 'Pastillas, viandes mijotées, poulet rôti et méchoui : le cœur de votre dîner.',
+        items: ['Pastilla au poulet', 'Pastilla aux fruits de mer', 'Viande aux pruneaux & amandes', 'Poulet rôti avec daghmira', 'Demi-méchoui', 'Poulet aux olives et citron confit'] },
+      { id: 'desserts', title: 'Desserts', image: '',
+        short: 'Pâtisseries marocaines, corbeilles de fruits et gâteaux pour finir en douceur.',
+        items: ['Pâtisseries marocaines', 'Corbeille de fruits', 'Salade de fruits', 'Gâteau des mariés', 'Petits fours sucrés'] },
+      { id: 'sucres-sales', title: 'Mets sucrés-salés', image: '',
+        short: 'Briouates, mini pastillas et bouchées à servir à l’accueil ou avec le thé.',
+        items: ['Briouates', 'Mini pastillas', 'Petits fours salés', 'Mini brochettes', 'Verrines salées'] },
+      { id: 'salades', title: 'Salades', image: '',
+        short: 'Salades marocaines fraîches et colorées, cuites ou crues, pour ouvrir le repas.',
+        items: ['Salades marocaines variées', 'Zaalouk', 'Taktouka', 'Salade de riz', 'Salade composée'] },
+      { id: 'jus', title: 'Jus', image: '',
+        short: 'Jus frais pressés et cocktails sans alcool, servis tout au long de la soirée.',
+        items: ['Jus d’orange frais', 'Jus d’avocat', 'Panaché de fruits', 'Jus de fraise', 'Citronnade à la menthe'] }
+    ];
+  }
   function defaultMenuDishes() {
     return [
       { id: uid(), name: 'Pastilla au poulet', text: 'Feuilles croustillantes, poulet, amandes, cannelle et sucre glace.', image: '' },
@@ -449,6 +468,7 @@
     }
     // menu de la page d'accueil
     if (!d.site.menuV2) { d.site.dishes = defaultMenuDishes(); d.site.menuV2 = true; }
+    if (!d.site.menuCats) d.site.menuCats = defaultMenuCats();
     if (!d.occasionsV2) {
       var keep = {};
       d.occasions.forEach(function (o) { if (o.image) keep[o.id === 'famille' ? 'anniversaire' : o.id] = o.image; });
