@@ -1117,3 +1117,19 @@ h1, h2, h3, h4, .section-title, .page-hero__title, .hero__title--text, .choice__
 /* accueil : fin contour arrondi autour des petits titres (Nos services, Notre cuisine, Votre événement…) */
 body[data-page="home"] main .section .eyebrow { display: inline-flex; align-items: center; padding: 8px 18px; border: 1px solid rgba(176, 138, 69, .55); border-radius: 999px; line-height: 1; margin-bottom: 18px; }
 body[data-page="home"] main .lux-choice .eyebrow { border-color: rgba(216, 191, 138, .5); }
+
+/* flèches du menu 3D poussées sur les côtés : les photos restent cliquables */
+.coverflow .cf-arrow { top: calc(clamp(320px, 42vw, 460px) / 2); }
+.coverflow .cf-arrow--prev { left: 0; right: auto; }
+.coverflow .cf-arrow--next { right: 0; left: auto; }
+@media (min-width: 1240px) { .coverflow .cf-arrow--prev { left: -70px; } .coverflow .cf-arrow--next { right: -70px; } }
+@media (max-width: 640px) {
+  /* sur téléphone : les flèches encadrent les points, sous le texte */
+  .coverflow .cf-arrow { top: auto; bottom: -15px; margin-top: 0; width: 38px; height: 38px; font-size: 1.3rem; background: var(--white); color: var(--gold-dark); border-color: var(--gold); backdrop-filter: none; -webkit-backdrop-filter: none; }
+  .coverflow .cf-arrow--prev { left: calc(50% - 100px); }
+  .coverflow .cf-arrow--next { right: calc(50% - 100px); }
+  .coverflow__dots { min-height: 10px; }
+}
+
+/* les cartes de côté reçoivent bien le clic (pas de couche 3D devant elles) */
+.coverflow__stage { transform-style: flat; }

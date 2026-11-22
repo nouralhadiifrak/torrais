@@ -201,9 +201,9 @@
   function coverflow(box, dishes) {
     var n = dishes.length;
     var cur = 0;
-    box.innerHTML = '<div class="coverflow__stage">' +
-      '<button type="button" class="cf-arrow cf-arrow--prev" data-cf="prev" aria-label="Plat précédent">‹</button>' +
-      '<button type="button" class="cf-arrow cf-arrow--next" data-cf="next" aria-label="Plat suivant">›</button>' + dishes.map(function (d, i) {
+    box.innerHTML = '<button type="button" class="cf-arrow cf-arrow--prev" data-cf="prev" aria-label="Plat précédent">‹</button>' +
+      '<button type="button" class="cf-arrow cf-arrow--next" data-cf="next" aria-label="Plat suivant">›</button>' +
+      '<div class="coverflow__stage">' + dishes.map(function (d, i) {
       return '<button type="button" class="cf-card" data-i="' + i + '" aria-label="' + esc(d.name) + '">' +
         (d.image ? '<img src="' + esc(d.image) + '" alt="" loading="lazy">' : '<span class="ph cf-ph tone-' + (i % 8 + 1) + '">' + T.icons[DISH_ICONS[i % 2]] + '<strong>' + esc(d.name) + '</strong><em>Photo à venir</em></span>') + '</button>';
     }).join('') + '</div>' +
