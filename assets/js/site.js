@@ -29,6 +29,63 @@
     occasion = data.occasions.filter(function (o) { return o.id === wanted; })[0] || data.occasions[0];
   }
 
+  /* ---------- bouton retour : une pression = une étape ----------
+     Un menu ou une visionneuse ouverts ajoutent une étape à l'historique : « retour » les ferme avant de quitter la page. */
+  var layer = null;
+  function openLayer(name, close) {
+    if (layer) return;
+    layer = { name: name, close: close };
+    history.pushState(Object.assign({}, history.state, { layer: name }), '');
+  }
+  function closeLayer() { if (layer) history.back(); }
+  window.addEventListener('popstate', function () {
+    if (layer) { var l = layer; layer = null; l.close(); }
+  });
+  // retour sur une page restée « ouverte » dans l'historique : on revient à l'étape d'avant, sans rien rouvrir
+  window.addEventListener('pageshow', function () {
+    if (history.state && history.state.layer && !layer) history.back();
+  });
+
+  /* ---------- la page part comme elle est venue (transitions entre pages) ----------
+     La carte cliquée s'agrandit jusqu'au haut de la page suivante ; au retour, la page se replie dans la carte. */
+  var VT_KEY = 'torrais_vt';
+  function vtName(el, on) { if (el) el.style.viewTransitionName = on ? 'hero-card' : ''; }
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest('a[href]');
+    if (!a || e.defaultPrevented || a.target === '_blank') return;
+    var href = a.getAttribute('href');
+    if (!href || href.charAt(0) === '#' || /^(https?:|tel:|mailto:)/.test(href)) return;
+    var card = a.closest('.pack, .occasion, .sig, .cf-card');
+    // un seul élément porte le nom (sinon le navigateur annule la transition)
+    $$('[style*="view-transition-name"]').forEach(function (el) { if (el !== card) vtName(el, false); });
+    if (!card) { try { sessionStorage.removeItem(VT_KEY); } catch (err) {} return; }
+    vtName(card, true);
+    try { sessionStorage.setItem(VT_KEY, JSON.stringify({ from: location.pathname, href: href.split('#')[0] })); } catch (err) {}
+  }, true);
+  function restoreVt() {
+    $$('[style*="view-transition-name"]').forEach(function (el) { vtName(el, false); });
+    // sur la page de liste : la carte d'où l'on était parti (au retour, la page se replie dedans)
+    var card = null;
+    try {
+      var v = JSON.parse(sessionStorage.getItem(VT_KEY) || 'null');
+      if (v && v.from === location.pathname) {
+        var link = $$('a[href]').filter(function (x) { return x.getAttribute('href').split('#')[0] === v.href && x.closest('.pack, .occasion'); })[0];
+        if (link) card = link.closest('.pack, .occasion');
+      }
+    } catch (err) {}
+    if (card) { vtName(card, true); return; }
+    // sinon, en haut de la page de détail (la carte cliquée s'agrandit jusqu'ici)
+    if (PAGE === 'pack' || PAGE === 'occasion' || PAGE === 'menus') vtName($('#pageHero'), true);
+  }
+  window.addEventListener('pageshow', restoreVt);
+  // une transition interrompue (changement de taille, retour rapide…) n'est pas une erreur
+  ['pageswap', 'pagereveal'].forEach(function (ev) {
+    window.addEventListener(ev, function (e) {
+      var vt = e.viewTransition;
+      if (vt) { [vt.ready, vt.finished, vt.updateCallbackDone].forEach(function (pr) { if (pr && pr.catch) pr.catch(function () {}); }); }
+    });
+  });
+
   /* ---------- en-tête et pied de page (communs aux pages) ---------- */
   function renderChrome() {
     // Logo : celui envoyé par le gérant, sinon l'emblème doré de TORRAIS EVENT
@@ -453,7 +510,8 @@
     var groups = !occasion ? ['mariage'] : occasion.id === 'mariage' ? ['mariage', 'fiancailles'] : [occasion.id];
     var labels = {}; (T.PACK_GROUPS || []).forEach(function (g) { labels[g.id] = g.label; });
     var tabs = $('#packTabs');
-    var current = groups[0];
+    var saved = history.state && history.state.packTab;
+    var current = groups.indexOf(saved) !== -1 ? saved : groups[0];
     function draw() {
       var list = packsOf(current);
       box.setAttribute('data-group', current);
@@ -471,11 +529,12 @@
     if (tabs) {
       if (groups.length > 1) {
         tabs.hidden = false;
-        tabs.innerHTML = groups.map(function (g, i) { return '<button type="button" role="tab" aria-selected="' + (i === 0) + '" class="pack-tab' + (i === 0 ? ' is-active' : '') + '" data-group="' + g + '">' + esc(labels[g] || g) + '</button>'; }).join('');
+        tabs.innerHTML = groups.map(function (g) { return '<button type="button" role="tab" aria-selected="' + (g === current) + '" class="pack-tab' + (g === current ? ' is-active' : '') + '" data-group="' + g + '">' + esc(labels[g] || g) + '</button>'; }).join('');
         tabs.addEventListener('click', function (e) {
           var t = e.target.closest('[data-group]');
           if (!t) return;
           current = t.getAttribute('data-group');
+          history.replaceState(Object.assign({}, history.state, { packTab: current }), '');
           $$('.pack-tab', tabs).forEach(function (x) { x.classList.toggle('is-active', x === t); x.setAttribute('aria-selected', String(x === t)); });
           draw();
         });
@@ -675,6 +734,7 @@
     var btn = $('#openDevis');
     if (!panel || !btn) return;
     function open(scroll) {
+      history.replaceState(Object.assign({}, history.state, { devisOpen: true }), '');
       panel.hidden = false;
       btn.setAttribute('aria-expanded', 'true');
       btn.classList.add('is-open');
@@ -701,6 +761,7 @@
       history.replaceState(null, '', '#devis');
     }, true);
     if (window.location.hash === '#devis') open(true);
+    else if (history.state && history.state.devisOpen) open(false);
   }
 
   /* ---------- page « univers » ---------- */
@@ -796,8 +857,10 @@
       show(+btn.getAttribute('data-index'));
       box.hidden = false;
       document.body.style.overflow = 'hidden';
+      openLayer('lightbox', hide);
     });
-    function close() { box.hidden = true; document.body.style.overflow = ''; }
+    function hide() { box.hidden = true; document.body.style.overflow = ''; }
+    function close() { if (!box.hidden) closeLayer(); }
     $('#lightboxClose').addEventListener('click', close);
     $('#lightboxPrev').addEventListener('click', function () { show(index - 1); });
     $('#lightboxNext').addEventListener('click', function () { show(index + 1); });
@@ -816,9 +879,10 @@
     var nav = $('#nav');
     var drop = $('.nav__drop');
     var dropBtn = $('.nav__droptoggle');
+    function setNav(open) { nav.classList.toggle('is-open', open); toggle.setAttribute('aria-expanded', String(open)); }
     toggle.addEventListener('click', function () {
-      var open = nav.classList.toggle('is-open');
-      toggle.setAttribute('aria-expanded', String(open));
+      if (nav.classList.contains('is-open')) closeLayer();
+      else { setNav(true); openLayer('nav', function () { setNav(false); }); }
     });
     dropBtn.addEventListener('click', function () {
       var open = drop.classList.toggle('is-open');
@@ -828,7 +892,11 @@
       if (!e.target.closest('.nav__drop')) { drop.classList.remove('is-open'); dropBtn.setAttribute('aria-expanded', 'false'); }
     });
     nav.addEventListener('click', function (e) {
-      if (e.target.closest('a')) { nav.classList.remove('is-open'); toggle.setAttribute('aria-expanded', 'false'); }
+      var a = e.target.closest('a');
+      if (!a || !nav.classList.contains('is-open')) return;
+      var href = a.getAttribute('href') || '';
+      if (href.charAt(0) === '#') { closeLayer(); return; } // ancre de la même page : on ferme le menu, puis on défile
+      setNav(false); // autre page : le pageshow du retour retirera l'étape « menu »
     });
     var header = $('.header');
     function onScroll() { header.classList.toggle('is-scrolled', window.scrollY > 40); }
@@ -943,6 +1011,7 @@
 
   /* ---------- démarrage ---------- */
   renderChrome();
+  restoreVt();
   renderOccasionPage();
   renderOccasions();
   renderServices();

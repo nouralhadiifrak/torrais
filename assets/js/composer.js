@@ -343,9 +343,11 @@
     if (err) { err.textContent = msg; err.hidden = !msg; }
     return !msg;
   }
-  function go(step) {
+  function go(step, fromHistory) {
     if (step > state.step && !canLeave(state.step)) return;
+    var prev = state.step;
     state.step = Math.max(0, Math.min(STEPS.length - 1, step));
+    if (!fromHistory && state.step !== prev) history.pushState({ czStep: state.step }, '');
     if (state.step !== 3) state.cat = '';
     render();
     var top = $('#composerSection').getBoundingClientRect().top + window.scrollY - 90;
@@ -398,7 +400,7 @@
   root.addEventListener('click', function (e) {
     var t = e.target;
     if (t.closest('[data-next]')) { go(state.step + 1); return; }
-    if (t.closest('[data-prev]')) { go(state.step - 1); return; }
+    if (t.closest('[data-prev]')) { history.back(); return; }
     var g = t.closest('[data-goto]');
     if (g && !g.disabled) { go(+g.getAttribute('data-goto')); return; }
     var c = t.closest('[data-cat]');
@@ -448,5 +450,11 @@
     if (e.target.id === 'composerForm') { e.preventDefault(); submit(e.target); }
   });
 
+  // bouton retour du téléphone ou du navigateur : revient à l'étape précédente (puis quitte la page)
+  history.replaceState(Object.assign({}, history.state, { czStep: 0 }), '');
+  window.addEventListener('popstate', function (e) {
+    var st = e.state && e.state.czStep;
+    if (typeof st === 'number') go(st, true);
+  });
   render();
 })();

@@ -1334,3 +1334,19 @@ input:checked + * .cz-radio, input:checked + .cz-custom__box .cz-radio { border:
 .occasions--zigzag .occasion__body { min-width: 0; flex: 1 1 auto; }
 .wstep__link { max-width: 100%; white-space: normal; }
 @media (max-width: 560px) { .wstep__link { padding: 8px 12px; font-size: .64rem; letter-spacing: .1em; } }
+
+/* =========================================================
+   Transitions entre pages (navigateurs compatibles : Chrome, Edge, Opera, Safari 18.2+)
+   La carte cliquée devient le haut de la page suivante ; au retour, la page se replie dans la carte.
+   ========================================================= */
+@view-transition { navigation: auto; }
+.header { view-transition-name: site-header; }
+::view-transition-group(hero-card) { animation-duration: .55s; animation-timing-function: cubic-bezier(.2, .8, .2, 1); }
+::view-transition-old(hero-card), ::view-transition-new(hero-card) { height: 100%; object-fit: cover; overflow: hidden; }
+::view-transition-old(root) { animation: vtOut .3s ease both; }
+::view-transition-new(root) { animation: vtIn .45s ease .1s both; }
+@keyframes vtOut { to { opacity: 0; } }
+@keyframes vtIn { from { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  @view-transition { navigation: none; }
+}
