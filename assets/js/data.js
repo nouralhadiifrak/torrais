@@ -168,24 +168,47 @@
         { id: uid(), src: 'assets/img/gallery/g11.webp', caption: 'Service du thé', category: 'Cuisine', tone: 3 }
     ];
   }
+  // Le menu de TORRAIS EVENT (liste du gérant), classé en 5 familles. photos : la 1re est la principale.
+  var MENU_IMG = 'assets/img/menu/';
   function defaultMenuCats() {
-    return [
-      { id: 'plats', title: 'Plats principaux', image: '',
-        short: 'Pastillas, viandes mijotées, poulet rôti et méchoui : le cœur de votre dîner.',
-        items: ['Pastilla au poulet', 'Pastilla aux fruits de mer', 'Viande aux pruneaux & amandes', 'Poulet rôti avec daghmira', 'Demi-méchoui', 'Poulet aux olives et citron confit'] },
-      { id: 'desserts', title: 'Desserts', image: '',
-        short: 'Pâtisseries marocaines, corbeilles de fruits et gâteaux pour finir en douceur.',
-        items: ['Pâtisseries marocaines', 'Corbeille de fruits', 'Salade de fruits', 'Gâteau des mariés', 'Petits fours sucrés'] },
-      { id: 'sucres-sales', title: 'Mets sucrés-salés', image: '',
-        short: 'Briouates, mini pastillas et bouchées à servir à l’accueil ou avec le thé.',
-        items: ['Briouates', 'Mini pastillas', 'Petits fours salés', 'Mini brochettes', 'Verrines salées'] },
+    var cats = [
+      { id: 'plats', title: 'Plats principaux', image: MENU_IMG + 'pastilla-poulet.webp',
+        short: 'Pastillas, viandes, poulet rôti, méchoui et poisson : le cœur de votre dîner.',
+        dishes: [
+          { name: 'Pastilla poulet', photos: [MENU_IMG + 'pastilla-poulet.webp'] },
+          { name: 'Pastilla poisson', photos: [MENU_IMG + 'pastilla-poisson.webp'] },
+          { name: 'Viande aux pruneaux', photos: [MENU_IMG + 'viande-pruneaux.webp'] },
+          { name: 'Demi-méchoui', photos: [MENU_IMG + 'demi-mechoui.webp'] },
+          { name: 'Poulet rôti avec daghmira', photos: [MENU_IMG + 'poulet-roti.webp'] },
+          { name: 'Poisson', photos: [MENU_IMG + 'poisson.webp', MENU_IMG + 'poisson-2.webp'] }
+        ] },
+      { id: 'desserts', title: 'Desserts', image: MENU_IMG + 'fruits.webp',
+        short: 'Fruits, glace et gâteau des mariés pour finir en douceur.',
+        dishes: [
+          { name: 'Dessert (fruits)', photos: [MENU_IMG + 'fruits.webp'] },
+          { name: 'Glace', photos: [MENU_IMG + 'glace.webp'] },
+          { name: 'Gâteau des mariés', photos: [] }
+        ] },
+      { id: 'sucres-sales', title: 'Mets sucrés-salés', image: MENU_IMG + 'mets-sucres-sales.webp',
+        short: 'Bouchées salées et gâteaux, à l’accueil ou avec le thé.',
+        dishes: [
+          { name: 'Mets sucrés-salés', photos: [MENU_IMG + 'mets-sucres-sales.webp'] },
+          { name: 'Gâteaux', photos: [MENU_IMG + 'gateaux.webp', MENU_IMG + 'gateaux-2.webp'] }
+        ] },
       { id: 'salades', title: 'Salades', image: '',
-        short: 'Salades marocaines fraîches et colorées, cuites ou crues, pour ouvrir le repas.',
-        items: ['Salades marocaines variées', 'Zaalouk', 'Taktouka', 'Salade de riz', 'Salade composée'] },
-      { id: 'jus', title: 'Jus', image: '',
-        short: 'Jus frais pressés et cocktails sans alcool, servis tout au long de la soirée.',
-        items: ['Jus d’orange frais', 'Jus d’avocat', 'Panaché de fruits', 'Jus de fraise', 'Citronnade à la menthe'] }
+        short: 'Salades fraîches pour ouvrir le repas.',
+        dishes: [
+          { name: 'Salades', photos: [] }
+        ] },
+      { id: 'jus', title: 'Jus', image: MENU_IMG + 'jus.webp',
+        short: 'Jus frais, et l’accueil traditionnel avec les dattes et le lait.',
+        dishes: [
+          { name: 'Jus', photos: [MENU_IMG + 'jus.webp'] },
+          { name: 'Dattes et lait', photos: [MENU_IMG + 'dattes-lait.webp'] }
+        ] }
     ];
+    cats.forEach(function (c) { c.items = c.dishes.map(function (d) { return d.name; }); });
+    return cats;
   }
   // Les étapes du mariage (page Mariage / Fiançailles)
   function defaultWeddingSteps() {
@@ -200,14 +223,9 @@
       { title: 'Votre menu', text: 'Composez votre dîner parmi nos plats\u00a0: pastillas, viandes, poulet, méchoui, desserts…', choose: false, options: [], link: { href: 'menus.html', label: 'Voir nos menus' } }
     ];
   }
+  // Carrousel « Nos menus » de l'accueil : les plats principaux, avec leur photo
   function defaultMenuDishes() {
-    return [
-      { id: uid(), name: 'Pastilla au poulet', text: 'Feuilles croustillantes, poulet, amandes, cannelle et sucre glace.', image: '' },
-      { id: uid(), name: 'Pastilla aux fruits de mer', text: 'Crevettes, calamars et vermicelles parfumés sous une pâte dorée.', image: '' },
-      { id: uid(), name: 'Viande aux pruneaux & amandes', text: 'Viande fondante mijotée, pruneaux caramélisés, amandes grillées et sésame.', image: '' },
-      { id: uid(), name: 'Poulet rôti avec daghmira', text: 'Poulet doré, sauce daghmira aux oignons confits et aux épices.', image: '' },
-      { id: uid(), name: 'Demi-méchoui', text: 'Agneau rôti lentement, fondant, servi avec cumin et sel.', image: '' }
-    ];
+    return defaultMenuCats()[0].dishes.map(function (d) { return { id: uid(), name: d.name, text: '', image: d.photos[0] || '' }; });
   }
   function defaultSite() {
     return {
@@ -502,8 +520,8 @@
       d.occasionsV2 = d.occasionsV3 = true;
     }
     // menu de la page d'accueil
-    if (!d.site.menuV2) { d.site.dishes = defaultMenuDishes(); d.site.menuV2 = true; }
-    if (!d.site.menuCats) d.site.menuCats = defaultMenuCats();
+    // v3 : le vrai menu (liste du gérant + photos)
+    if (!d.site.menuV3) { d.site.dishes = defaultMenuDishes(); d.site.menuCats = defaultMenuCats(); d.site.menuV3 = true; }
     if (!d.servicePacks) d.servicePacks = defaultServicePacks();
     // photos des services (seulement là où aucune photo n'a été choisie)
     if (!d.occasionsImgV1) {

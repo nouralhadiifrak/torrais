@@ -371,9 +371,18 @@
     }
     var carte = $('#carteList');
     if (carte) {
+      var ph = 0;
       carte.innerHTML = cats.map(function (c, i) {
-        return '<div class="carte__group" id="cat-' + esc(c.id) + '"><span class="carte__num">' + String(i + 1).padStart(2, '0') + '</span><h3 class="carte__title">' + esc(c.title) + '</h3><ul>' +
-          (c.items || []).map(function (n) { return '<li>' + esc(n) + '</li>'; }).join('') + '</ul></div>';
+        var list = c.dishes || (c.items || []).map(function (n) { return { name: n, photos: [] }; });
+        return '<section class="mcat" id="cat-' + esc(c.id) + '"><header class="mcat__head"><span class="mcat__num">' + String(i + 1).padStart(2, '0') + '</span><h2>' + esc(c.title) + '</h2></header>' +
+          '<div class="mdish-grid">' + list.map(function (d, j) {
+            var photos = (d.photos || []).filter(Boolean);
+            var id = c.id === 'plats' ? ' id="plat-' + j + '"' : '';
+            return '<figure class="mdish' + (photos.length > 1 ? ' mdish--duo' : '') + '"' + id + '><div class="mdish__img">' +
+              (photos.length ? photos.map(function (p, k) { return '<img src="' + esc(p) + '" alt="' + (k ? '' : esc(d.name)) + '" loading="lazy">'; }).join('') :
+                '<span class="ph cf-ph tone-' + (ph++ % 8 + 1) + '">' + T.icons[DISH_ICONS[j % 2]] + '<em>Photo à venir</em></span>') +
+              '</div><figcaption>' + esc(d.name) + '</figcaption></figure>';
+          }).join('') + '</div></section>';
       }).join('');
     }
     // arrivée depuis le carrousel : met le plat en valeur

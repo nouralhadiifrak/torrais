@@ -1376,3 +1376,22 @@ html.pt-enter body::after { content: ''; position: fixed; inset: 0; background: 
 /* photos des services : cadrage */
 .occasion__img img[src*="services/prive"] { object-position: 50% 35%; }
 .occasion__img img[src*="services/entreprise"] { object-position: 60% 60%; }
+
+/* page Nos menus : les plats de chaque famille, en photos (sans description) */
+.mcat { scroll-margin-top: 110px; }
+.mcat + .mcat { margin-top: 64px; }
+.mcat__head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 22px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+.mcat__num { font: 400 1.6rem/1 var(--lux); color: rgba(176, 138, 69, .55); }
+.mcat__head h2 { font: 400 clamp(1.7rem, 3vw, 2.2rem)/1.1 var(--lux); margin: 0; }
+.mdish-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 18px; }
+.mdish { margin: 0; scroll-margin-top: 120px; }
+.mdish__img { position: relative; aspect-ratio: 4 / 5; border-radius: 18px; overflow: hidden; background: var(--sand); box-shadow: 0 10px 26px rgba(74, 58, 35, .1); }
+.mdish__img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform .6s; }
+.mdish:hover .mdish__img img { transform: scale(1.04); }
+.mdish--duo .mdish__img img:nth-child(2) { animation: mdishSwap 8s ease-in-out infinite; }
+@keyframes mdishSwap { 0%, 40% { opacity: 0; } 50%, 90% { opacity: 1; } 100% { opacity: 0; } }
+.mdish figcaption { margin-top: 12px; text-align: center; font: 400 1.3rem/1.2 var(--lux); color: var(--ink); }
+.mdish.is-target .mdish__img { box-shadow: 0 0 0 3px var(--gold), 0 14px 30px rgba(74, 58, 35, .18); }
+#menuCats .occasion__img img { object-fit: cover; }
+@media (max-width: 560px) { .mdish-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; } .mdish figcaption { font-size: 1.05rem; margin-top: 8px; } .mdish__img { border-radius: 14px; } .mcat + .mcat { margin-top: 44px; } }
+@media (prefers-reduced-motion: reduce) { .mdish--duo .mdish__img img:nth-child(2) { animation: none; } }
