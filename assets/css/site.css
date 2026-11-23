@@ -1341,10 +1341,11 @@ input:checked + * .cz-radio, input:checked + .cz-custom__box .cz-radio { border:
    ========================================================= */
 @view-transition { navigation: auto; }
 .header { view-transition-name: site-header; }
-::view-transition-group(hero-card) { animation-duration: .55s; animation-timing-function: cubic-bezier(.2, .8, .2, 1); }
+::view-transition-group(hero-card) { animation-duration: 1s; animation-timing-function: cubic-bezier(.65, 0, .25, 1); }
 ::view-transition-old(hero-card), ::view-transition-new(hero-card) { height: 100%; object-fit: cover; overflow: hidden; }
-::view-transition-old(root) { animation: vtOut .3s ease both; }
-::view-transition-new(root) { animation: vtIn .45s ease .1s both; }
+::view-transition-old(root) { animation: vtOut .5s ease both; }
+::view-transition-new(root) { animation: vtIn .7s ease .25s both; }
+::view-transition-old(hero-card), ::view-transition-new(hero-card) { animation-duration: 1s; }
 @keyframes vtOut { to { opacity: 0; } }
 @keyframes vtIn { from { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) {

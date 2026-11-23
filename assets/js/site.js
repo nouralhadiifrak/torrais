@@ -55,24 +55,32 @@
     if (!a || e.defaultPrevented || a.target === '_blank') return;
     var href = a.getAttribute('href');
     if (!href || href.charAt(0) === '#' || /^(https?:|tel:|mailto:)/.test(href)) return;
-    var card = a.closest('.pack, .occasion, .sig, .cf-card');
+    var card = a.closest('.pack, .occasion, .sig, .cf-card') ||
+      (a.closest('.carte-cta') && a.getAttribute('href') === 'menus.html' ? $('#dishesTrack .cf-card.is-active') : null);
     // un seul élément porte le nom (sinon le navigateur annule la transition)
     $$('[style*="view-transition-name"]').forEach(function (el) { if (el !== card) vtName(el, false); });
     if (!card) { try { sessionStorage.removeItem(VT_KEY); } catch (err) {} return; }
     vtName(card, true);
     try { sessionStorage.setItem(VT_KEY, JSON.stringify({ from: location.pathname, href: href.split('#')[0] })); } catch (err) {}
   }, true);
+  function vtFrom(card, href) {
+    $$('[style*="view-transition-name"]').forEach(function (el) { if (el !== card) vtName(el, false); });
+    vtName(card, true);
+    try { sessionStorage.setItem(VT_KEY, JSON.stringify({ from: location.pathname, href: href })); } catch (err) {}
+  }
   function restoreVt() {
     $$('[style*="view-transition-name"]').forEach(function (el) { vtName(el, false); });
     // sur la page de liste : la carte d'où l'on était parti (au retour, la page se replie dedans)
-    var card = null;
+    var card = null, v = null;
     try {
-      var v = JSON.parse(sessionStorage.getItem(VT_KEY) || 'null');
+      v = JSON.parse(sessionStorage.getItem(VT_KEY) || 'null');
       if (v && v.from === location.pathname) {
         var link = $$('a[href]').filter(function (x) { return x.getAttribute('href').split('#')[0] === v.href && x.closest('.pack, .occasion'); })[0];
         if (link) card = link.closest('.pack, .occasion');
       }
     } catch (err) {}
+    // retour depuis la page Nos menus : la carte du milieu du carrousel
+    if (!card && v && v.from === location.pathname && v.href === 'menus.html') card = $('#dishesTrack .cf-card.is-active');
     if (card) { vtName(card, true); return; }
     // sinon, en haut de la page de détail (la carte cliquée s'agrandit jusqu'ici)
     if (PAGE === 'pack' || PAGE === 'occasion' || PAGE === 'menus') vtName($('#pageHero'), true);
@@ -431,7 +439,7 @@
       if (!c) return;
       hold();
       var i = +c.getAttribute('data-i');
-      if (i === cur && c.classList.contains('cf-card')) { window.location.href = 'menus.html#plat-' + i; return; }
+      if (i === cur && c.classList.contains('cf-card')) { vtFrom(c, 'menus.html'); window.location.href = 'menus.html#plat-' + i; return; }
       go(i);
     });
     $$('[data-carousel]').forEach(function (b) {
