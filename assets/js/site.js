@@ -856,19 +856,33 @@
     if (!mq || !mq.matches || reduce || conn.saveData || /(^|-)2g$/.test(conn.effectiveType || '')) return;
     var v = document.createElement('video');
     v.className = 'hero__video';
-    v.muted = true; v.defaultMuted = true; v.loop = true; v.playsInline = true; v.autoplay = true;
+    v.muted = true; v.defaultMuted = true; v.loop = true; v.playsInline = true;
     v.setAttribute('muted', ''); v.setAttribute('playsinline', ''); v.setAttribute('aria-hidden', 'true');
     v.preload = 'auto';
     v.poster = 'assets/video/hero-mobile-poster.jpg';
+    // la carte qui s'agrandit dans l'écran d'ouverture montre la première image de la vidéo
+    var still = box.querySelector('.hero__slide');
+    if (still) still.style.backgroundImage = 'url("assets/video/hero-mobile-poster.jpg")';
     v.src = 'assets/video/hero-mobile.mp4';
     $('.hero').classList.add('hero--video'); // héros plein écran sur téléphone pour montrer la vidéo verticale
     v.addEventListener('playing', function () { v.classList.add('is-playing'); }, { once: true });
     box.appendChild(v);
-    var p = v.play();
-    if (p && p.catch) p.catch(function () { /* lecture refusée : la photo reste */ });
+    var started = false;
+    function start() {
+      started = true;
+      var p = v.play();
+      if (p && p.catch) p.catch(function () { /* lecture refusée : la photo reste */ });
+    }
+    // pendant l'écran d'ouverture, la vidéo attend (chargée mais à l'arrêt) ; elle démarre quand l'accueil apparaît
+    if (document.documentElement.classList.contains('is-intro') && !window.__introDone) {
+      v.pause();
+      window.addEventListener('torrais:intro-done', start, { once: true });
+      setTimeout(function () { if (!started && !document.documentElement.classList.contains('is-intro')) start(); }, 9500);
+    } else start();
     // pause quand le héros n'est plus visible (économise la batterie)
     if ('IntersectionObserver' in window) {
       new IntersectionObserver(function (en) {
+        if (!started) return;
         if (en[0].isIntersecting) { var q = v.play(); if (q && q.catch) q.catch(function () {}); } else v.pause();
       }).observe(box);
     }

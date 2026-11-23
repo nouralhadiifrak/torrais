@@ -12,7 +12,7 @@
   var root = document.documentElement;
   var box = document.getElementById('intro');
   clearTimeout(window.__introSafety);
-  if (!box) return;
+  if (!box) { window.__introDone = true; return; }
   var gsap = window.gsap;
   if (!root.classList.contains('is-intro') || !gsap) { finish(); return; }
 
@@ -149,6 +149,8 @@
     ['click', 'keydown', 'wheel', 'touchstart'].forEach(function (ev) { window.removeEventListener(ev, skip, true); });
     root.classList.remove('is-intro', 'intro-reveal');
     if (box && box.parentNode) box.parentNode.removeChild(box);
+    window.__introDone = true;
+    try { window.dispatchEvent(new Event('torrais:intro-done')); } catch (e) {}
     var l = window.TorraisMotion && window.TorraisMotion.lenis;
     if (l) l.start();
     if (window.ScrollTrigger) window.ScrollTrigger.refresh();
