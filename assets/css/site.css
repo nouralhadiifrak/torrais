@@ -1323,3 +1323,9 @@ input:checked + * .cz-radio, input:checked + .cz-custom__box .cz-radio { border:
 
 .cz-dish__tag { display: none; }
 .cz-dish.is-included .cz-dish__tag { display: inline; }
+
+/* en-tête : même emblème que le logo du pied de page (plus large) */
+.brand__logo, .header .brand__logo { max-width: none; height: 52px; }
+@media (min-width: 961px) { .header .brand__logo { height: 56px; } }
+@media (max-width: 560px) { .brand__logo { height: 44px; } }
+.intro__logo { width: clamp(110px, 18vmin, 190px); }

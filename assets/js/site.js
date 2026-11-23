@@ -32,7 +32,7 @@
   /* ---------- en-tête et pied de page (communs aux pages) ---------- */
   function renderChrome() {
     // Logo : celui envoyé par le gérant, sinon l'emblème doré de TORRAIS EVENT
-    var logo = '<img class="brand__logo" src="' + esc(data.media && data.media.logo ? data.media.logo : 'assets/img/brand/logo-mark.webp') + '" alt="" width="320" height="297">';
+    var logo = '<img class="brand__logo" src="' + esc(data.media && data.media.logo ? data.media.logo : 'assets/img/brand/logo-emblem.webp') + '" alt="" width="360" height="212">';
     var occLinks = data.occasions.map(function (o) {
       return '<a href="' + occUrl(o) + '"' + (occasion && occasion.id === o.id ? ' aria-current="page"' : '') + '>' + esc(o.title) + '</a>';
     }).join('');
