@@ -844,6 +844,34 @@
     still.className = 'hero__slide is-active';
     still.style.backgroundImage = 'url("assets/img/salle.jpg")';
     box.appendChild(still);
+    heroVideo(box);
+  }
+
+  // Vidéo du héros, sur téléphone uniquement (vidéo verticale) : la photo s'affiche d'abord, la vidéo apparaît une fois chargée.
+  // Pas de vidéo en mode économie de données, si les animations sont réduites, ou sur ordinateur.
+  function heroVideo(box) {
+    var mq = window.matchMedia && window.matchMedia('(max-width: 760px) and (orientation: portrait)');
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var conn = navigator.connection || {};
+    if (!mq || !mq.matches || reduce || conn.saveData || /(^|-)2g$/.test(conn.effectiveType || '')) return;
+    var v = document.createElement('video');
+    v.className = 'hero__video';
+    v.muted = true; v.defaultMuted = true; v.loop = true; v.playsInline = true; v.autoplay = true;
+    v.setAttribute('muted', ''); v.setAttribute('playsinline', ''); v.setAttribute('aria-hidden', 'true');
+    v.preload = 'auto';
+    v.poster = 'assets/video/hero-mobile-poster.jpg';
+    v.src = 'assets/video/hero-mobile.mp4';
+    $('.hero').classList.add('hero--video'); // héros plein écran sur téléphone pour montrer la vidéo verticale
+    v.addEventListener('playing', function () { v.classList.add('is-playing'); }, { once: true });
+    box.appendChild(v);
+    var p = v.play();
+    if (p && p.catch) p.catch(function () { /* lecture refusée : la photo reste */ });
+    // pause quand le héros n'est plus visible (économise la batterie)
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (en) {
+        if (en[0].isIntersecting) { var q = v.play(); if (q && q.catch) q.catch(function () {}); } else v.pause();
+      }).observe(box);
+    }
   }
 
   /* ---------- visionneuse ---------- */
