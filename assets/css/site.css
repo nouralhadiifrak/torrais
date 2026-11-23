@@ -1339,8 +1339,7 @@ input:checked + * .cz-radio, input:checked + .cz-custom__box .cz-radio { border:
    Transitions entre pages (navigateurs compatibles : Chrome, Edge, Opera, Safari 18.2+)
    La carte cliquée devient le haut de la page suivante ; au retour, la page se replie dans la carte.
    ========================================================= */
-@view-transition { navigation: auto; }
-.header { view-transition-name: site-header; }
+@view-transition { navigation: none; }
 ::view-transition-group(hero-card) { animation-duration: 1s; animation-timing-function: cubic-bezier(.65, 0, .25, 1); }
 ::view-transition-old(hero-card), ::view-transition-new(hero-card) { height: 100%; object-fit: cover; overflow: hidden; }
 ::view-transition-old(root) { animation: vtOut .5s ease both; }
@@ -1351,3 +1350,13 @@ input:checked + * .cz-radio, input:checked + .cz-custom__box .cz-radio { border:
 @media (prefers-reduced-motion: reduce) {
   @view-transition { navigation: none; }
 }
+
+/* =========================================================
+   Transitions entre pages (transitions.js) — tous navigateurs
+   ========================================================= */
+html.pt-enter body::after { content: ''; position: fixed; inset: 0; background: #16130f; z-index: 100000; }
+.pt-shape { position: fixed; z-index: 100001; display: none; overflow: hidden; pointer-events: none; background: #16130f; box-shadow: 0 30px 80px rgba(0, 0, 0, .35); }
+.pt-shape.is-on { display: block; }
+.pt-shape .pt-clone { position: absolute; left: 0; top: 0; margin: 0 !important; transform-origin: top left; pointer-events: none; }
+
+.occasion, .pack, .sig, .cf-card, .drift__tile { -webkit-tap-highlight-color: transparent; }
