@@ -135,19 +135,19 @@
   }
   function defaultOccasions() {
     return [
-      { id: 'mariage', title: 'Mariage / Fiançailles', eventType: 'Mariage', galleryCat: 'Mariages', image: '',
+      { id: 'mariage', title: 'Mariage / Fiançailles', eventType: 'Mariage', galleryCat: 'Mariages', image: 'assets/img/services/mariage.webp',
         short: 'Le grand jour, du dîner à la kousha, pensé dans les moindres détails.',
         text: "Votre mariage ou vos fiançailles méritent une table à la hauteur de l'émotion. Neggafa, décoration, caméra, musique, dîner et douceurs : choisissez votre pack, nous nous occupons de tout pour que vous profitiez de votre fête.",
         includes: ['Neggafa et tenues', 'Décoration de la salle et de la kousha', 'Caméra et musique (DJ ou orchestre)', 'Dîner : pastilla, viande aux pruneaux, poulet…', 'Dessert, jus, gâteaux, thé à la menthe, dattes et lait'] },
-      { id: 'bapteme', title: 'Baptême', eventType: 'Aqiqa / Baptême', galleryCat: 'Cuisine', image: '',
+      { id: 'bapteme', title: 'Baptême', eventType: 'Aqiqa / Baptême', galleryCat: 'Cuisine', image: 'assets/img/services/bapteme.webp',
         short: 'Célébrez l’arrivée de bébé avec un repas généreux pour vos proches.',
         text: 'Pour le baptême (aqiqa), nous préparons le repas traditionnel, le thé et les douceurs, chez vous ou en salle, pour que vous profitiez pleinement de ce moment en famille.',
         includes: ['Méchoui, viande aux pruneaux ou poulet rôti', 'Thé, dattes et pâtisseries', 'Service sur place', 'Livraison à domicile possible'] },
-      { id: 'entreprise', title: 'Entreprise', eventType: "Événement d'entreprise", galleryCat: 'Cuisine', image: '',
+      { id: 'entreprise', title: 'Entreprise', eventType: "Événement d'entreprise", galleryCat: 'Cuisine', image: 'assets/img/services/entreprise.webp',
         short: 'Cocktails, séminaires et fins d’année pour vos équipes et vos clients.',
         text: 'Inauguration, séminaire, fin d’année ou réception de clients : nous proposons des cocktails dînatoires et des buffets élégants, ponctuels et adaptés à votre image.',
         includes: ['Cocktail dînatoire ou buffet', 'Pauses café', 'Service en tenue', 'Devis rapide et facture'] },
-      { id: 'prive', title: 'Événements privés', eventType: 'Autre', galleryCat: 'Cuisine', image: '',
+      { id: 'prive', title: 'Événements privés', eventType: 'Autre', galleryCat: 'Cuisine', image: 'assets/img/services/prive.webp',
         short: 'Anniversaires, henné, réceptions de famille : une fête à votre image.',
         text: 'Anniversaire, soirée du henné, retour de pèlerinage ou réception de famille : nous préparons un menu et un service sur mesure, chez vous ou dans la salle de votre choix.',
         includes: ['Menu sur mesure', 'Buffet ou service à table', 'Tyafer et décoration selon vos envies', 'Gâteau et douceurs marocaines'] }
@@ -505,6 +505,11 @@
     if (!d.site.menuV2) { d.site.dishes = defaultMenuDishes(); d.site.menuV2 = true; }
     if (!d.site.menuCats) d.site.menuCats = defaultMenuCats();
     if (!d.servicePacks) d.servicePacks = defaultServicePacks();
+    // photos des services (seulement là où aucune photo n'a été choisie)
+    if (!d.occasionsImgV1) {
+      (d.occasions || []).forEach(function (o) { if (!o.image && ['mariage', 'bapteme', 'entreprise', 'prive'].indexOf(o.id) !== -1) o.image = 'assets/img/services/' + o.id + '.webp'; });
+      d.occasionsImgV1 = true;
+    }
     // les vraies photos remplacent la galerie de démonstration (sauf si des photos ont déjà été ajoutées)
     if (!d.galleryV2) { if (!(d.gallery || []).some(function (g) { return g.src; })) d.gallery = defaultGallery(); d.galleryV2 = true; }
     if (!d.site.weddingSteps || !d.site.weddingStepsV2) { d.site.weddingSteps = defaultWeddingSteps(); d.site.weddingStepsV2 = true; }

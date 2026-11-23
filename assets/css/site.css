@@ -1372,3 +1372,7 @@ html.pt-enter body::after { content: ''; position: fixed; inset: 0; background: 
 /* galerie : emplacements vides (photo à venir) */
 .drift__tile--ph { cursor: default; filter: brightness(.6) saturate(.6); }
 .drift__tile--ph .ph svg { opacity: .55; }
+
+/* photos des services : cadrage */
+.occasion__img img[src*="services/prive"] { object-position: 50% 35%; }
+.occasion__img img[src*="services/entreprise"] { object-position: 60% 60%; }
