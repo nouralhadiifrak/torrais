@@ -1395,3 +1395,20 @@ html.pt-enter body::after { content: ''; position: fixed; inset: 0; background: 
 #menuCats .occasion__img img { object-fit: cover; }
 @media (max-width: 560px) { .mdish-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; } .mdish figcaption { font-size: 1.05rem; margin-top: 8px; } .mdish__img { border-radius: 14px; } .mcat + .mcat { margin-top: 44px; } }
 @media (prefers-reduced-motion: reduce) { .mdish--duo .mdish__img img:nth-child(2) { animation: none; } }
+
+/* formulaire de devis dans le panneau doré : le contenu ne dépasse plus sur téléphone */
+.devis-panel .devis { grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); }
+.devis-panel .devis > * { min-width: 0; }
+.devis-panel .form, .devis-panel .form__row > * { min-width: 0; }
+@media (max-width: 900px) { .devis-panel .devis { grid-template-columns: minmax(0, 1fr); gap: 28px; } }
+@media (max-width: 760px) { .devis-panel { padding: 26px 16px; } .devis-panel .form { padding: 20px 16px; } }
+
+@media (max-width: 420px) { .hide-xs { display: none; } }
+.form .btn--wa { white-space: normal; text-align: center; }
+
+/* simulateur : la famille du menu qui s'ouvre */
+.cz-veil { position: fixed; z-index: 2000; background: var(--white); border: 1.5px solid var(--gold); box-shadow: 0 30px 70px rgba(43, 34, 24, .25); overflow: hidden; pointer-events: none; }
+.cz-veil > .cz-cat { border: 0; width: 100%; height: 100%; }
+
+.cz-thumb--photo { background: var(--sand); }
+.cz-thumb--photo img { width: 100%; height: 100%; object-fit: cover; }

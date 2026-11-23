@@ -180,7 +180,7 @@
           { name: 'Viande aux pruneaux', photos: [MENU_IMG + 'viande-pruneaux.webp'] },
           { name: 'Demi-méchoui', photos: [MENU_IMG + 'demi-mechoui.webp'] },
           { name: 'Poulet rôti avec daghmira', photos: [MENU_IMG + 'poulet-roti.webp'] },
-          { name: 'Poisson', photos: [MENU_IMG + 'poisson.webp', MENU_IMG + 'poisson-2.webp'] }
+          { name: 'Poisson', photos: [MENU_IMG + 'poisson-2.webp', MENU_IMG + 'poisson.webp'] }
         ] },
       { id: 'desserts', title: 'Desserts', image: MENU_IMG + 'fruits.webp',
         short: 'Fruits, glace et gâteau des mariés pour finir en douceur.',

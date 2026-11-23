@@ -692,10 +692,9 @@
     if (!box) return;
     if (box.classList.contains('drift')) { renderDrift(box); return; }
     var all = data.gallery.slice();
-    if (occasion) {
-      var mine = all.filter(function (g) { return g.category === occasion.galleryCat; });
-      all = mine.length >= 3 ? mine : all;
-      all = all.slice(0, 6);
+    if (occasion || PAGE === 'pack') {
+      // pages de service : emplacements « photo à venir » en attendant les photos propres à chaque service
+      all = [0, 1, 2, 3, 4, 5].map(function (i) { return { src: '', caption: '', tone: i }; });
     }
     galleryList = filter && filter !== 'Tout' ? all.filter(function (g) { return g.category === filter; }) : all;
     box.innerHTML = galleryList.length ? galleryList.map(function (g, i) {
@@ -1030,7 +1029,7 @@
         '</div>' +
         '<label class="field"><span>Votre message</span><textarea name="message" rows="4" placeholder="Lieu, formule qui vous intéresse, demandes particulières…"></textarea></label>' +
         '<p class="form__error" id="formError" role="alert" hidden></p>' +
-        '<button type="submit" class="btn btn--wa btn--block"><span class="icon">' + T.icons.whatsapp + '</span> Envoyer ma demande sur WhatsApp</button>' +
+        '<button type="submit" class="btn btn--wa btn--block"><span class="icon">' + T.icons.whatsapp + '</span> Envoyer ma demande<span class="hide-xs"> sur WhatsApp</span></button>' +
         '<p class="form__hint">Votre demande s\'ouvre dans WhatsApp, prête à envoyer · Réponse rapide · Sans engagement</p>' +
       '</form>' +
       '<div class="form form--success" id="formSuccess" hidden>' +

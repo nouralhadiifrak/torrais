@@ -222,7 +222,7 @@
             var inMenu = menus.length && packMenus(p)[state.pkgMenu] && dishInMenu(d, packMenus(p)[state.pkgMenu].label);
             var on = inMenu || !!state.dishes[key];
             return '<label class="cz-dish' + (on ? ' is-on' : '') + (inMenu ? ' is-included' : '') + '"><input type="checkbox" data-dish="' + esc(key) + '"' + (on ? ' checked' : '') + (inMenu ? ' disabled' : '') + '>' +
-              thumb(CAT_ICONS[open.id] || 'traiteur', i) +
+              (dishPhoto(open, d) ? '<span class="cz-thumb cz-thumb--photo" aria-hidden="true"><img src="' + esc(dishPhoto(open, d)) + '" alt=""></span>' : thumb(CAT_ICONS[open.id] || 'traiteur', i)) +
               '<span class="cz-dish__name">' + esc(d) + '</span>' +
               '<span class="cz-dish__tag">' + (inMenu ? 'Dans votre menu' : on ? 'Ajouté' : 'Ajouter') + '</span>' +
               '<span class="opt__check" aria-hidden="true">' + T.icons.check + '</span></label>';
@@ -272,6 +272,10 @@
         '<a href="#" class="btn btn--wa" id="composerDoneWa"><span class="icon">' + T.icons.whatsapp + '</span> Ouvrir WhatsApp</a></div>';
   }
 
+  function dishPhoto(cat, name) {
+    var d = (cat.dishes || []).filter(function (x) { return x.name === name; })[0];
+    return d && d.photos && d.photos[0];
+  }
   function catIncluded(catId) {
     var p = currentPack();
     if (!p) return false;
@@ -284,7 +288,8 @@
     var d = norm(dish);
     return parts.some(function (part) {
       var words = part.split(' ').filter(function (w) { return w.length > 3; });
-      return words.length && words.every(function (w) { return d.indexOf(w.replace(/s$/, '')) !== -1 || (w === 'poisson' && d.indexOf('fruits de mer') !== -1); });
+      var pas = /^pastilla/.test(part) === /^pastilla/.test(d); // « Poulet » ≠ « Pastilla poulet »
+      return pas && words.length && words.every(function (w) { return d.indexOf(w.replace(/s$/, '')) !== -1 || (w === 'poisson' && d.indexOf('fruits de mer') !== -1); });
     });
   }
   function chosenDishes() {
@@ -334,6 +339,65 @@
     $('#composerBar').innerHTML = barHtml();
   }
   function redrawPanel() { $('#composerPanel').innerHTML = stepHtml(); refreshLive(); }
+
+  /* ---------- menu : la famille s'ouvre depuis sa carte, et s'y replie au retour (comme entre les pages) ---------- */
+  var REDUCE = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var catBusy = false;
+  function box(r) { return { left: r.left + 'px', top: r.top + 'px', width: r.width + 'px', height: r.height + 'px' }; }
+  function veil(r, radius) {
+    var v = document.createElement('div');
+    v.className = 'cz-veil';
+    v.style.left = r.left + 'px'; v.style.top = r.top + 'px'; v.style.width = r.width + 'px'; v.style.height = r.height + 'px';
+    v.style.borderRadius = radius;
+    document.body.appendChild(v);
+    return v;
+  }
+  function scrollPanelTop() {
+    var top = $('#composerSection').getBoundingClientRect().top + window.scrollY - 90;
+    if (window.scrollY > top + 10) { if (window.TorraisMotion && window.TorraisMotion.lenis) window.TorraisMotion.lenis.scrollTo(top, { immediate: true }); else window.scrollTo(0, top); }
+  }
+  function openCat(id, fromHistory) {
+    if (catBusy || state.cat === id) return;
+    var card = $('.cz-cat[data-cat="' + id + '"]', root);
+    var panel = $('#composerPanel');
+    if (!fromHistory) history.pushState({ czStep: 3, czCat: id }, '');
+    if (!card || REDUCE || !document.body.animate) { state.cat = id; redrawPanel(); scrollPanelTop(); return; }
+    catBusy = true;
+    var cr = card.getBoundingClientRect(), pr = panel.getBoundingClientRect();
+    var v = veil(cr, '16px');
+    v.innerHTML = card.outerHTML;
+    var a = v.animate([Object.assign(box(cr), { borderRadius: '16px' }), Object.assign(box({ left: pr.left - 6, top: Math.max(pr.top, 70), width: pr.width + 12, height: Math.min(pr.height, window.innerHeight - Math.max(pr.top, 70)) }), { borderRadius: '18px' })],
+      { duration: 650, easing: 'cubic-bezier(.65, 0, .25, 1)', fill: 'forwards' });
+    v.firstChild.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 380, fill: 'forwards' });
+    a.onfinish = function () {
+      state.cat = id; redrawPanel(); scrollPanelTop();
+      $$('.cz-dish, .cz-cathead', root).forEach(function (el, i) { el.animate([{ opacity: 0, transform: 'translateY(10px)' }, { opacity: 1, transform: 'none' }], { duration: 420, delay: 60 + i * 35, easing: 'ease-out', fill: 'backwards' }); });
+      v.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 380, easing: 'ease' }).onfinish = function () { v.remove(); catBusy = false; };
+    };
+  }
+  function closeCat(fromHistory) {
+    if (catBusy || !state.cat) return;
+    if (!fromHistory) { history.back(); return; } // le bouton retour du navigateur fera l'animation
+    var id = state.cat;
+    var panel = $('#composerPanel');
+    if (REDUCE || !document.body.animate) { state.cat = ''; redrawPanel(); return; }
+    catBusy = true;
+    var pr = panel.getBoundingClientRect();
+    var from = { left: pr.left - 6, top: Math.max(pr.top, 70), width: pr.width + 12, height: Math.min(pr.height, window.innerHeight - Math.max(pr.top, 70)) };
+    var v = veil(from, '18px');
+    state.cat = ''; redrawPanel();
+    var card = $('.cz-cat[data-cat="' + id + '"]', root);
+    if (!card) { v.remove(); catBusy = false; return; }
+    card.scrollIntoView({ block: 'nearest' });
+    var cr = card.getBoundingClientRect();
+    card.style.visibility = 'hidden';
+    var a = v.animate([Object.assign(box(from), { borderRadius: '18px' }), Object.assign(box(cr), { borderRadius: '16px' })],
+      { duration: 650, easing: 'cubic-bezier(.65, 0, .25, 1)', fill: 'forwards' });
+    a.onfinish = function () {
+      card.style.visibility = '';
+      v.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 260 }).onfinish = function () { v.remove(); catBusy = false; };
+    };
+  }
 
   function canLeave(step) {
     var msg = '';
@@ -404,7 +468,7 @@
     var g = t.closest('[data-goto]');
     if (g && !g.disabled) { go(+g.getAttribute('data-goto')); return; }
     var c = t.closest('[data-cat]');
-    if (c) { state.cat = c.getAttribute('data-cat'); redrawPanel(); return; }
+    if (c) { var cid = c.getAttribute('data-cat'); if (cid) openCat(cid); else closeCat(); return; }
     var ty = t.closest('[data-tyafer]');
     if (ty) {
       state.tyafer = Math.max(0, Math.min(30, state.tyafer + (+ty.getAttribute('data-tyafer'))));
@@ -454,7 +518,13 @@
   history.replaceState(Object.assign({}, history.state, { czStep: 0 }), '');
   window.addEventListener('popstate', function (e) {
     var st = e.state && e.state.czStep;
-    if (typeof st === 'number') go(st, true);
+    if (state.step === 3 && st === 3) {
+      var want = (e.state && e.state.czCat) || '';
+      if (want && want !== state.cat) openCat(want, true);
+      else if (!want && state.cat) closeCat(true);
+      return;
+    }
+    if (typeof st === 'number') { go(st, true); if (st === 3 && e.state.czCat) { state.cat = e.state.czCat; redrawPanel(); } }
   });
   render();
 })();
