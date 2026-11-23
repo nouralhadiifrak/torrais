@@ -1368,3 +1368,7 @@ html.pt-enter body::after { content: ''; position: fixed; inset: 0; background: 
 @media (max-width: 760px) and (orientation: portrait) {
   .hero--video { min-height: calc(100svh - 104px); display: flex; flex-direction: column; justify-content: center; }
 }
+
+/* galerie : emplacements vides (photo à venir) */
+.drift__tile--ph { cursor: default; filter: brightness(.6) saturate(.6); }
+.drift__tile--ph .ph svg { opacity: .55; }

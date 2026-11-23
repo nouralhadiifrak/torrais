@@ -36,7 +36,7 @@
     if (m) heroSrc = m[1];
   }
   var N = 12;
-  var pics = own.concat(CROPS).slice(0, N - 1);
+  var pics = CROPS.slice(0, N - 1); // les 11 photos recadrées en carré pour le carrousel
   while (pics.length < N - 1) pics.push(CROPS[pics.length % CROPS.length]);
   pics.push(heroSrc); // la dernière carte (au-dessus des autres) est celle du héros
 

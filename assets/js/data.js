@@ -153,6 +153,21 @@
         includes: ['Menu sur mesure', 'Buffet ou service à table', 'Tyafer et décoration selon vos envies', 'Gâteau et douceurs marocaines'] }
     ];
   }
+  function defaultGallery() {
+    return [
+        { id: uid(), src: 'assets/img/gallery/g01.webp', caption: 'Salle de réception', category: 'Mariages', tone: 1 },
+        { id: uid(), src: 'assets/img/gallery/g02.webp', caption: 'Salon traditionnel', category: 'Décoration', tone: 2 },
+        { id: uid(), src: 'assets/img/gallery/g03.webp', caption: 'Coffret de fiançailles', category: 'Mariages', tone: 3 },
+        { id: uid(), src: 'assets/img/gallery/g04.webp', caption: 'Dattes et douceurs', category: 'Cuisine', tone: 4 },
+        { id: uid(), src: 'assets/img/gallery/g05.webp', caption: 'Salon des mariés', category: 'Décoration', tone: 5 },
+        { id: uid(), src: 'assets/img/gallery/g06.webp', caption: 'Pastilla aux fruits de mer', category: 'Cuisine', tone: 6 },
+        { id: uid(), src: 'assets/img/gallery/g07.webp', caption: 'Arche personnalisée', category: 'Décoration', tone: 7 },
+        { id: uid(), src: 'assets/img/gallery/g08.webp', caption: 'Table de baby shower', category: 'Décoration', tone: 8 },
+        { id: uid(), src: 'assets/img/gallery/g09.webp', caption: 'Buffet sucré', category: 'Cuisine', tone: 1 },
+        { id: uid(), src: 'assets/img/gallery/g10.webp', caption: 'Accueil traditionnel', category: 'Mariages', tone: 2 },
+        { id: uid(), src: 'assets/img/gallery/g11.webp', caption: 'Service du thé', category: 'Cuisine', tone: 3 }
+    ];
+  }
   function defaultMenuCats() {
     return [
       { id: 'plats', title: 'Plats principaux', image: '',
@@ -265,16 +280,7 @@
         { id: 'deco', image: '', icon: 'deco', title: 'Décoration', text: 'Décoration des tables, fleurs, lumières et kousha de la mariée, accordées au thème et aux couleurs de votre fête.' }
       ],
       packages: defaultPackages(),
-      gallery: [
-        { id: uid(), src: '', caption: "Table d'honneur", tone: 1 },
-        { id: uid(), src: '', caption: 'Buffet marocain', tone: 2 },
-        { id: uid(), src: '', caption: 'Tyafer de la henné', tone: 3 },
-        { id: uid(), src: '', caption: 'Kousha de la mariée', tone: 4 },
-        { id: uid(), src: '', caption: 'Pastilla royale', tone: 5 },
-        { id: uid(), src: '', caption: 'Plateaux de fruits', tone: 6 },
-        { id: uid(), src: '', caption: 'Décoration florale', tone: 7 },
-        { id: uid(), src: '', caption: 'Pâtisseries marocaines', tone: 8 }
-      ]
+      gallery: defaultGallery()
     };
   }
 
@@ -499,6 +505,8 @@
     if (!d.site.menuV2) { d.site.dishes = defaultMenuDishes(); d.site.menuV2 = true; }
     if (!d.site.menuCats) d.site.menuCats = defaultMenuCats();
     if (!d.servicePacks) d.servicePacks = defaultServicePacks();
+    // les vraies photos remplacent la galerie de démonstration (sauf si des photos ont déjà été ajoutées)
+    if (!d.galleryV2) { if (!(d.gallery || []).some(function (g) { return g.src; })) d.gallery = defaultGallery(); d.galleryV2 = true; }
     if (!d.site.weddingSteps || !d.site.weddingStepsV2) { d.site.weddingSteps = defaultWeddingSteps(); d.site.weddingStepsV2 = true; }
     if (!d.occasionsV2) {
       var keep = {};

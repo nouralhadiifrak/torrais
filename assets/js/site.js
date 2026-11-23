@@ -600,33 +600,52 @@
      Colonnes de largeurs différentes, tuiles de hauteurs variées (tile 180 × 124, écart 6, arrondi 16, variance 0,4),
      mur légèrement incliné, chaque colonne dérive à sa propre vitesse, en sens alternés. */
   function renderDrift(box) {
-    galleryList = data.gallery.slice();
+    // chaque vraie photo n'apparaît qu'une fois sur le mur ; les autres cases sont des emplacements « photo à venir »
+    galleryList = data.gallery.filter(function (g) { return g.src; });
     var n = galleryList.length;
-    if (!n) { box.innerHTML = '<p class="gallery__empty">Bientôt nos photos.</p>'; return; }
     var mobile = window.innerWidth < 700;
     var TW = mobile ? 128 : 180, TH = mobile ? 90 : 124, GAP = 6, VAR = 0.4;
     // petit générateur pseudo-aléatoire stable (même mur à chaque visite)
     var seed = 7;
     function rnd() { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; }
     var wallW = box.clientWidth * 1.25;
-    var html = '<div class="drift__wall">';
-    var x = 0, c = 0, pick = 0;
+    // 1. la forme du mur : colonnes et hauteurs des cases
+    var cols = [], x = 0;
     while (x < wallW) {
       var w = Math.round(TW * (1 + (rnd() * 2 - 1) * VAR * 0.5));
-      var tiles = '', total = 0;
-      while (total < box.clientHeight * 1.35 || tiles.split('<button').length < 6) {
-        var h = Math.round(TH * (1 + (rnd() * 2 - 1) * VAR));
-        var idx = pick++ % n;
-        var g = galleryList[idx];
-        tiles += '<button type="button" class="drift__tile" data-index="' + idx + '" style="height:' + h + 'px" aria-label="' + esc(g.caption || 'Photo') + '">' +
-          photoInner(g, idx) + (g.caption ? '<span class="drift__cap">' + esc(g.caption) + '</span>' : '') + '</button>';
-        total += h + GAP;
-      }
-      var speed = (mobile ? 14 : 18) + Math.round(rnd() * (mobile ? 22 : 30)); // px / seconde
-      html += '<div class="drift__col" style="width:' + w + 'px" data-speed="' + speed + '" data-dir="' + (c % 2 ? 1 : -1) + '"><div class="drift__track">' +
-        tiles + tiles.replace(/<button /g, '<button tabindex="-1" aria-hidden="true" ') + '</div></div>';
-      x += w + GAP; c++;
+      var hs = [], total = 0;
+      while (total < box.clientHeight * 1.35 || hs.length < 5) { var h = Math.round(TH * (1 + (rnd() * 2 - 1) * VAR)); hs.push(h); total += h + GAP; }
+      cols.push({ w: w, hs: hs, speed: (mobile ? 14 : 18) + Math.round(rnd() * (mobile ? 22 : 30)) });
+      x += w + GAP;
     }
+    // 2. on place les photos : réparties sur les colonnes du milieu (les mieux visibles), une case par photo
+    var slots = [];
+    var mid = (cols.length - 1) / 2;
+    var order = cols.map(function (c, i) { return i; }).sort(function (p, q) { return Math.abs(p - mid) - Math.abs(q - mid); });
+    var row = 1;
+    while (slots.length < n && row < 12) {
+      order.forEach(function (ci) { if (slots.length < n && row < cols[ci].hs.length) slots.push(ci + ':' + ((row + ci) % cols[ci].hs.length)); });
+      row += 2;
+    }
+    var at = {};
+    slots.forEach(function (k, i) { at[k] = i; });
+    // 3. le mur
+    var html = '<div class="drift__wall">';
+    cols.forEach(function (col, ci) {
+      var tiles = '', ph = 0;
+      col.hs.forEach(function (h, ri) {
+        var idx = at[ci + ':' + ri];
+        if (idx != null) {
+          var g = galleryList[idx];
+          tiles += '<button type="button" class="drift__tile" data-index="' + idx + '" style="height:' + h + 'px" aria-label="' + esc(g.caption || 'Photo') + '">' +
+            photoInner(g, idx) + (g.caption ? '<span class="drift__cap">' + esc(g.caption) + '</span>' : '') + '</button>';
+        } else {
+          tiles += '<div class="drift__tile drift__tile--ph" style="height:' + h + 'px" aria-hidden="true">' + placeholder(ci + ri + ph++) + '</div>';
+        }
+      });
+      html += '<div class="drift__col" style="width:' + col.w + 'px" data-speed="' + col.speed + '" data-dir="' + (ci % 2 ? 1 : -1) + '"><div class="drift__track">' +
+        tiles + tiles.replace(/<button /g, '<button tabindex="-1" aria-hidden="true" ') + '</div></div>';
+    });
     box.innerHTML = html + '</div><div class="drift__vignette" aria-hidden="true"></div>';
     driftMotion(box);
   }
