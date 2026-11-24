@@ -813,7 +813,7 @@
     $('#occIncludes').innerHTML = (occasion.includes || []).map(function (x) {
       return '<li><span class="icon">' + T.icons.check + '</span><span>' + esc(x) + '</span></li>';
     }).join('');
-    $('#occWa').setAttribute('data-wa-text', 'Bonjour TORRAIS EVENT, je souhaite des informations pour : ' + occasion.title.toLowerCase() + '.');
+    var oc = $('#occCompose'); if (oc) oc.href = 'composer.html?type=' + encodeURIComponent(occasion.id);
     var bg = occasion.image || (data.media.hero[0] && data.media.hero[0].src) || (data.media.heroVideo ? 'assets/img/salle.jpg' : '');
     if (bg) {
       $('#pageHero').classList.add('page-hero--photo');

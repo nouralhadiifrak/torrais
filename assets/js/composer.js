@@ -17,11 +17,11 @@
 
   /* ---------- données ---------- */
   var TYPES = [
-    { id: 'mariage', label: 'Mariage', eventType: 'Mariage', icon: 'deco' },
-    { id: 'fiancailles', label: 'Fiançailles', eventType: 'Fiançailles', icon: 'tyafer' },
-    { id: 'bapteme', label: 'Baptême', eventType: 'Aqiqa / Baptême', icon: 'buffet' },
-    { id: 'entreprise', label: 'Entreprise', eventType: "Événement d'entreprise", icon: 'traiteur' },
-    { id: 'prive', label: 'Autre', eventType: 'Autre', icon: 'buffet' }
+    { id: 'mariage', label: 'Mariage', eventType: 'Mariage', icon: 'deco', img: 'assets/img/services/mariage.webp' },
+    { id: 'fiancailles', label: 'Fiançailles', eventType: 'Fiançailles', icon: 'tyafer', img: 'assets/img/loader/c03.webp' },
+    { id: 'bapteme', label: 'Baptême', eventType: 'Aqiqa / Baptême', icon: 'buffet', img: 'assets/img/services/bapteme.webp' },
+    { id: 'entreprise', label: 'Entreprise', eventType: "Événement d'entreprise", icon: 'traiteur', img: 'assets/img/services/entreprise.webp' },
+    { id: 'prive', label: 'Autre', eventType: 'Autre', icon: 'buffet', img: 'assets/img/services/prive.webp' }
   ];
   var PLACES = [
     { id: 'salle', label: 'Salle de fête', text: 'Nous réservons et préparons la salle.', icon: 'deco' },
@@ -47,6 +47,7 @@
   var startType = TYPES.some(function (t) { return t.id === q.get('type'); }) ? q.get('type') : 'mariage';
   var state = {
     step: 0,
+    maxStep: 0,
     type: startType,
     guests: 200,
     date: '',
@@ -128,7 +129,7 @@
     root.innerHTML =
       '<div class="composer__main">' +
         '<ol class="steps-bar steps-bar--6">' + STEPS.map(function (s, i) {
-          return '<li class="' + (i === state.step ? 'is-current' : i < state.step ? 'is-done' : '') + '"><button type="button" data-goto="' + i + '"' + (i > state.step ? ' disabled' : '') + '><span>' + (i + 1) + '</span>' + s + '</button></li>';
+          return '<li class="' + (i === state.step ? 'is-current' : i <= state.maxStep ? 'is-done' : '') + '"><button type="button" data-goto="' + i + '"' + (i > state.maxStep ? ' disabled' : '') + ' aria-label="Étape ' + (i + 1) + ' : ' + s + (i <= state.maxStep && i !== state.step ? ' (modifier)' : '') + '"><span>' + (i + 1) + '</span>' + s + '</button></li>';
         }).join('') + '</ol>' +
         '<div class="composer__panel" id="composerPanel">' + stepHtml() + '</div>' +
         '<p class="form__error" id="stepError" hidden></p>' +
@@ -147,7 +148,7 @@
       return '<h2 class="composer__title">Quel événement préparez-vous ?</h2>' +
         '<div class="cz-types">' + TYPES.map(function (x, i) {
           return '<label class="cz-type"><input type="radio" name="type" value="' + x.id + '"' + (state.type === x.id ? ' checked' : '') + '>' +
-            '<span class="cz-type__box">' + thumb(x.icon, i) + '<strong>' + esc(x.label) + '</strong></span></label>';
+            '<span class="cz-type__box">' + (x.img ? '<span class="cz-type__img"><img src="' + x.img + '" alt=""></span>' : thumb(x.icon, i)) + '<strong>' + esc(x.label) + '</strong></span></label>';
         }).join('') + '</div>' +
         '<div class="composer__row">' +
           '<label class="field field--guests"><span>Nombre d\'invités : <b id="guestsOut">' + state.guests + '</b></span>' +
@@ -372,6 +373,15 @@
     var top = $('#composerSection').getBoundingClientRect().top + window.scrollY - 90;
     if (window.scrollY > top + 10) { if (window.TorraisMotion && window.TorraisMotion.lenis) window.TorraisMotion.lenis.scrollTo(top, { immediate: true }); window.scrollTo({ top: top, behavior: 'instant' }); }
   }
+  // fait défiler la page pour que « el » arrive à l'endroit où se trouvait « rect » (aucun saut visible)
+  function keepAt(el, rect) {
+    var dy = el.getBoundingClientRect().top - rect.top;
+    if (Math.abs(dy) < 2) return;
+    var y = Math.max(0, window.scrollY + dy);
+    var lenis = window.TorraisMotion && window.TorraisMotion.lenis;
+    if (lenis) lenis.scrollTo(y, { immediate: true });
+    window.scrollTo({ top: y, behavior: 'instant' });
+  }
   function flyPhoto(src, from, to, fromR, toR, done) {
     var p = document.createElement('div');
     p.className = 'pt-photo';
@@ -392,8 +402,9 @@
     if (!img || REDUCE || !document.body.animate) { state.cat = id; redrawPanel(); scrollPanelTop(); stagger('.cz-dish'); return; }
     catBusy = true;
     var from = img.parentNode.getBoundingClientRect(), src = img.currentSrc || img.src;
-    state.cat = id; redrawPanel(); scrollPanelTop();
+    state.cat = id; redrawPanel();
     var target = $('.cz-cathead__img', root);
+    if (target) keepAt(target, from);
     stagger('.cz-back, .cz-cathead h3, .cz-inc, .cz-dish');
     if (!target) { catBusy = false; return; }
     target.style.visibility = 'hidden';
@@ -412,7 +423,7 @@
     var target = card && card.querySelector('.cz-cat__img');
     stagger('.cz-cat');
     if (!target) { catBusy = false; return; }
-    card.scrollIntoView({ block: 'nearest' });
+    keepAt(target, from);
     target.style.visibility = 'hidden';
     flyPhoto(src, from, target.getBoundingClientRect(), '12px', '12px', function () {
       target.style.visibility = '';
@@ -432,9 +443,11 @@
     return !msg;
   }
   function go(step, fromHistory) {
-    if (step > state.step && !canLeave(state.step)) return;
+    // pour aller plus loin, chaque étape intermédiaire doit être complète (lieu, pack)
+    if (step > state.step) { for (var k = state.step; k < step; k++) { if (!canLeave(k)) { if (k !== state.step) { state.step = k; render(); canLeave(k); } return; } } }
     var prev = state.step;
     state.step = Math.max(0, Math.min(STEPS.length - 1, step));
+    if (state.step > state.maxStep) state.maxStep = state.step;
     if (!fromHistory && state.step !== prev) history.pushState({ czStep: state.step }, '');
     if (state.step !== 3) state.cat = '';
     // on remonte en haut du simulateur avant d'afficher l'étape (sinon le pied de page apparaît un instant)
@@ -506,7 +519,10 @@
   });
   root.addEventListener('change', function (e) {
     var t = e.target;
-    if (t.name === 'type') { state.type = t.value; state.pkg = ''; state.pkgMenu = 0; }
+    if (t.name === 'type') {
+      state.type = t.value;
+      if (!currentPacks().some(function (p) { return p.id === state.pkg; }) && state.pkg !== 'surmesure') { state.pkg = ''; state.pkgMenu = 0; if (state.maxStep > 2) state.maxStep = 2; }
+    }
     if (t.name === 'place') {
       state.place = t.value;
       // présélectionne le pack qui correspond au lieu (s'il existe)
