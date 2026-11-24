@@ -238,7 +238,7 @@
       zones: ['Casablanca', 'Mohammedia', 'Bouskoura', 'Dar Bouazza', 'Nouaceur', 'Berrechid'],
       dishes: defaultMenuDishes(),
       faq: [
-        { q: 'Quelles prestations proposez-vous ?', a: 'Nous organisons des événements clés en main : mariages et fiançailles (menus traditionnels, buffets, cocktails, desserts), entreprises (déjeuners, plateaux-repas, pauses-café, dîners de gala), location de salles et d’espaces événementiels, et prestations complémentaires (négafa, photographe, DJ, décoration, location de matériel, serveurs).', html: '<p>Nous organisons des événements clés en main :</p><ul><li><strong>Mariages &amp; fiançailles</strong> — menus traditionnels, buffets, cocktails, desserts.</li><li><strong>Entreprises</strong> — déjeuners, plateaux-repas, pauses-café, dîners de gala.</li><li><strong>Location de salles</strong> et d’espaces événementiels.</li><li><strong>Prestations complémentaires</strong> — négafa, photographe, DJ, décoration, location de matériel, serveurs.</li></ul>' },
+        { q: 'Que propose TORRAIS EVENT ?', a: 'Un service complet, du lieu au dîner : mariages et fiançailles avec nos packs Essentiel, Villa et Salle de fête, baptêmes, événements d’entreprise et fêtes privées, en salle, en villa ou à domicile.', html: '<p>Nous préparons votre fête de A à Z, en salle, en villa ou chez vous :</p><ul><li><strong>Mariage &amp; fiançailles</strong> — trois packs tout compris (Essentiel, Villa, Salle de fête) : neggafa, décoration, caméra, DJ ou orchestre, dîner et douceurs.</li><li><strong>Baptême, entreprise et fêtes privées</strong> — repas traditionnel, buffets et cocktails adaptés à votre nombre d’invités.</li><li><strong>Notre cuisine</strong> — pastillas, viande aux pruneaux, poulet rôti avec daghmira, demi-méchoui, poisson, mets sucrés-salés, desserts et jus.</li><li><strong>Pour une entrée inoubliable</strong> — dattes et lait, Issawa ou dakka marrakchia, photographe et vidéaste, tyafer et kousha.</li></ul><p>Vous préférez composer vous-même ? Essayez notre <a href="composer.html">simulateur</a>.</p>' },
         { q: 'Combien de temps à l’avance faut-il réserver ?', a: 'Pour un mariage, idéalement 3 à 4 mois avant, surtout en été. Pour une petite réception, quelques semaines suffisent souvent : contactez-nous pour vérifier la date.' },
         { q: 'Est-ce que vous vous déplacez à domicile ?', a: 'Oui. Nous servons en salle comme à domicile, à Casablanca et dans les environs.' },
         { q: 'Peut-on adapter une formule ?', a: 'Bien sûr. Chaque formule est une base : nous ajustons le menu, la décoration et le service selon vos envies et votre budget.' },
@@ -524,8 +524,12 @@
     // v3 : le vrai menu (liste du gérant + photos)
     if (!d.site.menuV3) { d.site.dishes = defaultMenuDishes(); d.site.menuCats = defaultMenuCats(); d.site.menuV3 = true; }
     if (!d.servicePacks) d.servicePacks = defaultServicePacks();
-    // FAQ : question « Quelles prestations proposez-vous ? » ajoutée en tête
-    if (!d.site.faqV2) { var fq = defaultSite().faq[0]; if (!(d.site.faq || []).some(function (f) { return f.q === fq.q; })) d.site.faq = [fq].concat(d.site.faq || []); d.site.faqV2 = true; }
+    // FAQ : question de présentation en tête (remplace l'ancienne version)
+    if (!d.site.faqV3) {
+      var fq = defaultSite().faq[0];
+      d.site.faq = [fq].concat((d.site.faq || []).filter(function (f) { return f.q !== fq.q && f.q !== 'Quelles prestations proposez-vous ?'; }));
+      d.site.faqV2 = d.site.faqV3 = true;
+    }
     // photos des services (seulement là où aucune photo n'a été choisie)
     if (!d.occasionsImgV1) {
       (d.occasions || []).forEach(function (o) { if (!o.image && ['mariage', 'bapteme', 'entreprise', 'prive'].indexOf(o.id) !== -1) o.image = 'assets/img/services/' + o.id + '.webp'; });
