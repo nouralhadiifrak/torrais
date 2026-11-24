@@ -370,7 +370,7 @@
   }
   function scrollPanelTop() {
     var top = $('#composerSection').getBoundingClientRect().top + window.scrollY - 90;
-    if (window.scrollY > top + 10) { if (window.TorraisMotion && window.TorraisMotion.lenis) window.TorraisMotion.lenis.scrollTo(top, { immediate: true }); else window.scrollTo(0, top); }
+    if (window.scrollY > top + 10) { if (window.TorraisMotion && window.TorraisMotion.lenis) window.TorraisMotion.lenis.scrollTo(top, { immediate: true }); window.scrollTo({ top: top, behavior: 'instant' }); }
   }
   function flyPhoto(src, from, to, fromR, toR, done) {
     var p = document.createElement('div');
@@ -437,10 +437,12 @@
     state.step = Math.max(0, Math.min(STEPS.length - 1, step));
     if (!fromHistory && state.step !== prev) history.pushState({ czStep: state.step }, '');
     if (state.step !== 3) state.cat = '';
-    render();
+    // on remonte en haut du simulateur avant d'afficher l'étape (sinon le pied de page apparaît un instant)
     var top = $('#composerSection').getBoundingClientRect().top + window.scrollY - 90;
-    if (window.TorraisMotion && window.TorraisMotion.lenis) window.TorraisMotion.lenis.scrollTo(top);
-    else window.scrollTo({ top: top, behavior: 'smooth' });
+    var lenis = window.TorraisMotion && window.TorraisMotion.lenis;
+    if (window.scrollY > top) { if (lenis) lenis.scrollTo(top, { immediate: true }); window.scrollTo({ top: top, behavior: 'instant' }); }
+    render();
+    if (!REDUCE && root.animate) $('#composerPanel').animate([{ opacity: 0, transform: 'translateY(10px)' }, { opacity: 1, transform: 'none' }], { duration: 320, easing: 'ease-out' });
   }
 
   /* ---------- envoi ---------- */

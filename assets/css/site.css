@@ -1456,3 +1456,12 @@ html.pt-enter body::after { content: ''; position: fixed; inset: 0; background: 
 .cz-split i { position: absolute; top: -10%; bottom: -10%; left: 50%; width: 2px; background: #fff; transform: rotate(17deg); box-shadow: 0 0 6px rgba(0, 0, 0, .25); }
 .cz-split--one img { clip-path: none !important; }
 @media (max-width: 560px) { .cz-split { width: 72px; height: 58px; } }
+
+html.pt-card body::before { content: ''; position: fixed; left: 0; right: 0; top: var(--pt-top, 0); height: var(--pt-h, 50vh); z-index: 100001; pointer-events: none;
+  background: linear-gradient(180deg, rgba(28, 22, 16, .5), rgba(28, 22, 16, .68)), var(--pt-src, none) center / cover no-repeat, #b48c4c; }
+
+/* les transitions passent sous l'en-tête et la barre du bas : elles restent fixes, comme dans une app */
+html.pt-enter body::after { z-index: 47 !important; }
+html.pt-card body::before { z-index: 48 !important; }
+.pt-veil { z-index: 47 !important; }
+.pt-photo { z-index: 48 !important; }

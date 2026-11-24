@@ -15,7 +15,23 @@
   <link rel="stylesheet" href="assets/css/site.css">
   <script>
     // Transition entre pages : la page arrive derrière un voile sombre qui s'efface (voir transitions.js)
-    try { if (sessionStorage.getItem('pt_enter') && !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) { document.documentElement.classList.add('pt-enter'); setTimeout(function () { document.documentElement.classList.remove('pt-enter'); }, 2500); } } catch (e) {}
+    try {
+      var ptE = sessionStorage.getItem('pt_enter'), ptD = document.documentElement;
+      var ptBack = ptE === 'back' && (JSON.parse(sessionStorage.getItem('pt_nav') || 'null') || {}).from === location.pathname;
+      if ((ptE === 'card' || ptE === 'fade' || ptBack) && !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) {
+        ptD.classList.add('pt-enter');
+        window.__ptArrive = true;
+        // la photo qui voyage reste à l'écran dès le premier affichage de la nouvelle page (pas de clignement)
+        var ptN = (ptE === 'card' || ptBack) && JSON.parse(sessionStorage.getItem('pt_nav') || 'null');
+        if (ptN && ptN.hero) {
+          ptD.classList.add('pt-card');
+          ptD.style.setProperty('--pt-src', ptN.src ? 'url("' + ptN.src + '")' : 'none');
+          ptD.style.setProperty('--pt-top', ptN.hero.top + 'px');
+          ptD.style.setProperty('--pt-h', ptN.hero.height + 'px');
+        }
+        setTimeout(function () { ptD.classList.remove('pt-enter', 'pt-card'); }, 2500);
+      }
+    } catch (e) {}
   </script>
 </head>
 <body data-page="occasion" data-occasion="bapteme">

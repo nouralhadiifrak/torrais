@@ -48,6 +48,11 @@
   ].join(',');
   var items = $$(REVEAL).filter(function (el) { return !el.closest('.hero'); });
   // Seulement l'opacité : les éléments restent utilisables (clavier, lecteurs d'écran) avant leur apparition
+  if (window.__ptArrive) {
+    // arrivée par une transition : les éléments déjà visibles restent en place (pas de second fondu)
+    var vh0 = window.innerHeight;
+    items = items.filter(function (el) { var r = el.getBoundingClientRect(); return r.top > vh0; });
+  }
   gsap.set(items, { opacity: 0, y: 28 });
   ScrollTrigger.batch(items, {
     start: 'top 90%',

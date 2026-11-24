@@ -97,15 +97,18 @@
     if (href === 'menus.html') return document.querySelector('#dishesTrack .cf-card.is-active');
     return null;
   }
-  function cleanup() { $$('.pt-veil, .pt-photo').forEach(function (el) { el.remove(); }); html.classList.remove('pt-enter'); busy = false; }
+  function cleanup() { $$('.pt-veil, .pt-photo').forEach(function (el) { el.remove(); }); html.classList.remove('pt-enter', 'pt-card'); busy = false; }
 
   function arrive(isBack) {
     var info = null;
     try { info = JSON.parse(ss(KEY) || 'null'); } catch (e) {}
     var entering = ss(KEY_ENTER);
     ss(KEY_ENTER, null);
-    $$('.pt-veil, .pt-photo').forEach(function (el) { el.remove(); });
-    if (reduce || (!entering && !html.classList.contains('pt-enter') && !isBack)) { cleanup(); return; }
+    var hadCover = html.classList.contains('pt-enter');
+    // page restaurée depuis la mémoire du navigateur : elle a gardé le voile et la photo du départ
+    var oldVeil = document.querySelector('.pt-veil');
+    var oldPhotos = $$('.pt-photo');
+    if (reduce || (!entering && !hadCover && !isBack)) { cleanup(); return; }
 
     // retour : la grande photo se replie dans sa carte
     var card = isBack && info && info.from === location.pathname ? findCard(info.href) : null;
@@ -114,14 +117,18 @@
       var start = info.hero || heroRect();
       var r = rectOf(s.el);
       var radius = getComputedStyle(s.el).borderRadius || '16px';
-      var v = veil(1);
       var p = photo(s.src || info.src, start, '0px', true);
       p.firstChild.style.opacity = 1;
-      html.classList.remove('pt-enter');
+      // le voile clair (page rechargée ou restaurée) s'efface en douceur, sans clignement
+      var vb = oldVeil || (hadCover ? veil(1) : null);
+      if (vb) { var o = +getComputedStyle(vb).opacity || 1; if (vb.getAnimations) vb.getAnimations().forEach(function (x) { x.cancel(); }); vb.style.opacity = o; vb.animate([{ opacity: o }, { opacity: 0 }], { duration: 420, easing: 'ease', fill: 'forwards' }); }
+      oldPhotos.forEach(function (el) { el.remove(); });
+      html.classList.remove('pt-enter', 'pt-card');
+      s.el.style.visibility = 'hidden';
       var a = p.animate([kf(start, '0px'), kf(r, radius)], { duration: DUR, easing: EASE, fill: 'forwards' });
       p.firstChild.animate([{ opacity: 1 }, { opacity: 0 }], { duration: DUR, easing: 'ease', fill: 'forwards' });
-      v.animate([{ opacity: 1 }, { opacity: 0 }], { duration: DUR, easing: 'ease', fill: 'forwards' });
       done(a, function () {
+        s.el.style.visibility = '';
         cleanup();
         card.classList.add('pt-came-from');
         setTimeout(function () { card.classList.remove('pt-came-from'); }, 1400);
@@ -130,22 +137,39 @@
       return;
     }
 
+    // retour sans carte retrouvée : simple fondu du voile s'il y en a un
+    if (isBack || entering === 'back') {
+      oldPhotos.forEach(function (el) { el.remove(); });
+      var vv = oldVeil || (hadCover ? veil(1) : null);
+      html.classList.remove('pt-enter', 'pt-card');
+      if (!vv) { cleanup(); return; }
+      done(vv.animate([{ opacity: +getComputedStyle(vv).opacity || 1 }, { opacity: 0 }], { duration: 380, fill: 'forwards' }), cleanup);
+      return;
+    }
+    oldPhotos.forEach(function (el) { el.remove(); });
+    if (oldVeil) oldVeil.remove();
+
     // aller : la page arrive sous la grande photo, qui se fond dans le haut de la page
     var v2 = veil(1);
-    html.classList.remove('pt-enter');
     var p2 = null;
-    if (entering === 'card' && info && info.href === clean(location.pathname.split('/').pop() || 'index.html')) {
+    if (entering === 'card' && info && info.hero) {
       var hr = heroRect();
-      p2 = photo(info.src, info.hero || hr, '0px', true);
+      p2 = photo(info.src, info.hero, '0px', true);
       p2.firstChild.style.opacity = 1;
-      var hero = document.getElementById('pageHero');
-      p2.animate([kf(info.hero || hr, '0px', { opacity: 1 }), kf(hr, '0px', { opacity: hero ? 0 : 1 })], { duration: 520, easing: 'ease', fill: 'forwards' });
+      // la photo glisse à la place exacte de la grande photo, puis s'efface une fois le voile parti
+      p2.animate([kf(info.hero, '0px'), kf(hr, '0px')], { duration: 420, easing: EASE, fill: 'forwards' });
     }
+    html.classList.remove('pt-enter', 'pt-card');
     // le contenu monte légèrement en apparaissant
     var main = document.getElementById('contenu');
-    if (main && main.animate) main.animate([{ transform: 'translateY(18px)' }, { transform: 'none' }], { duration: 560, easing: 'cubic-bezier(.2, .7, .2, 1)' });
-    var a2 = v2.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 480, delay: 60, easing: 'ease', fill: 'forwards' });
-    done(a2, function () { if (p2) p2.remove(); cleanup(); });
+    if (main && main.animate) main.animate([{ transform: 'translateY(14px)' }, { transform: 'none' }], { duration: 600, easing: 'cubic-bezier(.2, .7, .2, 1)' });
+    var a2 = v2.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 500, easing: 'ease', fill: 'forwards' });
+    done(a2, function () {
+      if (!p2) { cleanup(); return; }
+      var hero = document.getElementById('pageHero');
+      var f = p2.animate([{ opacity: 1 }, { opacity: hero ? 0 : 1 }], { duration: 350, easing: 'ease', fill: 'forwards' });
+      done(f, cleanup);
+    });
   }
 
   window.TorraisPT = {
@@ -160,7 +184,7 @@
   });
   // en quittant une page de détail par le bouton retour : on note où était la grande photo
   window.addEventListener('pagehide', function () {
-    if (!ss(KEY_ENTER)) ss(KEY_ENTER, 'back');
+    if (!ss(KEY_ENTER)) ss(KEY_ENTER, 'back'); // « back » ne pose aucun voile au chargement
     try {
       var info = JSON.parse(ss(KEY) || 'null');
       if (info && document.getElementById('pageHero')) { info.hero = heroRect(); ss(KEY, JSON.stringify(info)); }
