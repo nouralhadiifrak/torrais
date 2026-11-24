@@ -197,7 +197,7 @@
       var head = '<h2 class="composer__title">Votre menu</h2>';
       var packMenu = menus.length ? '<h3 class="composer__group">Le menu de votre pack</h3><div class="cz-menus">' + menus.map(function (m, i) {
         return '<label class="cz-menu"><input type="radio" name="pkgMenu" value="' + i + '"' + (state.pkgMenu === i ? ' checked' : '') + '>' +
-          '<span class="cz-menu__box">' + thumb('traiteur', i + 2) + '<span class="cz-menu__text"><strong>' + esc(m.label) + '</strong><span>' + (+m.price ? 'Pack dès ' + U.formatDH(m.price) : 'Sur devis') + '</span></span><span class="cz-radio" aria-hidden="true"></span></span></label>';
+          '<span class="cz-menu__box">' + menuThumb(m.label, i) + '<span class="cz-menu__text"><strong>' + esc(m.label) + '</strong><span>' + (+m.price ? 'Pack dès ' + U.formatDH(m.price) : 'Sur devis') + '</span></span><span class="cz-radio" aria-hidden="true"></span></span></label>';
       }).join('') + '</div>' : '';
       var open = cats.filter(function (c) { return c.id === state.cat; })[0];
       var catBlock;
@@ -216,6 +216,7 @@
       } else {
         var inc = catIncluded(open.id);
         catBlock = '<div class="cz-cathead"><button type="button" class="cz-back" data-cat="">← Toutes les familles</button>' +
+          (open.image ? '<span class="cz-cathead__img"><img src="' + esc(open.image) + '" alt=""></span>' : '') +
           '<h3>' + esc(open.title) + '</h3>' + (inc ? '<span class="cz-inc">Inclus dans votre pack</span>' : '') + '</div>' +
           '<div class="cz-dishes">' + (open.items || []).map(function (d, i) {
             var key = open.id + ':' + d;
@@ -272,6 +273,21 @@
         '<a href="#" class="btn btn--wa" id="composerDoneWa"><span class="icon">' + T.icons.whatsapp + '</span> Ouvrir WhatsApp</a></div>';
   }
 
+  // Menu d'un pack (« Poulet + viande aux pruneaux ») : une image coupée en deux, un plat de chaque côté
+  function menuPhotos(label) {
+    var plats = ((data.site.menuCats || [])[0] || {}).dishes || [];
+    return norm(label).split('+').map(function (part) {
+      part = part.trim();
+      var d = plats.filter(function (x) { return dishInMenu(x.name, part); })[0];
+      return d && d.photos && d.photos[0];
+    }).filter(Boolean).slice(0, 2);
+  }
+  function menuThumb(label, i) {
+    var ph = menuPhotos(label);
+    if (ph.length === 2) return '<span class="cz-split" aria-hidden="true"><img src="' + esc(ph[0]) + '" alt=""><img src="' + esc(ph[1]) + '" alt=""><i></i></span>';
+    if (ph.length === 1) return '<span class="cz-split cz-split--one" aria-hidden="true"><img src="' + esc(ph[0]) + '" alt=""></span>';
+    return thumb('traiteur', i + 2);
+  }
   function dishPhoto(cat, name) {
     var d = (cat.dishes || []).filter(function (x) { return x.name === name; })[0];
     return d && d.photos && d.photos[0];
@@ -356,48 +372,56 @@
     var top = $('#composerSection').getBoundingClientRect().top + window.scrollY - 90;
     if (window.scrollY > top + 10) { if (window.TorraisMotion && window.TorraisMotion.lenis) window.TorraisMotion.lenis.scrollTo(top, { immediate: true }); else window.scrollTo(0, top); }
   }
+  function flyPhoto(src, from, to, fromR, toR, done) {
+    var p = document.createElement('div');
+    p.className = 'pt-photo';
+    p.style.backgroundImage = 'url("' + src + '")';
+    p.style.left = from.left + 'px'; p.style.top = from.top + 'px'; p.style.width = from.width + 'px'; p.style.height = from.height + 'px';
+    document.body.appendChild(p);
+    var a = p.animate([Object.assign(box(from), { borderRadius: fromR }), Object.assign(box(to), { borderRadius: toR })], { duration: 560, easing: 'cubic-bezier(.65, 0, .25, 1)', fill: 'forwards' });
+    a.onfinish = function () { p.remove(); done(); };
+  }
+  function stagger(sel) {
+    $$(sel, root).forEach(function (el, i) { el.animate([{ opacity: 0, transform: 'translateY(10px)' }, { opacity: 1, transform: 'none' }], { duration: 380, delay: 80 + i * 35, easing: 'ease-out', fill: 'backwards' }); });
+  }
   function openCat(id, fromHistory) {
     if (catBusy || state.cat === id) return;
     var card = $('.cz-cat[data-cat="' + id + '"]', root);
-    var panel = $('#composerPanel');
     if (!fromHistory) history.pushState({ czStep: 3, czCat: id }, '');
-    if (!card || REDUCE || !document.body.animate) { state.cat = id; redrawPanel(); scrollPanelTop(); return; }
+    var img = card && card.querySelector('.cz-cat__img img');
+    if (!img || REDUCE || !document.body.animate) { state.cat = id; redrawPanel(); scrollPanelTop(); stagger('.cz-dish'); return; }
     catBusy = true;
-    var cr = card.getBoundingClientRect(), pr = panel.getBoundingClientRect();
-    var v = veil(cr, '16px');
-    v.innerHTML = card.outerHTML;
-    var a = v.animate([Object.assign(box(cr), { borderRadius: '16px' }), Object.assign(box({ left: pr.left - 6, top: Math.max(pr.top, 70), width: pr.width + 12, height: Math.min(pr.height, window.innerHeight - Math.max(pr.top, 70)) }), { borderRadius: '18px' })],
-      { duration: 650, easing: 'cubic-bezier(.65, 0, .25, 1)', fill: 'forwards' });
-    v.firstChild.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 380, fill: 'forwards' });
-    a.onfinish = function () {
-      state.cat = id; redrawPanel(); scrollPanelTop();
-      $$('.cz-dish, .cz-cathead', root).forEach(function (el, i) { el.animate([{ opacity: 0, transform: 'translateY(10px)' }, { opacity: 1, transform: 'none' }], { duration: 420, delay: 60 + i * 35, easing: 'ease-out', fill: 'backwards' }); });
-      v.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 380, easing: 'ease' }).onfinish = function () { v.remove(); catBusy = false; };
-    };
+    var from = img.parentNode.getBoundingClientRect(), src = img.currentSrc || img.src;
+    state.cat = id; redrawPanel(); scrollPanelTop();
+    var target = $('.cz-cathead__img', root);
+    stagger('.cz-back, .cz-cathead h3, .cz-inc, .cz-dish');
+    if (!target) { catBusy = false; return; }
+    target.style.visibility = 'hidden';
+    flyPhoto(src, from, target.getBoundingClientRect(), '12px', '12px', function () { target.style.visibility = ''; catBusy = false; });
   }
   function closeCat(fromHistory) {
     if (catBusy || !state.cat) return;
-    if (!fromHistory) { history.back(); return; } // le bouton retour du navigateur fera l'animation
+    if (!fromHistory) { history.back(); return; } // le bouton retour fera l'animation (une pression = une étape)
     var id = state.cat;
-    var panel = $('#composerPanel');
-    if (REDUCE || !document.body.animate) { state.cat = ''; redrawPanel(); return; }
+    var head = $('.cz-cathead__img', root);
+    if (!head || REDUCE || !document.body.animate) { state.cat = ''; redrawPanel(); stagger('.cz-cat'); return; }
     catBusy = true;
-    var pr = panel.getBoundingClientRect();
-    var from = { left: pr.left - 6, top: Math.max(pr.top, 70), width: pr.width + 12, height: Math.min(pr.height, window.innerHeight - Math.max(pr.top, 70)) };
-    var v = veil(from, '18px');
+    var from = head.getBoundingClientRect(), src = head.querySelector('img').currentSrc || head.querySelector('img').src;
     state.cat = ''; redrawPanel();
     var card = $('.cz-cat[data-cat="' + id + '"]', root);
-    if (!card) { v.remove(); catBusy = false; return; }
+    var target = card && card.querySelector('.cz-cat__img');
+    stagger('.cz-cat');
+    if (!target) { catBusy = false; return; }
     card.scrollIntoView({ block: 'nearest' });
-    var cr = card.getBoundingClientRect();
-    card.style.visibility = 'hidden';
-    var a = v.animate([Object.assign(box(from), { borderRadius: '18px' }), Object.assign(box(cr), { borderRadius: '16px' })],
-      { duration: 650, easing: 'cubic-bezier(.65, 0, .25, 1)', fill: 'forwards' });
-    a.onfinish = function () {
-      card.style.visibility = '';
-      v.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 260 }).onfinish = function () { v.remove(); catBusy = false; };
-    };
+    target.style.visibility = 'hidden';
+    flyPhoto(src, from, target.getBoundingClientRect(), '12px', '12px', function () {
+      target.style.visibility = '';
+      card.classList.add('pt-came-from');
+      setTimeout(function () { card.classList.remove('pt-came-from'); }, 1200);
+      catBusy = false;
+    });
   }
+
 
   function canLeave(step) {
     var msg = '';
