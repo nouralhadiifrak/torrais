@@ -154,6 +154,7 @@
           '<li><span data-bind="address"></span></li><li><span data-bind="hours"></span></li></ul></div>' +
       '</div>' +
       '<div class="container footer__bottom"><span>© <span id="year"></span> TORRAIS EVENT. Tous droits réservés.</span>' +
+        '<span class="footer__legal"><a href="mentions-legales.html">Mentions légales</a> · <a href="confidentialite.html">Politique de confidentialité</a></span>' +
         '</div></footer>' +
       // Barre d'actions sur téléphone : devis et simulateur (WhatsApp reste en bouton flottant)
       (PAGE === 'composer' ? '' :
@@ -162,6 +163,7 @@
           '<a class="mbar__btn" href="composer.html">Composer votre événement</a>' +
         '</nav>') +
       '<div class="floating">' +
+        '<a href="#" class="floating__btn floating__btn--ig" data-bind-href="instagram" target="_blank" rel="noopener" aria-label="Instagram"><span class="icon" data-icon="instagram"></span></a>' +
         '<a href="#" class="floating__btn floating__btn--wa" data-wa-link aria-label="WhatsApp"><span class="icon" data-icon="whatsapp"></span></a>' +
       '</div>' +
       '<div class="lightbox" id="lightbox" hidden><button class="lightbox__close" id="lightboxClose" aria-label="Fermer">×</button>' +
@@ -751,7 +753,8 @@
     var list = data.site.faq || [];
     if (!list.length) { $('#faq').hidden = true; return; }
     box.innerHTML = list.map(function (f) {
-      return '<details class="faq__item"><summary>' + esc(f.q) + '</summary><p>' + esc(f.a) + '</p></details>';
+      // f.html : réponse mise en forme (texte écrit par nous, jamais par un visiteur)
+      return '<details class="faq__item"><summary>' + esc(f.q) + '</summary>' + (f.html ? '<div class="faq__html">' + f.html + '</div>' : '<p>' + esc(f.a) + '</p>') + '</details>';
     }).join('');
   }
 

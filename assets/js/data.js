@@ -238,6 +238,7 @@
       zones: ['Casablanca', 'Mohammedia', 'Bouskoura', 'Dar Bouazza', 'Nouaceur', 'Berrechid'],
       dishes: defaultMenuDishes(),
       faq: [
+        { q: 'Quelles prestations proposez-vous ?', a: 'Nous organisons des événements clés en main : mariages et fiançailles (menus traditionnels, buffets, cocktails, desserts), entreprises (déjeuners, plateaux-repas, pauses-café, dîners de gala), location de salles et d’espaces événementiels, et prestations complémentaires (négafa, photographe, DJ, décoration, location de matériel, serveurs).', html: '<p>Nous organisons des événements clés en main :</p><ul><li><strong>Mariages &amp; fiançailles</strong> — menus traditionnels, buffets, cocktails, desserts.</li><li><strong>Entreprises</strong> — déjeuners, plateaux-repas, pauses-café, dîners de gala.</li><li><strong>Location de salles</strong> et d’espaces événementiels.</li><li><strong>Prestations complémentaires</strong> — négafa, photographe, DJ, décoration, location de matériel, serveurs.</li></ul>' },
         { q: 'Combien de temps à l’avance faut-il réserver ?', a: 'Pour un mariage, idéalement 3 à 4 mois avant, surtout en été. Pour une petite réception, quelques semaines suffisent souvent : contactez-nous pour vérifier la date.' },
         { q: 'Est-ce que vous vous déplacez à domicile ?', a: 'Oui. Nous servons en salle comme à domicile, à Casablanca et dans les environs.' },
         { q: 'Peut-on adapter une formule ?', a: 'Bien sûr. Chaque formule est une base : nous ajustons le menu, la décoration et le service selon vos envies et votre budget.' },
@@ -523,6 +524,8 @@
     // v3 : le vrai menu (liste du gérant + photos)
     if (!d.site.menuV3) { d.site.dishes = defaultMenuDishes(); d.site.menuCats = defaultMenuCats(); d.site.menuV3 = true; }
     if (!d.servicePacks) d.servicePacks = defaultServicePacks();
+    // FAQ : question « Quelles prestations proposez-vous ? » ajoutée en tête
+    if (!d.site.faqV2) { var fq = defaultSite().faq[0]; if (!(d.site.faq || []).some(function (f) { return f.q === fq.q; })) d.site.faq = [fq].concat(d.site.faq || []); d.site.faqV2 = true; }
     // photos des services (seulement là où aucune photo n'a été choisie)
     if (!d.occasionsImgV1) {
       (d.occasions || []).forEach(function (o) { if (!o.image && ['mariage', 'bapteme', 'entreprise', 'prive'].indexOf(o.id) !== -1) o.image = 'assets/img/services/' + o.id + '.webp'; });

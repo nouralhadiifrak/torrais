@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mentions légales — TORRAIS EVENT</title>
+  <meta name="description" content="Mentions légales du site torraisevent.ma, TORRAIS EVENT, traiteur à Casablanca.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Mulish:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/img/brand/favicon-32.png">
+  <link rel="apple-touch-icon" href="assets/img/brand/apple-touch-icon.png">
+  <meta name="theme-color" content="#16130f">
+  <link rel="stylesheet" href="assets/vendor/lenis.css">
+  <link rel="stylesheet" href="assets/css/site.css">
+  <script>
+    // Transition entre pages : la page arrive derrière un voile sombre qui s'efface (voir transitions.js)
+    try { if (sessionStorage.getItem('pt_enter') && !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) { document.documentElement.classList.add('pt-enter'); setTimeout(function () { document.documentElement.classList.remove('pt-enter'); }, 2500); } } catch (e) {}
+  </script>
+</head>
+<body data-page="legal">
+
+  <div id="siteHeader"></div>
+
+  <main id="contenu">
+    <section class="page-hero page-hero--compact">
+      <div class="container page-hero__inner">
+        <nav class="crumbs" aria-label="Fil d'Ariane"><a href="index.html">Accueil</a> <span>›</span> <span>Mentions légales</span></nav>
+        <h1 class="page-hero__title">Mentions légales</h1>
+        <p class="page-hero__lead">Informations sur l’éditeur et l’hébergeur du site.</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container legal">
+        <p class="legal__date">Dernière mise à jour : novembre 2026</p>
+
+        <h2>Éditeur du site</h2>
+        <p>Le site <strong>torraisevent.ma</strong> est édité par <strong>TORRAIS EVENT</strong>, traiteur de mariages et d’événements.</p>
+        <ul>
+          <li>Responsable de la publication : <span data-bind="owner">Saïd</span></li>
+          <li>Adresse : <span data-bind="address">Casablanca, Maroc</span></li>
+          <li>Téléphone : <a href="#" data-bind-tel="phone" data-bind="phoneDisplay">06 63 35 15 07</a></li>
+          <li data-hide-empty="email">E-mail : <a href="#" data-bind-mail="email" data-bind="email"></a></li>
+          <li>Forme juridique, ICE, RC, IF : <em class="legal__todo">[à compléter par TORRAIS EVENT]</em></li>
+        </ul>
+
+        <h2>Hébergement</h2>
+        <p>Le site est hébergé par <strong>Vercel Inc.</strong>, 440 N Barranca Ave #4133, Covina, CA 91723, États-Unis — <a href="https://vercel.com" target="_blank" rel="noopener">vercel.com</a>.</p>
+        <p>Le nom de domaine <strong>torraisevent.ma</strong> est enregistré auprès de CapConnect.</p>
+
+        <h2>Propriété intellectuelle</h2>
+        <p>Les textes, photos, vidéos, logos et éléments graphiques du site appartiennent à TORRAIS EVENT ou sont utilisés avec autorisation. Toute reproduction, même partielle, sans accord écrit préalable est interdite.</p>
+
+        <h2>Prix et informations</h2>
+        <p>Les prix affichés sur le site (packs, simulateur) sont donnés « à partir de », à titre indicatif. Seul le devis remis par TORRAIS EVENT fait foi. Les photos des plats et des décorations sont des exemples de réalisations.</p>
+
+        <h2>Responsabilité</h2>
+        <p>TORRAIS EVENT veille à l’exactitude des informations publiées, sans pouvoir garantir l’absence d’erreur. Les liens vers des sites externes (Instagram, WhatsApp…) n’engagent pas TORRAIS EVENT quant à leur contenu.</p>
+
+        <h2>Données personnelles</h2>
+        <p>Pour savoir comment vos informations sont utilisées, consultez notre <a href="confidentialite.html">politique de confidentialité</a>.</p>
+
+        <h2>Droit applicable</h2>
+        <p>Le présent site et ses mentions légales sont soumis au droit marocain.</p>
+      </div>
+    </section>
+  </main>
+
+  <div id="siteFooter"></div>
+
+  <script src="assets/vendor/gsap.min.js"></script>
+  <script src="assets/vendor/ScrollTrigger.min.js"></script>
+  <script src="assets/vendor/lenis.min.js"></script>
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/site.js"></script>
+  <script src="assets/js/transitions.js"></script>
+  <script src="assets/js/motion.js"></script>
+</body>
+</html>
