@@ -704,6 +704,11 @@
       all = mine.length ? mine.map(function (src, i) { return { src: src, caption: '', tone: i }; })
         : [0, 1, 2, 3, 4, 5].map(function (i) { return { src: '', caption: '', tone: i }; });
       if (PAGE === 'pack') all = all.slice(0, 8);
+      // les photos se fondent dans un bouton vers Instagram
+      if (mine.length && !box.parentNode.querySelector('.gallery-more')) {
+        box.classList.add('gallery--fade');
+        box.insertAdjacentHTML('afterend', '<div class="gallery-more"><a class="btn btn--gold" href="' + esc(s.instagram || 'https://www.instagram.com/torrais.event/') + '" target="_blank" rel="noopener"><span class="icon">' + T.icons.instagram + '</span> Voir plus sur notre page Instagram</a></div>');
+      }
     }
     galleryList = filter && filter !== 'Tout' ? all.filter(function (g) { return g.category === filter; }) : all;
     box.innerHTML = galleryList.length ? galleryList.map(function (g, i) {
