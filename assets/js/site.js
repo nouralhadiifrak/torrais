@@ -629,15 +629,11 @@
       cols.push({ w: w, hs: hs, speed: (mobile ? 14 : 18) + Math.round(rnd() * (mobile ? 22 : 30)) });
       x += w + GAP;
     }
-    // 2. on place les photos : réparties sur les colonnes du milieu (les mieux visibles), une case par photo
-    var slots = [];
-    var mid = (cols.length - 1) / 2;
-    var order = cols.map(function (c, i) { return i; }).sort(function (p, q) { return Math.abs(p - mid) - Math.abs(q - mid); });
-    var row = 1;
-    while (slots.length < n && row < 12) {
-      order.forEach(function (ci) { if (slots.length < n && row < cols[ci].hs.length) slots.push(ci + ':' + ((row + ci) % cols[ci].hs.length)); });
-      row += 2;
-    }
+    // 2. on place les photos : une case par photo, réparties sur tout le mur (le centre d'abord, sans regrouper)
+    var tilesAll = [];
+    cols.forEach(function (c, ci) { c.hs.forEach(function (h, ri) { tilesAll.push({ k: ci + ':' + ri, w: Math.abs(ci - (cols.length - 1) / 2) + rnd() * 1.5 + (ri % 2) * 0.4 }); }); });
+    tilesAll.sort(function (p, q) { return p.w - q.w; });
+    var slots = tilesAll.slice(0, n).map(function (t) { return t.k; });
     var at = {};
     slots.forEach(function (k, i) { at[k] = i; });
     // 3. le mur
@@ -695,8 +691,12 @@
     if (box.classList.contains('drift')) { renderDrift(box); return; }
     var all = data.gallery.slice();
     if (occasion || PAGE === 'pack') {
-      // pages de service : emplacements « photo à venir » en attendant les photos propres à chaque service
-      all = [0, 1, 2, 3, 4, 5].map(function (i) { return { src: '', caption: '', tone: i }; });
+      // pages de service : les photos du service, sinon des emplacements « photo à venir »
+      var sid = occasion ? occasion.id : GROUP_OCC[PACK_GROUP];
+      var mine = ((data.servicePhotos || {})[sid] || []);
+      all = mine.length ? mine.map(function (src, i) { return { src: src, caption: '', tone: i }; })
+        : [0, 1, 2, 3, 4, 5].map(function (i) { return { src: '', caption: '', tone: i }; });
+      if (PAGE === 'pack') all = all.slice(0, 8);
     }
     galleryList = filter && filter !== 'Tout' ? all.filter(function (g) { return g.category === filter; }) : all;
     box.innerHTML = galleryList.length ? galleryList.map(function (g, i) {

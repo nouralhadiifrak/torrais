@@ -1515,3 +1515,6 @@ html.pt-card body::before { z-index: 48 !important; }
   body[data-page="menu-order"] .footer { padding-bottom: 96px; }
   .mo-dishes { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* galeries des services : la grille comble les trous quand il y a beaucoup de photos */
+.gallery { grid-auto-flow: dense; }

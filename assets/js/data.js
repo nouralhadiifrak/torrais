@@ -170,6 +170,55 @@
   }
   // Le menu de TORRAIS EVENT (liste du gérant), classé en 5 familles. photos : la 1re est la principale.
   var MENU_IMG = 'assets/img/menu/';
+  // Photos de chaque service (pages Baptême, Entreprise, Événements privés) — Mariage : à venir
+  function defaultServicePhotos() {
+    return {"prive": ["assets/img/services/prive/01.webp", "assets/img/services/prive/02.webp", "assets/img/services/prive/03.webp", "assets/img/services/prive/04.webp", "assets/img/services/prive/05.webp", "assets/img/services/prive/06.webp", "assets/img/services/prive/07.webp", "assets/img/services/prive/08.webp", "assets/img/services/prive/09.webp", "assets/img/services/prive/10.webp", "assets/img/services/prive/11.webp", "assets/img/services/prive/12.webp", "assets/img/services/prive/13.webp", "assets/img/services/prive/14.webp", "assets/img/services/prive/15.webp", "assets/img/services/prive/16.webp"], "entreprise": ["assets/img/services/entreprise/01.webp", "assets/img/services/entreprise/02.webp", "assets/img/services/entreprise/03.webp", "assets/img/services/entreprise/04.webp", "assets/img/services/entreprise/05.webp", "assets/img/services/entreprise/06.webp", "assets/img/services/entreprise/07.webp", "assets/img/services/entreprise/08.webp", "assets/img/services/entreprise/09.webp", "assets/img/services/entreprise/10.webp", "assets/img/services/entreprise/11.webp"], "bapteme": ["assets/img/services/bapteme/01.webp", "assets/img/services/bapteme/02.webp", "assets/img/services/bapteme/03.webp", "assets/img/services/bapteme/04.webp", "assets/img/services/bapteme/05.webp", "assets/img/services/bapteme/06.webp", "assets/img/services/bapteme/07.webp", "assets/img/services/bapteme/08.webp", "assets/img/services/bapteme/09.webp", "assets/img/services/bapteme/10.webp", "assets/img/services/bapteme/11.webp", "assets/img/services/bapteme/12.webp", "assets/img/services/bapteme/13.webp", "assets/img/services/bapteme/14.webp", "assets/img/services/bapteme/15.webp", "assets/img/services/bapteme/16.webp", "assets/img/services/bapteme/18.webp"]};
+  }
+  // Photos des services ajoutées au mur de la galerie (chacune une seule fois, sans doublon avec les 11 premières)
+  function moreGallery() {
+    return [
+      { id: uid(), src: 'assets/img/services/prive/01.webp', caption: 'Événements privés', category: 'Événements privés', tone: 1 },
+      { id: uid(), src: 'assets/img/services/prive/02.webp', caption: 'Événements privés', category: 'Événements privés', tone: 2 },
+      { id: uid(), src: 'assets/img/services/prive/03.webp', caption: 'Événements privés', category: 'Événements privés', tone: 3 },
+      { id: uid(), src: 'assets/img/services/prive/04.webp', caption: 'Événements privés', category: 'Événements privés', tone: 4 },
+      { id: uid(), src: 'assets/img/services/prive/05.webp', caption: 'Événements privés', category: 'Événements privés', tone: 5 },
+      { id: uid(), src: 'assets/img/services/prive/06.webp', caption: 'Événements privés', category: 'Événements privés', tone: 6 },
+      { id: uid(), src: 'assets/img/services/prive/08.webp', caption: 'Événements privés', category: 'Événements privés', tone: 7 },
+      { id: uid(), src: 'assets/img/services/prive/09.webp', caption: 'Événements privés', category: 'Événements privés', tone: 8 },
+      { id: uid(), src: 'assets/img/services/prive/10.webp', caption: 'Événements privés', category: 'Événements privés', tone: 1 },
+      { id: uid(), src: 'assets/img/services/prive/11.webp', caption: 'Événements privés', category: 'Événements privés', tone: 2 },
+      { id: uid(), src: 'assets/img/services/prive/12.webp', caption: 'Événements privés', category: 'Événements privés', tone: 3 },
+      { id: uid(), src: 'assets/img/services/prive/13.webp', caption: 'Événements privés', category: 'Événements privés', tone: 4 },
+      { id: uid(), src: 'assets/img/services/prive/14.webp', caption: 'Événements privés', category: 'Événements privés', tone: 5 },
+      { id: uid(), src: 'assets/img/services/prive/15.webp', caption: 'Événements privés', category: 'Événements privés', tone: 6 },
+      { id: uid(), src: 'assets/img/services/prive/16.webp', caption: 'Événements privés', category: 'Événements privés', tone: 7 },
+      { id: uid(), src: 'assets/img/services/entreprise/01.webp', caption: 'Entreprise', category: 'Entreprise', tone: 8 },
+      { id: uid(), src: 'assets/img/services/entreprise/02.webp', caption: 'Entreprise', category: 'Entreprise', tone: 1 },
+      { id: uid(), src: 'assets/img/services/entreprise/03.webp', caption: 'Entreprise', category: 'Entreprise', tone: 2 },
+      { id: uid(), src: 'assets/img/services/entreprise/04.webp', caption: 'Entreprise', category: 'Entreprise', tone: 3 },
+      { id: uid(), src: 'assets/img/services/entreprise/05.webp', caption: 'Entreprise', category: 'Entreprise', tone: 4 },
+      { id: uid(), src: 'assets/img/services/entreprise/06.webp', caption: 'Entreprise', category: 'Entreprise', tone: 5 },
+      { id: uid(), src: 'assets/img/services/entreprise/07.webp', caption: 'Entreprise', category: 'Entreprise', tone: 6 },
+      { id: uid(), src: 'assets/img/services/entreprise/08.webp', caption: 'Entreprise', category: 'Entreprise', tone: 7 },
+      { id: uid(), src: 'assets/img/services/entreprise/09.webp', caption: 'Entreprise', category: 'Entreprise', tone: 8 },
+      { id: uid(), src: 'assets/img/services/entreprise/10.webp', caption: 'Entreprise', category: 'Entreprise', tone: 1 },
+      { id: uid(), src: 'assets/img/services/bapteme/01.webp', caption: 'Baptême', category: 'Baptême', tone: 2 },
+      { id: uid(), src: 'assets/img/services/bapteme/02.webp', caption: 'Baptême', category: 'Baptême', tone: 3 },
+      { id: uid(), src: 'assets/img/services/bapteme/03.webp', caption: 'Baptême', category: 'Baptême', tone: 4 },
+      { id: uid(), src: 'assets/img/services/bapteme/04.webp', caption: 'Baptême', category: 'Baptême', tone: 5 },
+      { id: uid(), src: 'assets/img/services/bapteme/05.webp', caption: 'Baptême', category: 'Baptême', tone: 6 },
+      { id: uid(), src: 'assets/img/services/bapteme/06.webp', caption: 'Baptême', category: 'Baptême', tone: 7 },
+      { id: uid(), src: 'assets/img/services/bapteme/07.webp', caption: 'Baptême', category: 'Baptême', tone: 8 },
+      { id: uid(), src: 'assets/img/services/bapteme/09.webp', caption: 'Baptême', category: 'Baptême', tone: 1 },
+      { id: uid(), src: 'assets/img/services/bapteme/10.webp', caption: 'Baptême', category: 'Baptême', tone: 2 },
+      { id: uid(), src: 'assets/img/services/bapteme/11.webp', caption: 'Baptême', category: 'Baptême', tone: 3 },
+      { id: uid(), src: 'assets/img/services/bapteme/12.webp', caption: 'Baptême', category: 'Baptême', tone: 4 },
+      { id: uid(), src: 'assets/img/services/bapteme/13.webp', caption: 'Baptême', category: 'Baptême', tone: 5 },
+      { id: uid(), src: 'assets/img/services/bapteme/14.webp', caption: 'Baptême', category: 'Baptême', tone: 6 },
+      { id: uid(), src: 'assets/img/services/bapteme/16.webp', caption: 'Baptême', category: 'Baptême', tone: 7 },
+      { id: uid(), src: 'assets/img/services/bapteme/18.webp', caption: 'Baptême', category: 'Baptême', tone: 8 }
+    ];
+  }
   function defaultMenuCats() {
     var cats = [
       { id: 'plats', title: 'Plats principaux', image: MENU_IMG + 'pastilla-poulet.webp',
@@ -524,6 +573,12 @@
     // v3 : le vrai menu (liste du gérant + photos)
     if (!d.site.menuV3) { d.site.dishes = defaultMenuDishes(); d.site.menuCats = defaultMenuCats(); d.site.menuV3 = true; }
     if (!d.servicePacks) d.servicePacks = defaultServicePacks();
+    d.servicePhotos = defaultServicePhotos();
+    if (!d.galleryV3) {
+      var have = {}; (d.gallery || []).forEach(function (g) { if (g.src) have[g.src] = 1; });
+      d.gallery = (d.gallery || []).concat(moreGallery().filter(function (g) { return !have[g.src]; }));
+      d.galleryV3 = true;
+    }
     // FAQ : question de présentation en tête (remplace l'ancienne version)
     if (!d.site.faqV3) {
       var fq = defaultSite().faq[0];
