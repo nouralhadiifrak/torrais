@@ -1519,24 +1519,28 @@ html.pt-card body::before { z-index: 48 !important; }
 /* galeries des services : la grille comble les trous quand il y a beaucoup de photos */
 .gallery { grid-auto-flow: dense; }
 
-/* « En images » : des formes variées — arche marocaine, cercle, feuille, pilule, carré arrondi */
-.gallery { grid-template-columns: repeat(6, minmax(0, 1fr)); grid-auto-rows: 170px; gap: 16px; grid-auto-flow: dense; }
-.gallery__item { border-radius: 20px; grid-column: auto; grid-row: auto; }
-.gallery__item:nth-child(n) { grid-column: span 1; grid-row: span 1; }
-.gallery__item:nth-child(8n + 1) { grid-column: span 2; grid-row: span 2; border-radius: 999px 999px 20px 20px; }   /* grande arche */
-.gallery__item:nth-child(8n + 2) { clip-path: circle(closest-side); border-radius: 0; }                               /* cercle */
-.gallery__item:nth-child(8n + 3) { grid-column: span 2; border-radius: 999px; }                                       /* pilule */
-.gallery__item:nth-child(8n + 4) { border-radius: 70px 0 70px 0; }                                                    /* feuille */
-.gallery__item:nth-child(8n + 5) { grid-row: span 2; border-radius: 999px 999px 20px 20px; }                          /* arche haute */
-.gallery__item:nth-child(8n + 6) { grid-column: span 2; border-radius: 26px; }                                         /* carré arrondi large */
-.gallery__item:nth-child(8n + 7) { border-radius: 0 70px 0 70px; }                                                    /* feuille inversée */
-.gallery__item:nth-child(8n + 8) { clip-path: circle(closest-side); border-radius: 0; }                               /* cercle */
-.gallery__item:hover { filter: brightness(1.05); }
+/* « En images » : des rectangles de tailles variées (petit, moyen, grand, large, haut) */
+.gallery { grid-template-columns: repeat(6, minmax(0, 1fr)); grid-auto-rows: 120px; gap: 14px; grid-auto-flow: dense; }
+.gallery__item { border-radius: 14px; }
+.gallery__item:nth-child(n) { grid-column: span 2; grid-row: span 2; }                      /* moyen */
+.gallery__item:nth-child(10n + 1) { grid-column: span 3; grid-row: span 3; }                /* grand */
+.gallery__item:nth-child(10n + 2) { grid-column: span 3; grid-row: span 2; }                /* large */
+.gallery__item:nth-child(10n + 3) { grid-column: span 1; grid-row: span 1; }                /* petit */
+.gallery__item:nth-child(10n + 4) { grid-column: span 2; grid-row: span 1; }                /* bandeau */
+.gallery__item:nth-child(10n + 5) { grid-column: span 2; grid-row: span 3; }                /* haut */
+.gallery__item:nth-child(10n + 6) { grid-column: span 1; grid-row: span 2; }                /* étroit */
+.gallery__item:nth-child(10n + 7) { grid-column: span 4; grid-row: span 2; }                /* très large */
+.gallery__item:nth-child(10n + 8) { grid-column: span 1; grid-row: span 1; }                /* petit */
+.gallery__item:nth-child(10n + 9) { grid-column: span 2; grid-row: span 2; }                /* moyen */
+.gallery__item:nth-child(10n + 10) { grid-column: span 3; grid-row: span 2; }               /* large */
 @media (max-width: 860px) {
-  .gallery { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: 150px; gap: 12px; }
-  .gallery__item:nth-child(8n + 1) { grid-column: span 2; grid-row: span 2; }
-  .gallery__item:nth-child(8n + 3), .gallery__item:nth-child(8n + 6) { grid-column: span 2; }
-  .gallery__item:nth-child(8n + 5) { grid-row: span 2; }
-  .gallery__item:nth-child(8n + 4) { border-radius: 50px 0 50px 0; }
-  .gallery__item:nth-child(8n + 7) { border-radius: 0 50px 0 50px; }
+  .gallery { grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-rows: 80px; gap: 10px; }
+  .gallery__item:nth-child(n) { grid-column: span 2; grid-row: span 2; }
+  .gallery__item:nth-child(10n + 1) { grid-column: span 4; grid-row: span 3; }
+  .gallery__item:nth-child(10n + 2) { grid-column: span 2; grid-row: span 3; }
+  .gallery__item:nth-child(10n + 3), .gallery__item:nth-child(10n + 8) { grid-column: span 1; grid-row: span 1; }
+  .gallery__item:nth-child(10n + 4) { grid-column: span 3; grid-row: span 2; }
+  .gallery__item:nth-child(10n + 5) { grid-column: span 2; grid-row: span 3; }
+  .gallery__item:nth-child(10n + 6) { grid-column: span 1; grid-row: span 2; }
+  .gallery__item:nth-child(10n + 7) { grid-column: span 4; grid-row: span 2; }
 }
