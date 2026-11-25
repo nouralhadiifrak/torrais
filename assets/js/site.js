@@ -615,20 +615,27 @@
     galleryList = data.gallery.filter(function (g) { return g.src; });
     var n = galleryList.length;
     var mobile = window.innerWidth < 700;
-    var TW = mobile ? 128 : 180, TH = mobile ? 90 : 124, GAP = 6, VAR = 0.4;
+    var GAP = 6, VAR = 0.4;
+    var seed, cols;
     // petit générateur pseudo-aléatoire stable (même mur à chaque visite)
-    var seed = 7;
     function rnd() { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; }
-    var wallW = box.clientWidth * 1.25;
-    // 1. la forme du mur : colonnes et hauteurs des cases
-    var cols = [], x = 0;
-    while (x < wallW) {
-      var w = Math.round(TW * (1 + (rnd() * 2 - 1) * VAR * 0.5));
-      var hs = [], total = 0;
-      while (total < box.clientHeight * 1.35 || hs.length < 5) { var h = Math.round(TH * (1 + (rnd() * 2 - 1) * VAR)); hs.push(h); total += h + GAP; }
-      cols.push({ w: w, hs: hs, speed: (mobile ? 14 : 18) + Math.round(rnd() * (mobile ? 22 : 30)) });
-      x += w + GAP;
+    // 1. la forme du mur : colonnes et hauteurs des cases. Si le mur a plus de cases que de photos,
+    //    on agrandit les cases jusqu'à ce que chaque case ait sa propre photo (mur plein, aucune répétition).
+    function layout(scale) {
+      seed = 7; cols = [];
+      var TW = (mobile ? 128 : 180) * scale, TH = (mobile ? 90 : 124) * scale;
+      var wallW = box.clientWidth * 1.25, x = 0;
+      while (x < wallW) {
+        var w = Math.round(TW * (1 + (rnd() * 2 - 1) * VAR * 0.5));
+        var hs = [], total = 0;
+        while (total < box.clientHeight * 1.35 || hs.length < 3) { var h = Math.round(TH * (1 + (rnd() * 2 - 1) * VAR)); hs.push(h); total += h + GAP; }
+        cols.push({ w: w, hs: hs, speed: (mobile ? 14 : 18) + Math.round(rnd() * (mobile ? 22 : 30)) });
+        x += w + GAP;
+      }
+      return cols.reduce(function (t, c) { return t + c.hs.length; }, 0);
     }
+    var scale = 1;
+    if (n) { while (layout(scale) > n && scale < 4) scale *= 1.06; } else layout(1);
     // 2. on place les photos : une case par photo, réparties sur tout le mur (le centre d'abord, sans regrouper)
     var tilesAll = [];
     cols.forEach(function (c, ci) { c.hs.forEach(function (h, ri) { tilesAll.push({ k: ci + ':' + ri, w: Math.abs(ci - (cols.length - 1) / 2) + rnd() * 1.5 + (ri % 2) * 0.4 }); }); });

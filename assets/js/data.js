@@ -172,7 +172,38 @@
   var MENU_IMG = 'assets/img/menu/';
   // Photos de chaque service (pages Baptême, Entreprise, Événements privés) — Mariage : à venir
   function defaultServicePhotos() {
-    return {"prive": ["assets/img/services/prive/01.webp", "assets/img/services/prive/02.webp", "assets/img/services/prive/03.webp", "assets/img/services/prive/04.webp", "assets/img/services/prive/05.webp", "assets/img/services/prive/06.webp", "assets/img/services/prive/07.webp", "assets/img/services/prive/08.webp", "assets/img/services/prive/09.webp", "assets/img/services/prive/10.webp", "assets/img/services/prive/11.webp", "assets/img/services/prive/12.webp", "assets/img/services/prive/13.webp", "assets/img/services/prive/14.webp", "assets/img/services/prive/15.webp", "assets/img/services/prive/16.webp"], "entreprise": ["assets/img/services/entreprise/01.webp", "assets/img/services/entreprise/02.webp", "assets/img/services/entreprise/03.webp", "assets/img/services/entreprise/04.webp", "assets/img/services/entreprise/05.webp", "assets/img/services/entreprise/06.webp", "assets/img/services/entreprise/07.webp", "assets/img/services/entreprise/08.webp", "assets/img/services/entreprise/09.webp", "assets/img/services/entreprise/10.webp", "assets/img/services/entreprise/11.webp"], "bapteme": ["assets/img/services/bapteme/01.webp", "assets/img/services/bapteme/02.webp", "assets/img/services/bapteme/03.webp", "assets/img/services/bapteme/04.webp", "assets/img/services/bapteme/05.webp", "assets/img/services/bapteme/06.webp", "assets/img/services/bapteme/07.webp", "assets/img/services/bapteme/08.webp", "assets/img/services/bapteme/09.webp", "assets/img/services/bapteme/10.webp", "assets/img/services/bapteme/11.webp", "assets/img/services/bapteme/12.webp", "assets/img/services/bapteme/13.webp", "assets/img/services/bapteme/14.webp", "assets/img/services/bapteme/15.webp", "assets/img/services/bapteme/16.webp", "assets/img/services/bapteme/18.webp"]};
+    return {"prive": ["assets/img/services/prive/01.webp", "assets/img/services/prive/02.webp", "assets/img/services/prive/03.webp", "assets/img/services/prive/04.webp", "assets/img/services/prive/05.webp", "assets/img/services/prive/06.webp", "assets/img/services/prive/07.webp", "assets/img/services/prive/08.webp", "assets/img/services/prive/09.webp", "assets/img/services/prive/10.webp", "assets/img/services/prive/11.webp", "assets/img/services/prive/12.webp", "assets/img/services/prive/13.webp", "assets/img/services/prive/14.webp", "assets/img/services/prive/15.webp", "assets/img/services/prive/16.webp"], "entreprise": ["assets/img/services/entreprise/01.webp", "assets/img/services/entreprise/02.webp", "assets/img/services/entreprise/03.webp", "assets/img/services/entreprise/04.webp", "assets/img/services/entreprise/05.webp", "assets/img/services/entreprise/06.webp", "assets/img/services/entreprise/07.webp", "assets/img/services/entreprise/08.webp", "assets/img/services/entreprise/09.webp", "assets/img/services/entreprise/10.webp", "assets/img/services/entreprise/11.webp"], "bapteme": ["assets/img/services/bapteme/01.webp", "assets/img/services/bapteme/02.webp", "assets/img/services/bapteme/03.webp", "assets/img/services/bapteme/04.webp", "assets/img/services/bapteme/05.webp", "assets/img/services/bapteme/06.webp", "assets/img/services/bapteme/07.webp", "assets/img/services/bapteme/08.webp", "assets/img/services/bapteme/09.webp", "assets/img/services/bapteme/10.webp", "assets/img/services/bapteme/11.webp", "assets/img/services/bapteme/12.webp", "assets/img/services/bapteme/13.webp", "assets/img/services/bapteme/14.webp", "assets/img/services/bapteme/15.webp", "assets/img/services/bapteme/16.webp", "assets/img/services/bapteme/18.webp"], "mariage": ["assets/img/services/mariage/01.webp", "assets/img/services/mariage/02.webp", "assets/img/services/mariage/03.webp", "assets/img/services/mariage/04.webp", "assets/img/services/mariage/05.webp", "assets/img/services/mariage/06.webp", "assets/img/services/mariage/07.webp", "assets/img/services/mariage/08.webp", "assets/img/services/mariage/09.webp", "assets/img/services/mariage/10.webp", "assets/img/services/mariage/11.webp", "assets/img/services/mariage/12.webp", "assets/img/services/mariage/13.webp", "assets/img/services/mariage/14.webp", "assets/img/services/mariage/15.webp", "assets/img/services/mariage/16.webp", "assets/img/services/mariage/17.webp", "assets/img/services/mariage/18.webp", "assets/img/services/mariage/19.webp", "assets/img/services/mariage/20.webp", "assets/img/services/mariage/21.webp", "assets/img/services/mariage/22.webp", "assets/img/services/mariage/23.webp", "assets/img/services/mariage/24.webp", "assets/img/services/mariage/25.webp", "assets/img/services/mariage/26.webp", "assets/img/services/mariage/27.webp", "assets/img/services/mariage/28.webp", "assets/img/services/mariage/29.webp", "assets/img/services/mariage/30.webp", "assets/img/services/mariage/31.webp"]};
+  }
+  // Photos du mariage ajoutées au mur (sans celles déjà présentes)
+  function moreGalleryMariage() {
+    return [
+      { id: uid(), src: 'assets/img/services/mariage/01.webp', caption: 'Mariage', category: 'Mariages', tone: 1 },
+      { id: uid(), src: 'assets/img/services/mariage/02.webp', caption: 'Mariage', category: 'Mariages', tone: 2 },
+      { id: uid(), src: 'assets/img/services/mariage/03.webp', caption: 'Mariage', category: 'Mariages', tone: 3 },
+      { id: uid(), src: 'assets/img/services/mariage/04.webp', caption: 'Mariage', category: 'Mariages', tone: 4 },
+      { id: uid(), src: 'assets/img/services/mariage/05.webp', caption: 'Mariage', category: 'Mariages', tone: 5 },
+      { id: uid(), src: 'assets/img/services/mariage/06.webp', caption: 'Mariage', category: 'Mariages', tone: 6 },
+      { id: uid(), src: 'assets/img/services/mariage/07.webp', caption: 'Mariage', category: 'Mariages', tone: 7 },
+      { id: uid(), src: 'assets/img/services/mariage/08.webp', caption: 'Mariage', category: 'Mariages', tone: 8 },
+      { id: uid(), src: 'assets/img/services/mariage/10.webp', caption: 'Mariage', category: 'Mariages', tone: 1 },
+      { id: uid(), src: 'assets/img/services/mariage/11.webp', caption: 'Mariage', category: 'Mariages', tone: 2 },
+      { id: uid(), src: 'assets/img/services/mariage/12.webp', caption: 'Mariage', category: 'Mariages', tone: 3 },
+      { id: uid(), src: 'assets/img/services/mariage/13.webp', caption: 'Mariage', category: 'Mariages', tone: 4 },
+      { id: uid(), src: 'assets/img/services/mariage/14.webp', caption: 'Mariage', category: 'Mariages', tone: 5 },
+      { id: uid(), src: 'assets/img/services/mariage/15.webp', caption: 'Mariage', category: 'Mariages', tone: 6 },
+      { id: uid(), src: 'assets/img/services/mariage/16.webp', caption: 'Mariage', category: 'Mariages', tone: 7 },
+      { id: uid(), src: 'assets/img/services/mariage/17.webp', caption: 'Mariage', category: 'Mariages', tone: 8 },
+      { id: uid(), src: 'assets/img/services/mariage/19.webp', caption: 'Mariage', category: 'Mariages', tone: 1 },
+      { id: uid(), src: 'assets/img/services/mariage/21.webp', caption: 'Mariage', category: 'Mariages', tone: 2 },
+      { id: uid(), src: 'assets/img/services/mariage/22.webp', caption: 'Mariage', category: 'Mariages', tone: 3 },
+      { id: uid(), src: 'assets/img/services/mariage/24.webp', caption: 'Mariage', category: 'Mariages', tone: 4 },
+      { id: uid(), src: 'assets/img/services/mariage/25.webp', caption: 'Mariage', category: 'Mariages', tone: 5 },
+      { id: uid(), src: 'assets/img/services/mariage/26.webp', caption: 'Mariage', category: 'Mariages', tone: 6 },
+      { id: uid(), src: 'assets/img/services/mariage/28.webp', caption: 'Mariage', category: 'Mariages', tone: 7 },
+      { id: uid(), src: 'assets/img/services/mariage/29.webp', caption: 'Mariage', category: 'Mariages', tone: 8 },
+      { id: uid(), src: 'assets/img/services/mariage/30.webp', caption: 'Mariage', category: 'Mariages', tone: 1 },
+      { id: uid(), src: 'assets/img/services/mariage/31.webp', caption: 'Mariage', category: 'Mariages', tone: 2 }
+    ];
   }
   // Photos des services ajoutées au mur de la galerie (chacune une seule fois, sans doublon avec les 11 premières)
   function moreGallery() {
@@ -574,10 +605,19 @@
     if (!d.site.menuV3) { d.site.dishes = defaultMenuDishes(); d.site.menuCats = defaultMenuCats(); d.site.menuV3 = true; }
     if (!d.servicePacks) d.servicePacks = defaultServicePacks();
     d.servicePhotos = defaultServicePhotos();
+    if (!d.galleryV4) {
+      var have4 = {}; (d.gallery || []).forEach(function (g) { if (g.src) have4[g.src] = 1; });
+      if (d.galleryV3) d.gallery = (d.gallery || []).concat(moreGalleryMariage().filter(function (g) { return !have4[g.src]; }));
+    }
     if (!d.galleryV3) {
       var have = {}; (d.gallery || []).forEach(function (g) { if (g.src) have[g.src] = 1; });
       d.gallery = (d.gallery || []).concat(moreGallery().filter(function (g) { return !have[g.src]; }));
       d.galleryV3 = true;
+      var have5 = {}; d.gallery.forEach(function (g) { if (g.src) have5[g.src] = 1; });
+      d.gallery = d.gallery.concat(moreGalleryMariage().filter(function (g) { return !have5[g.src]; }));
+    }
+    if (!d.galleryV4) {
+      d.galleryV4 = true;
     }
     // FAQ : question de présentation en tête (remplace l'ancienne version)
     if (!d.site.faqV3) {
