@@ -703,7 +703,7 @@
       var mine = ((data.servicePhotos || {})[sid] || []);
       all = mine.length ? mine.map(function (src, i) { return { src: src, caption: '', tone: i }; })
         : [0, 1, 2, 3, 4, 5].map(function (i) { return { src: '', caption: '', tone: i }; });
-      if (PAGE === 'pack') all = all.slice(0, 8);
+      if (PAGE === 'pack') all = all.slice(0, 14);
       // les photos se fondent dans un bouton vers Instagram
       if (mine.length && !box.parentNode.querySelector('.gallery-more')) {
         box.classList.add('gallery--fade');
