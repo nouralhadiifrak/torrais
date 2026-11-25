@@ -296,11 +296,11 @@
       { title: 'Le lieu', text: 'Votre fête où vous le souhaitez : nous nous occupons de la salle ou nous venons chez vous.', choose: true, options: ['Salle de fête', 'Villa', 'À domicile'] },
       { title: 'L’ambiance traditionnelle', text: 'Une entrée inoubliable, portée par les rythmes de la tradition marocaine.', choose: true, options: ['Issawa', 'Dakka marrakchia'] },
       { title: 'La musique', text: 'Pour faire danser vos invités toute la soirée.', choose: true, options: ['DJ', 'Orchestre'] },
-      { title: 'L’entrée', text: 'L’accueil des invités, comme le veut la tradition.', choose: false, options: ['Dattes et lait'] },
+      { title: 'L’entrée', text: 'L’accueil des invités, comme le veut la tradition.', choose: false, options: ['Dattes et lait'], image: 'assets/img/services/entree-dattes.webp' },
       { title: 'Le thé', text: 'Atay servi dans les règles de l’art, accompagné des douceurs de votre choix.', choose: true, options: ['Mets sucrés-salés', 'Gâteaux'] },
       { title: 'La neggafa', text: 'Pour sublimer la mariée tout au long de la soirée.', choose: false, options: ['De 2 à 5 tenues'] },
       { title: 'Photographe et vidéaste', text: 'Chaque instant capturé, en photo et en vidéo, pour revivre votre mariage.', choose: false, options: ['Photographe', 'Vidéaste'] },
-      { title: 'Votre menu', text: 'Composez votre dîner parmi nos plats\u00a0: pastillas, viandes, poulet, méchoui, desserts…', choose: false, options: [], link: { href: 'menus.html', label: 'Voir nos menus' } }
+      { title: 'Votre menu', text: 'Composez votre dîner parmi nos plats\u00a0: pastillas, viandes, poulet, méchoui, desserts…', choose: false, options: [], link: { href: 'menus.html', label: 'Voir nos menus' }, images: ['assets/img/menu/pastilla-poulet.webp', 'assets/img/menu/viande-pruneaux.webp'] }
     ];
   }
   // Carrousel « Nos menus » de l'accueil : les plats principaux, avec leur photo
@@ -632,7 +632,7 @@
     }
     // les vraies photos remplacent la galerie de démonstration (sauf si des photos ont déjà été ajoutées)
     if (!d.galleryV2) { if (!(d.gallery || []).some(function (g) { return g.src; })) d.gallery = defaultGallery(); d.galleryV2 = true; }
-    if (!d.site.weddingSteps || !d.site.weddingStepsV2) { d.site.weddingSteps = defaultWeddingSteps(); d.site.weddingStepsV2 = true; }
+    if (!d.site.weddingSteps || !d.site.weddingStepsV3) { d.site.weddingSteps = defaultWeddingSteps(); d.site.weddingStepsV2 = d.site.weddingStepsV3 = true; }
     if (!d.occasionsV2) {
       var keep = {};
       d.occasions.forEach(function (o) { if (o.image) keep[o.id === 'famille' ? 'anniversaire' : o.id] = o.image; });

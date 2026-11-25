@@ -340,7 +340,8 @@
     var icons = ['deco', 'tyafer', 'deco', 'traiteur', 'buffet', 'tyafer', 'deco', 'traiteur'];
     box.innerHTML = (data.site.weddingSteps || []).map(function (st, i) {
       return '<article class="occasion wstep"><div class="occasion__img">' +
-        (st.image ? '<img src="' + esc(st.image) + '" alt="' + esc(st.title) + '" loading="lazy">' :
+        (st.images && st.images.length > 1 ? '<span class="wstep__split"><img src="' + esc(st.images[0]) + '" alt="" loading="lazy"><img src="' + esc(st.images[1]) + '" alt="" loading="lazy"><i></i></span>' :
+         st.image ? '<img src="' + esc(st.image) + '" alt="' + esc(st.title) + '" loading="lazy">' :
           '<span class="ph cf-ph tone-' + (i % 8 + 1) + '">' + T.icons[icons[i % icons.length]] + '<strong>' + esc(st.title) + '</strong><em>Photo à venir</em></span>') + '</div>' +
         '<div class="occasion__body"><span class="occasion__tag">' + String(i + 1).padStart(2, '0') + '</span><h3>' + esc(st.title) + '</h3><p>' + esc(st.text) + '</p>' +
         (st.options && st.options.length ? '<div class="wstep__opts">' + (st.choose ? '<span class="wstep__label">Au choix</span>' : '') +
