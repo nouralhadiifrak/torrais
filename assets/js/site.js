@@ -913,7 +913,7 @@
     // la carte qui s'agrandit dans l'écran d'ouverture montre la première image de la vidéo
     var still = box.querySelector('.hero__slide');
     if (still) still.style.backgroundImage = 'url("assets/video/hero-mobile-poster.jpg")';
-    v.src = 'assets/video/hero-mobile.mp4';
+    v.src = split ? 'assets/video/hero-hd.mp4' : 'assets/video/hero-mobile.mp4'; // ordinateur : version 1080p, plus nette sur grand écran
     $('.hero').classList.add('hero--video'); // héros plein écran sur téléphone pour montrer la vidéo verticale
     v.addEventListener('playing', function () { v.classList.add('is-playing'); }, { once: true });
     box.appendChild(v);
