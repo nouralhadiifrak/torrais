@@ -890,13 +890,20 @@
     heroVideo(box);
   }
 
-  // Vidéo du héros, sur téléphone uniquement (vidéo verticale) : la photo s'affiche d'abord, la vidéo apparaît une fois chargée.
-  // Pas de vidéo en mode économie de données, si les animations sont réduites, ou sur ordinateur.
+  // Vidéo du héros : la photo s'affiche d'abord, la vidéo apparaît une fois chargée.
+  // Téléphone : vidéo en plein écran derrière le texte. Ordinateur : texte à gauche, vidéo à droite qui se fond dans le texte.
+  // Pas de vidéo en mode économie de données ou si les animations sont réduites (la première image reste affichée).
   function heroVideo(box) {
     var mq = window.matchMedia && window.matchMedia('(max-width: 760px) and (orientation: portrait)');
+    var split = window.innerWidth >= 900;
     var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     var conn = navigator.connection || {};
-    if (!mq || !mq.matches || reduce || conn.saveData || /(^|-)2g$/.test(conn.effectiveType || '')) return;
+    if (split) {
+      $('.hero').classList.add('hero--split');
+      var first = box.querySelector('.hero__slide');
+      if (first) first.style.backgroundImage = 'url("assets/video/hero-mobile-poster.jpg")';
+    }
+    if (!(split || (mq && mq.matches)) || reduce || conn.saveData || /(^|-)2g$/.test(conn.effectiveType || '')) return;
     var v = document.createElement('video');
     v.className = 'hero__video';
     v.muted = true; v.defaultMuted = true; v.loop = true; v.playsInline = true;

@@ -128,6 +128,13 @@
         hero.free = true;
         gsap.set(hero.el, { transform: 'none', left: b.left, top: b.top, width: b.width, height: b.height, zIndex: 50 });
         var dest = heroRect();
+        var split = document.querySelector('.hero--split') && window.innerWidth >= 900;
+        if (split) {
+          // même fondu que le héros, qui s'installe pendant que la photo s'agrandit (--f : 0 → 1)
+          hero.el.style.setProperty('--f', '0');
+          hero.el.style.webkitMaskImage = hero.el.style.maskImage = 'linear-gradient(90deg, transparent 0%, rgba(0,0,0,calc(.08 * var(--f) + 1 - var(--f))) calc(10% * var(--f)), rgba(0,0,0,calc(.28 * var(--f) + 1 - var(--f))) calc(22% * var(--f)), rgba(0,0,0,calc(.58 * var(--f) + 1 - var(--f))) calc(36% * var(--f)), rgba(0,0,0,calc(.85 * var(--f) + 1 - var(--f))) calc(50% * var(--f)), #000 calc(62% * var(--f)))';
+          gsap.to(hero.el, { '--f': 1, duration: 1.25, ease: 'power2.inOut' });
+        }
         gsap.timeline()
           .to(hero.el, { left: dest.left, top: dest.top, width: dest.width, height: dest.height, borderRadius: 0, borderColor: 'rgba(216,191,138,0)', boxShadow: '0 0 0 rgba(0,0,0,0)', duration: 1.25, ease: 'power3.inOut' }, 0)
           .to(hero.el.firstChild, { opacity: 1, duration: 1.0, ease: 'power1.inOut' }, 0.25)
