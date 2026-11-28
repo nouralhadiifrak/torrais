@@ -1,0 +1,25 @@
+# Secrets : ne jamais publier de clés ou de mots de passe
+.env
+.env.*
+*.pem
+*.key
+*.p12
+secrets.*
+credentials*.json
+
+# Outils
+node_modules/
+.vercel/
+.claude/settings.local.json
+
+# Fichiers système et éditeurs
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+.vscode/
+.idea/
+
+# Journaux et fichiers temporaires
+*.log
+*.tmp
