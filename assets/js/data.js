@@ -28,6 +28,8 @@
     return parseISO(s).toLocaleDateString('fr-FR', opts || { day: 'numeric', month: 'long', year: 'numeric' });
   }
   function digits(s) { return String(s || '').replace(/\D/g, ''); }
+  // texte saisi : sans espaces superflus, sans caractères de contrôle, limité à n caractères
+  function clip(s, n) { return String(s == null ? '' : s).replace(/[\u0000-\u0008\u000B-\u001F\u007F]/g, '').trim().slice(0, n || 200); }
   function formatPhone(s) {
     var d = digits(s);
     if (d.length === 10) return d.replace(/(\d{2})(?=\d)/g, '$1 ').trim();
@@ -508,7 +510,7 @@
     store: { load: load, fresh: fresh, save: save, reset: reset },
     util: {
       uid: uid, iso: iso, addDays: addDays, parseISO: parseISO, esc: esc, formatDH: formatDH,
-      formatDate: formatDate, formatPhone: formatPhone, waNumber: waNumber, waLink: waLink, digits: digits
+      formatDate: formatDate, formatPhone: formatPhone, waNumber: waNumber, waLink: waLink, digits: digits, clip: clip
     },
     icons: ICONS,
     EVENT_TYPES: EVENT_TYPES,

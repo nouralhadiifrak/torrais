@@ -51,15 +51,15 @@
         return '<li><strong>' + esc(g.cat.title) + '</strong><span>' + g.dishes.map(function (d) { var n = qty[key(g.cat, d)]; return esc(d.name) + (n > 1 ? ' × ' + n : ''); }).join(', ') + '</span></li>';
       }).join('') + '</ul>' : '<p class="mo-empty">Ajoutez les plats qui vous font envie.</p>') +
       '<form class="mo-form" id="moForm" novalidate>' +
-        '<label class="field"><span>Nombre d\'invités *</span><input name="guests" type="number" inputmode="numeric" min="5" step="5" placeholder="Ex. 150" required></label>' +
+        '<label class="field"><span>Nombre d\'invités *</span><input name="guests" type="number" inputmode="numeric" min="5" max="2000" step="5" placeholder="Ex. 150" required></label>' +
         '<label class="field"><span>Date *</span><input name="date" type="date" min="' + U.iso(new Date()) + '" required></label>' +
-        '<label class="field"><span>Votre nom *</span><input name="name" autocomplete="name" placeholder="Ex. Salma Bennani" required></label>' +
-        '<label class="field"><span>Téléphone *</span><input name="phone" type="tel" autocomplete="tel" placeholder="06 XX XX XX XX" required></label>' +
+        '<label class="field"><span>Votre nom *</span><input name="name" maxlength="80" autocomplete="name" placeholder="Ex. Salma Bennani" required></label>' +
+        '<label class="field"><span>Téléphone *</span><input name="phone" type="tel" maxlength="20" autocomplete="tel" placeholder="06 XX XX XX XX" required></label>' +
         '<fieldset class="mo-mode"><legend>Service</legend>' +
           '<label><input type="radio" name="mode" value="Livraison" checked><span>Livraison</span></label>' +
           '<label><input type="radio" name="mode" value="Service sur place"><span>Service sur place</span></label>' +
         '</fieldset>' +
-        '<label class="field"><span>Précisions</span><textarea name="note" rows="2" placeholder="Adresse, allergies, demandes particulières…"></textarea></label>' +
+        '<label class="field"><span>Précisions</span><textarea name="note" rows="2" maxlength="1000" placeholder="Adresse, allergies, demandes particulières…"></textarea></label>' +
         '<p class="form__error" id="moError" hidden></p>' +
         '<button type="submit" class="btn btn--wa btn--block"><span class="icon">' + T.icons.whatsapp + '</span> Envoyer ma liste<span class="hide-xs"> sur WhatsApp</span></button>' +
       '</form>';
@@ -108,15 +108,15 @@
     err.hidden = true;
     var mode = $('input[name="mode"]:checked', e.target).value;
     var text = 'Bonjour TORRAIS EVENT, je souhaite commander un menu.\n' +
-      '• Nom : ' + f.name.value.trim() + '\n' +
-      '• Téléphone : ' + f.phone.value.trim() + '\n' +
-      '• Date : ' + U.formatDate(f.date.value) + '\n' +
-      '• Invités : ' + f.guests.value + '\n' +
+      '• Nom : ' + U.clip(f.name.value, 80) + '\n' +
+      '• Téléphone : ' + U.clip(f.phone.value, 20) + '\n' +
+      '• Date : ' + U.formatDate(U.clip(f.date.value, 10)) + '\n' +
+      '• Invités : ' + Math.min(2000, Math.max(0, Math.round(+f.guests.value) || 0)) + '\n' +
       '• Service : ' + mode + '\n\n' +
       '*Ma liste*\n' + list.map(function (g) {
         return g.cat.title + ' :\n' + g.dishes.map(function (d) { var n = qty[key(g.cat, d)]; return '  – ' + d.name + (n > 1 ? ' × ' + n : ''); }).join('\n');
       }).join('\n') +
-      (f.note.value.trim() ? '\n\n• Précisions : ' + f.note.value.trim() : '');
+      (U.clip(f.note.value, 1000) ? '\n\n• Précisions : ' + U.clip(f.note.value, 1000) : '');
     window.open(U.waLink(S.whatsapp || S.phone, text), '_blank', 'noopener');
   });
 

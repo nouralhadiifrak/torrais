@@ -1030,8 +1030,8 @@
     mount.innerHTML =
       '<form class="form" id="quoteForm" novalidate>' +
         '<div class="form__row">' +
-          '<label class="field"><span>Nom complet *</span><input type="text" name="name" required autocomplete="name" placeholder="Ex. Salma Bennani"></label>' +
-          '<label class="field"><span>Téléphone / WhatsApp *</span><input type="tel" name="phone" required autocomplete="tel" placeholder="06 XX XX XX XX"></label>' +
+          '<label class="field"><span>Nom complet *</span><input type="text" name="name" required maxlength="80" autocomplete="name" placeholder="Ex. Salma Bennani"></label>' +
+          '<label class="field"><span>Téléphone / WhatsApp *</span><input type="tel" name="phone" required maxlength="20" autocomplete="tel" placeholder="06 XX XX XX XX"></label>' +
         '</div>' +
         '<div class="form__row">' +
           '<label class="field"><span>Type d\'événement *</span><select name="eventType" required><option value="">Choisir…</option>' +
@@ -1043,7 +1043,7 @@
           '<label class="field"><span>Budget approximatif</span><select name="budget"><option value="">Je ne sais pas encore</option>' +
             '<option>Moins de 20 000 DH</option><option>20 000 – 50 000 DH</option><option>50 000 – 80 000 DH</option><option>80 000 – 120 000 DH</option><option>Plus de 120 000 DH</option></select></label>' +
         '</div>' +
-        '<label class="field"><span>Votre message</span><textarea name="message" rows="4" placeholder="Lieu, formule qui vous intéresse, demandes particulières…"></textarea></label>' +
+        '<label class="field"><span>Votre message</span><textarea name="message" rows="4" maxlength="1000" placeholder="Lieu, formule qui vous intéresse, demandes particulières…"></textarea></label>' +
         '<p class="form__error" id="formError" role="alert" hidden></p>' +
         '<button type="submit" class="btn btn--wa btn--block"><span class="icon">' + T.icons.whatsapp + '</span> Envoyer ma demande<span class="hide-xs"> sur WhatsApp</span></button>' +
         '<p class="form__hint">Votre demande s\'ouvre dans WhatsApp, prête à envoyer · Réponse rapide · Sans engagement</p>' +
@@ -1097,8 +1097,8 @@
       errorBox.hidden = true;
 
       var req = {
-        name: f.name.value.trim(), phone: f.phone.value.trim(), eventType: f.eventType.value,
-        date: f.date.value, guests: +f.guests.value, budget: f.budget.value, message: f.message.value.trim()
+        name: U.clip(f.name.value, 80), phone: U.clip(f.phone.value, 20), eventType: U.clip(f.eventType.value, 60),
+        date: U.clip(f.date.value, 10), guests: Math.min(2000, Math.max(0, Math.round(+f.guests.value) || 0)), budget: U.clip(f.budget.value, 60), message: U.clip(f.message.value, 1000)
       };
       var text = 'Bonjour TORRAIS EVENT, je souhaite un devis.\n' +
         '• Nom : ' + req.name + '\n' +

@@ -259,10 +259,10 @@
       '</div>' +
       '<form class="composer__form" id="composerForm" novalidate>' +
         '<div class="form__row">' +
-          '<label class="field"><span>Votre nom *</span><input name="name" autocomplete="name" placeholder="Ex. Salma Bennani"></label>' +
-          '<label class="field"><span>Téléphone / WhatsApp *</span><input name="phone" type="tel" autocomplete="tel" placeholder="06 XX XX XX XX"></label>' +
+          '<label class="field"><span>Votre nom *</span><input name="name" maxlength="80" autocomplete="name" placeholder="Ex. Salma Bennani"></label>' +
+          '<label class="field"><span>Téléphone / WhatsApp *</span><input name="phone" type="tel" maxlength="20" autocomplete="tel" placeholder="06 XX XX XX XX"></label>' +
         '</div>' +
-        '<label class="field"><span>Un mot à ajouter ?</span><textarea name="message" rows="3" placeholder="Thème, demandes particulières…"></textarea></label>' +
+        '<label class="field"><span>Un mot à ajouter ?</span><textarea name="message" rows="3" maxlength="1000" placeholder="Thème, demandes particulières…"></textarea></label>' +
         '<p class="form__error" id="composerError" hidden></p>' +
         '<div class="composer__send">' +
           '<button type="submit" class="btn btn--wa"><span class="icon">' + T.icons.whatsapp + '</span> Envoyer ma composition sur WhatsApp</button>' +
@@ -477,8 +477,8 @@
   }
   function submit(form) {
     var f = form.elements;
-    var name = f.name.value.trim();
-    var phone = f.phone.value.trim();
+    var name = U.clip(f.name.value, 80);
+    var phone = U.clip(f.phone.value, 20);
     var err = $('#composerError');
     if (!name || U.digits(phone).length < 9) {
       err.textContent = !name ? 'Merci d\'indiquer votre nom.' : 'Merci de vérifier votre numéro de téléphone.';
@@ -487,7 +487,7 @@
       return;
     }
     err.hidden = true;
-    var extra = f.message.value.trim();
+    var extra = U.clip(f.message.value, 1000);
     var url = U.waLink(S.whatsapp || S.phone, waText(name) + '\n• Téléphone : ' + phone + (extra ? '\n• Message : ' + extra : ''));
     window.open(url, '_blank', 'noopener');
     form.hidden = true;
