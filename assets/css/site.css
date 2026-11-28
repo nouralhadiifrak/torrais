@@ -1579,3 +1579,17 @@ html.pt-card body::before { z-index: 48 !important; }
 }
 @media (min-width: 900px) and (max-width: 1199px) { .hero--split .hero__slides { left: 46%; } .hero--split .hero__inner > * { max-width: 500px; } }
 @media (min-width: 1400px) { .hero--split .hero__slides { left: 42%; } }
+
+/* en-tête : les liens du menu au centre de la barre (ordinateur) */
+.nav__links { display: contents; }
+@media (min-width: 1100px) {
+  .header__inner { position: relative; }
+  .nav__links { display: flex; align-items: center; gap: 1.8rem; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); }
+}
+
+/* héros : titre en Cormorant Garamond, « Casablanca » en italique doré */
+.hero__title--text { font-family: 'Cormorant Garamond', var(--lux); font-weight: 500; letter-spacing: .005em; line-height: 1.02; }
+.hero__title--text span { font-style: italic; font-weight: 400; }
+.hero .hero__lead span { font-family: 'Cormorant Garamond', var(--serif); font-style: italic; font-size: 1.55rem; letter-spacing: .01em; line-height: 1.35; color: rgba(255, 255, 255, .88); }
+@media (min-width: 900px) { .hero--split .hero__title--text { font-size: clamp(3rem, 5vw, 4.9rem); } }
+@media (max-width: 600px) { .hero .hero__lead span { font-size: 1.32rem; } }

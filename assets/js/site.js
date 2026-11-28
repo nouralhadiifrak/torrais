@@ -118,11 +118,11 @@
       '<header class="header"><div class="container header__inner">' +
         '<a href="' + (HOME || '#top') + '" class="brand" aria-label="TORRAIS EVENT — accueil">' + logo + '<span class="brand__text" aria-hidden="true">TORRAIS <em>EVENT</em></span></a>' +
         '<nav class="nav" id="nav" aria-label="Navigation principale">' +
-          '<a href="' + (HOME || '#top') + '"' + (PAGE === 'home' ? ' aria-current="page"' : '') + '>Accueil</a>' +
+          '<div class="nav__links"><a href="' + (HOME || '#top') + '"' + (PAGE === 'home' ? ' aria-current="page"' : '') + '>Accueil</a>' +
           '<div class="nav__drop"><button type="button" class="nav__droptoggle" aria-expanded="false">Nos services <span aria-hidden="true">▾</span></button>' +
             '<div class="nav__menu">' + occLinks + '</div></div>' +
           '<a href="menus.html"' + (PAGE === 'menus' ? ' aria-current="page"' : '') + '>Nos menus</a>' +
-          '<a href="apropos.html"' + (PAGE === 'about' ? ' aria-current="page"' : '') + '>À propos</a>' +
+          '<a href="apropos.html"' + (PAGE === 'about' ? ' aria-current="page"' : '') + '>À propos</a></div>' +
           '<a href="' + (PAGE === 'home' || PAGE === 'occasion' ? '#devis' : HOME + '#devis') + '" class="btn btn--gold btn--sm">Devis gratuit</a>' +
         '</nav>' +
         '<button class="nav-toggle" id="navToggle" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="nav"><span></span><span></span><span></span></button>' +
