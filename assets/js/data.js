@@ -383,181 +383,8 @@
     };
   }
 
-  /* ---------- données fictives du tableau de bord ---------- */
+  /* ---------- contenu du site (aucune donnée client ou employé) ---------- */
   function seed() {
-    var today = new Date();
-    var events = [];
-    var requests = [];
-    function d(n) { return iso(addDays(today, n)); }
-    // Équipe (extras payés à l'événement) et stock de matériel — données fictives
-    var staff = [
-      { id: 's1', name: 'Hassan Bouzidi', role: 'Chef cuisinier', phone: '0661100201', rate: 800 },
-      { id: 's2', name: 'Fatima Zahra Lamrani', role: 'Cuisinier', phone: '0661100202', rate: 400 },
-      { id: 's3', name: 'Khadija Ouali', role: 'Cuisinier', phone: '0661100203', rate: 400 },
-      { id: 's4', name: 'Rachid Benali', role: 'Cuisinier', phone: '0661100204', rate: 400 },
-      { id: 's5', name: 'Omar Tahri', role: "Maître d'hôtel", phone: '0661100205', rate: 500 },
-      { id: 's6', name: 'Yassine Kabbaj', role: 'Serveur', phone: '0661100206', rate: 200 },
-      { id: 's7', name: 'Mehdi Roudani', role: 'Serveur', phone: '0661100207', rate: 200 },
-      { id: 's8', name: 'Anas Filali', role: 'Serveur', phone: '0661100208', rate: 200 },
-      { id: 's9', name: 'Soufiane Jabri', role: 'Serveur', phone: '0661100209', rate: 200 },
-      { id: 's10', name: 'Hamid Zouine', role: 'Serveur', phone: '0661100210', rate: 200 },
-      { id: 's11', name: 'Ilyas Mansouri', role: 'Serveur', phone: '0661100211', rate: 200 },
-      { id: 's12', name: 'Badr Essaidi', role: 'Serveur', phone: '0661100212', rate: 200 },
-      { id: 's13', name: 'Ayoub Lazrak', role: 'Serveur', phone: '0661100213', rate: 200 },
-      { id: 's14', name: 'Samira Hilali', role: 'Décorateur', phone: '0661100214', rate: 350 },
-      { id: 's15', name: 'Zineb Akhrif', role: 'Décorateur', phone: '0661100215', rate: 350 },
-      { id: 's16', name: 'Abdelkader Moussaoui', role: 'Chauffeur', phone: '0661100216', rate: 250 }
-    ];
-    var inventory = [
-      { id: 'i_tables', name: 'Tables rondes (10 pers.)', category: 'Mobilier', qty: 35, rule: 'table1' },
-      { id: 'i_chairs', name: 'Chaises', category: 'Mobilier', qty: 350, rule: 'guest1' },
-      { id: 'i_nappes', name: 'Nappes', category: 'Linge', qty: 45, rule: 'table1' },
-      { id: 'i_assiettes', name: 'Assiettes', category: 'Vaisselle', qty: 900, rule: 'guest2' },
-      { id: 'i_verres', name: 'Verres', category: 'Vaisselle', qty: 800, rule: 'guest2' },
-      { id: 'i_couverts', name: 'Couverts (jeux)', category: 'Vaisselle', qty: 400, rule: 'guest1' },
-      { id: 'i_plateaux', name: 'Plateaux de service', category: 'Service', qty: 60, rule: 'table1' },
-      { id: 'i_theieres', name: 'Théières', category: 'Service', qty: 40, rule: 'table1' },
-      { id: 'i_tyafer', name: 'Tyafer', category: 'Tyafer', qty: 24, rule: '' },
-      { id: 'i_kousha', name: 'Kousha (trône des mariés)', category: 'Décoration', qty: 2, rule: '' },
-      { id: 'i_chandeliers', name: 'Chandeliers', category: 'Décoration', qty: 40, rule: '' }
-    ];
-    var MENUS = {
-      'Essentielle': ['Pastilla au poulet', 'Tajine de viande aux pruneaux', 'Corbeille de fruits', 'Thé à la menthe et pâtisseries marocaines'],
-      'Prestige': ['Pastilla aux fruits de mer', 'Méchoui', 'Poulet aux olives et citron confit', 'Buffet de desserts', 'Thé à la menthe et pâtisseries marocaines'],
-      'Royale': ["Cocktail d'accueil", 'Pastilla aux fruits de mer', 'Méchoui', 'Tajine de veau aux pruneaux', 'Corbeille de fruits', 'Gâteau des mariés', 'Thé à la menthe et pâtisseries marocaines'],
-      'Buffet cocktail': ['Mini pastillas', 'Briouates', 'Verrines salées', 'Mini brochettes', 'Petits fours sucrés', 'Jus et boissons'],
-      'Sur mesure': ['Buffet salé', 'Gâteau', 'Jus et boissons']
-    };
-    function round500(n) { return Math.round(n / 500) * 500; }
-
-    var SRC_CYCLE = ['WhatsApp', 'Boutique', 'Site web', 'WhatsApp', 'Téléphone', 'Instagram', 'Boutique', 'WhatsApp', 'Bouche-à-oreille', 'Site web'];
-    var srcIndex = 0;
-
-    function addEvent(o) {
-      var id = uid();
-      var source = o.source || SRC_CYCLE[srcIndex++ % SRC_CYCLE.length];
-      var e = {
-        id: id,
-        source: source,
-        clientName: o.client,
-        phone: o.phone,
-        eventType: o.type,
-        date: d(o.at),
-        venue: o.venue,
-        guests: o.guests,
-        package: o.pkg,
-        total: o.total,
-        status: 'confirme',
-        notes: o.notes || '',
-        createdAt: d(o.booked),
-        payments: (o.paid || []).map(function (p) {
-          return { id: uid(), date: d(p[0]), amount: p[1], note: p[2] || 'Acompte' };
-        }),
-        arrival: '', service: '', menu: '', menuNotes: o.menuNotes || '',
-        team: [], equipment: [], expenses: []
-      };
-      var services = o.services || ['Traiteur'];
-      var hasFood = o.pkg !== 'Tyafer + décoration';
-      var hasDeco = o.pkg === 'Royale' || o.pkg === 'Prestige' || o.pkg === 'Tyafer + décoration' || services.indexOf('Décoration') !== -1;
-      var hasTyafer = o.pkg === 'Tyafer + décoration' || o.pkg === 'Prestige' || o.pkg === 'Royale' || services.indexOf('Tyafer') !== -1;
-      var tables = Math.ceil(o.guests / 10);
-
-      // Menu et horaires : pour les événements passés ou proches
-      if (o.at <= 100) {
-        e.menu = (MENUS[o.pkg] || []).join('\n');
-        e.arrival = hasFood ? '16:00' : '14:00';
-        e.service = hasFood ? '20:30' : '';
-      }
-      // Équipe : affectée pour les événements passés ou dans le mois
-      if (o.at <= 30 && !o.noTeam) {
-        var ids = [];
-        if (hasFood) {
-          ids.push('s1');
-          ['s2', 's3', 's4'].slice(0, Math.min(3, Math.ceil(o.guests / 100))).forEach(function (x) { ids.push(x); });
-          if (o.guests >= 150) ids.push('s5');
-          ['s6', 's7', 's8', 's9', 's10', 's11', 's12', 's13'].slice(0, Math.min(8, Math.ceil(o.guests / 30))).forEach(function (x) { ids.push(x); });
-        }
-        if (hasDeco) { ids.push('s14'); if (o.guests >= 150 || !hasFood) ids.push('s15'); }
-        ids.push('s16');
-        e.team = ids.map(function (sid) {
-          var st = staff.filter(function (x) { return x.id === sid; })[0];
-          return { staffId: sid, pay: st.rate, paid: o.at < 0 && !o.teamUnpaid };
-        });
-      }
-      // Matériel réservé
-      if (o.at <= 100) {
-        var eq = [['i_tables', tables], ['i_chairs', o.guests], ['i_nappes', tables]];
-        if (hasFood) eq = eq.concat([['i_assiettes', o.guests * 2], ['i_verres', o.guests * 2], ['i_couverts', o.guests], ['i_plateaux', tables], ['i_theieres', tables]]);
-        if (hasTyafer) eq.push(['i_tyafer', o.pkg === 'Tyafer + décoration' ? 12 : 8]);
-        if (hasDeco) { eq.push(['i_chandeliers', Math.min(tables, 20)]); if (o.type === 'Mariage' || o.type === 'Henné') eq.push(['i_kousha', 1]); }
-        e.equipment = eq.map(function (x) { return { itemId: x[0], qty: x[1] }; });
-      }
-      // Dépenses : complètes pour le passé, avances pour les événements proches
-      function expense(label, category, amount, at) { e.expenses.push({ id: uid(), label: label, category: category, amount: amount, date: d(at) }); }
-      if (o.at < 0) {
-        if (hasFood) expense('Viandes, volailles et poissons', 'Ingrédients', round500(o.total * 0.22), o.at - 2);
-        if (hasFood) expense('Légumes, fruits et épicerie', 'Ingrédients', round500(o.total * 0.11), o.at - 1);
-        if (hasFood) expense('Pâtisseries', 'Ingrédients', round500(o.total * 0.04), o.at - 1);
-        if (hasDeco) expense('Fleurs', 'Décoration', round500(o.total * (hasFood ? 0.05 : 0.2)), o.at - 1);
-        expense('Carburant et transport', 'Transport', o.guests >= 150 ? 1500 : 800, o.at);
-        if (o.guests > 250) expense('Location de chaises supplémentaires', 'Location', 2000, o.at - 1);
-      } else if (o.at <= 15) {
-        if (hasFood) expense('Avance boucher', 'Ingrédients', round500(o.total * 0.1), -2);
-        if (hasDeco) expense('Acompte fleuriste', 'Décoration', round500(o.total * 0.03) || 500, -3);
-      }
-      events.push(e);
-      requests.push({
-        id: uid(), source: source, createdAt: d(o.booked) + 'T11:00', name: o.client, phone: o.phone, eventType: o.type,
-        date: e.date, guests: o.guests, budget: '', services: o.services || ['Traiteur'], message: '',
-        status: 'confirme', notes: 'Converti en événement.', eventId: id
-      });
-    }
-
-    // Événements passés (cette année)
-    addEvent({ at: -290, booked: -360, type: 'Mariage', client: 'Famille Naciri', phone: '0661452378', venue: 'Salle Les Orangers, Casablanca', guests: 230, pkg: 'Prestige', total: 76000, paid: [[-360, 25000], [-290, 51000, 'Solde']] });
-    addEvent({ at: -236, booked: -300, type: 'Fiançailles', client: 'Famille Belhaj', phone: '0670213698', venue: 'Domicile, Oasis', guests: 70, pkg: 'Essentielle', total: 16000, paid: [[-300, 5000], [-236, 11000, 'Solde']] });
-    addEvent({ at: -190, booked: -260, type: 'Mariage', client: 'Famille Guessous', phone: '0662783145', venue: 'Salle Dar Essalam, Casablanca', guests: 260, pkg: 'Royale', total: 102000, paid: [[-260, 35000], [-190, 67000, 'Solde']] });
-    addEvent({ at: -151, booked: -200, type: 'Mariage', client: 'Famille Amrani', phone: '0663981274', venue: 'Salle Al Firdaous, Casablanca', guests: 210, pkg: 'Prestige', total: 74000, paid: [[-200, 25000], [-151, 49000, 'Solde']] });
-    addEvent({ at: -144, booked: -180, type: 'Henné', client: 'Famille Rachidi', phone: '0675123498', venue: 'Domicile, Hay Hassani', guests: 55, pkg: 'Tyafer + décoration', total: 13000, services: ['Tyafer', 'Décoration'], paid: [[-180, 4000], [-144, 9000, 'Solde']] });
-    addEvent({ at: -109, booked: -170, type: 'Mariage', client: 'Famille Cherkaoui', phone: '0661784523', venue: 'Salle Royal Palace, Casablanca', guests: 290, pkg: 'Royale', total: 115000, paid: [[-170, 40000], [-109, 75000, 'Solde']] });
-    addEvent({ at: -82, booked: -130, type: "Événement d'entreprise", client: 'Maroc Logistique', phone: '0522364178', venue: 'Siège social, Sidi Maârouf', guests: 120, pkg: 'Buffet cocktail', total: 26000, services: ['Buffet'], paid: [[-130, 13000], [-82, 13000, 'Solde']] });
-    addEvent({ at: -48, booked: -140, type: 'Mariage', client: 'Famille Bennani', phone: '0661245873', venue: 'Salle Les Jardins, Casablanca', guests: 250, pkg: 'Prestige', total: 85000, services: ['Traiteur', 'Décoration', 'Tyafer'], paid: [[-140, 30000], [-48, 55000, 'Solde']] });
-    addEvent({ at: -21, booked: -100, type: 'Fiançailles', client: 'Famille El Idrissi', phone: '0672318450', venue: 'Domicile, Aïn Diab', guests: 80, pkg: 'Essentielle', total: 18000, paid: [[-100, 6000], [-21, 9000, 'Solde partiel']] });
-    addEvent({ at: -7, booked: -60, type: 'Anniversaire', client: 'Mme Tazi', phone: '0650981234', venue: 'Villa, Bouskoura', guests: 60, pkg: 'Sur mesure', total: 12000, services: ['Buffet'], paid: [[-60, 4000], [-7, 8000, 'Solde']], teamUnpaid: true });
-
-    // Événements à venir (jusqu'à 9 mois à l'avance)
-    addEvent({ at: 4, booked: -120, type: 'Mariage', client: 'Famille Alaoui', phone: '0663784512', venue: 'Salle Royal Palace, Casablanca', guests: 300, pkg: 'Royale', total: 120000, services: ['Traiteur', 'Décoration', 'Tyafer', 'Buffet'], paid: [[-120, 40000], [-30, 30000]], notes: 'Parking derrière la salle. Demander M. Karim à l\'accueil.', menuNotes: 'Menu poisson pour 20 invités (table 4 et table 7). Pas d\'amandes à la table 12.' });
-    addEvent({ at: 4, booked: -45, type: 'Henné', client: 'Famille Chraibi', phone: '0668452197', venue: 'Domicile, Maârif', guests: 70, pkg: 'Tyafer + décoration', total: 15000, services: ['Tyafer', 'Décoration'], paid: [[-45, 5000]], noTeam: true });
-    addEvent({ at: 11, booked: -50, type: "Événement d'entreprise", client: 'Atlas Conseil', phone: '0522458796', venue: 'Hôtel, Casa Finance City', guests: 150, pkg: 'Buffet cocktail', total: 32000, services: ['Buffet'], paid: [[-50, 16000]] });
-    addEvent({ at: 25, booked: -80, type: 'Mariage', client: 'Famille Berrada', phone: '0661987345', venue: 'Salle Al Firdaous, Casablanca', guests: 220, pkg: 'Prestige', total: 78000, paid: [[-80, 25000]] });
-    addEvent({ at: 46, booked: -35, type: 'Fiançailles', client: 'Famille Ouazzani', phone: '0677123986', venue: 'Domicile, Californie', guests: 90, pkg: 'Essentielle', total: 20000, paid: [[-35, 6000]] });
-    addEvent({ at: 68, booked: -40, type: 'Mariage', client: 'Famille Kettani', phone: '0662345718', venue: 'Salle Les Orangers, Casablanca', guests: 280, pkg: 'Royale', total: 110000, paid: [[-40, 30000]] });
-    addEvent({ at: 68, booked: -12, type: 'Aqiqa / Baptême', client: 'M. Sefrioui', phone: '0655782341', venue: 'Domicile, Oasis', guests: 50, pkg: 'Sur mesure', total: 9000, services: ['Buffet'], paid: [] });
-    addEvent({ at: 96, booked: -25, type: 'Mariage', client: 'Famille Lahlou', phone: '0670456123', venue: 'Salle Dar Essalam, Casablanca', guests: 200, pkg: 'Prestige', total: 72000, paid: [[-25, 20000]] });
-    addEvent({ at: 112, booked: -18, type: 'Henné', client: 'Famille Tahiri', phone: '0661239874', venue: 'Domicile, Hay Hassani', guests: 60, pkg: 'Tyafer + décoration', total: 14000, services: ['Tyafer', 'Décoration'], paid: [[-18, 4000]] });
-    addEvent({ at: 131, booked: -9, type: 'Mariage', client: 'Famille Mernissi', phone: '0664781235', venue: 'Salle Les Jardins, Casablanca', guests: 260, pkg: 'Royale', total: 105000, paid: [[-9, 30000]] });
-    addEvent({ at: 175, booked: -6, type: 'Mariage', client: 'Famille Zniber', phone: '0669874512', venue: 'Salle Royal Palace, Casablanca', guests: 240, pkg: 'Prestige', total: 80000, paid: [[-6, 25000]] });
-    addEvent({ at: 232, booked: -3, type: 'Mariage', client: 'Famille Benkirane', phone: '0673219865', venue: 'Villa, Dar Bouazza', guests: 180, pkg: 'Prestige', total: 68000, paid: [] });
-    addEvent({ at: 268, booked: -2, type: 'Fiançailles', client: 'Famille Sqalli', phone: '0662147896', venue: 'Domicile, Anfa', guests: 100, pkg: 'Essentielle', total: 22000, paid: [] });
-
-    // Demandes en cours
-    function addReq(o) {
-      requests.push({
-        id: uid(), source: o.source, createdAt: d(o.created) + 'T' + (o.time || '09:30'), name: o.name, phone: o.phone, eventType: o.type,
-        date: d(o.at), guests: o.guests, budget: o.budget || '', services: o.services || [], message: o.message || '',
-        status: o.status, notes: o.notes || '', eventId: null
-      });
-    }
-    addReq({ source: 'Site web', created: 0, time: '10:12', status: 'nouveau', name: 'Salma Aït Lahcen', phone: '0661728394', type: 'Mariage', at: 4, guests: 200, budget: '60 000 – 80 000 DH', services: ['Traiteur', 'Décoration'], message: 'Bonjour, nous cherchons un traiteur pour notre mariage. Est-ce que cette date est encore disponible ?' });
-    addReq({ source: 'WhatsApp', created: -1, time: '18:40', status: 'nouveau', name: 'Youssef Amrani', phone: '0677345612', type: 'Fiançailles', at: 38, guests: 100, budget: '20 000 – 25 000 DH', services: ['Traiteur', 'Tyafer'], message: 'Fiançailles à la maison, environ 100 personnes.' });
-    addReq({ source: 'Instagram', created: -2, time: '14:05', status: 'nouveau', name: 'Nadia Squalli', phone: '0650127845', type: 'Henné', at: 60, guests: 50, services: ['Tyafer', 'Décoration'], message: 'Je voudrais voir vos modèles de tyafer.' });
-    addReq({ source: 'Boutique', created: -4, time: '11:20', status: 'contacte', name: 'Karim Fassi', phone: '0662984513', type: 'Mariage', at: 130, guests: 250, budget: '90 000 DH', services: ['Traiteur', 'Décoration', 'Buffet'], notes: 'Rappeler samedi. Hésite entre Prestige et Royale.' });
-    addReq({ source: 'Téléphone', created: -7, time: '16:45', status: 'devis', name: 'Imane Rami', phone: '0671456239', type: 'Anniversaire', at: 18, guests: 40, services: ['Buffet'], notes: 'Devis envoyé par WhatsApp : 8 500 DH.' });
-    addReq({ source: 'Site web', created: -10, time: '09:15', status: 'devis', name: 'Novatech SARL', phone: '0522987412', type: "Événement d'entreprise", at: 52, guests: 120, budget: '30 000 DH', services: ['Buffet'], notes: 'Cocktail de fin d\'année. Devis de 28 000 DH envoyé.' });
-    addReq({ source: 'WhatsApp', created: -15, time: '20:30', status: 'refuse', name: 'Hamza Benjelloun', phone: '0663218745', type: 'Mariage', at: 200, guests: 400, services: ['Traiteur'], notes: 'Budget trop bas pour 400 invités.' });
-
-    requests.sort(function (a, b) { return a.createdAt < b.createdAt ? 1 : -1; });
-
     var content = defaultContent();
     return {
       version: 1,
@@ -569,11 +396,7 @@
       dishes: defaultDishes(),
       site: defaultSite(),
       occasions: defaultOccasions(),
-      pricing: defaultPricing(),
-      requests: requests,
-      events: events,
-      staff: staff,
-      inventory: inventory
+      pricing: defaultPricing()
     };
   }
 
@@ -581,6 +404,8 @@
   var memory = null;
   // Complète les données enregistrées avant l'ajout de nouvelles fonctions
   function ensure(d) {
+    // anciennes données de démonstration du tableau de bord : supprimées des navigateurs des visiteurs
+    ['requests', 'events', 'staff', 'inventory'].forEach(function (k) { delete d[k]; });
     if (!d.media) d.media = { logo: '', about: '', hero: [] };
     if (!d.media.hero) d.media.hero = [];
     if (d.media.heroVideo == null) d.media.heroVideo = true; // photo de la salle en fond quand il n'y a pas de photos
@@ -665,7 +490,7 @@
     if (memory) return memory;
     try {
       var raw = localStorage.getItem(KEY);
-      if (raw) { memory = ensure(JSON.parse(raw)); return memory; }
+      if (raw) { memory = ensure(JSON.parse(raw)); save(memory); return memory; }
     } catch (e) { /* stockage indisponible : on garde la démo en mémoire */ }
     memory = ensure(seed());
     save(memory);
